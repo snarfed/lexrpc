@@ -3,6 +3,7 @@
 TODO: usage description
 """
 import copy
+import json
 import logging
 
 import jsonschema
@@ -24,12 +25,17 @@ class Server():
         Raises:
           :class:`jsonschema.SchemaError` if any schema is invalid
         """
+        logging.debug(f'Got lexicons: {json.dumps(lexicons, indent=2)}')
         assert isinstance(lexicons, (list, tuple))
 
         self._lexicons = {s['id']: s for s in copy.deepcopy(lexicons)}
 
         # validate schemas
         for lexicon in self._lexicons.values():
+            id = lexicon.get('id')
+            assert id, f'Lexicon {i} missing id field'
+            type = lexicon.get('type')
+            assert type in ('query', 'procedure'), f'Bad type for lexicon {id}: {type}'
             for field in 'input', 'output':
                 schema = lexicon.get(field, {}).get('schema')
                 if schema:
@@ -59,7 +65,7 @@ class Server():
           NotImplementedError, if the given NSID is not found in any of the
             loaded lexicons
           :class:`jsonschema.ValidationError`, if the input or output returned
-            by the method don't validate against the method's schemas
+            by the method doesn't validate against the method's schemas
         """
         logger.debug(f'{nsid}: {params} {input}')
 
@@ -78,6 +84,7 @@ class Server():
         # run method
         logger.debug(f'Running method')
         output = getattr(self, self._method_name(nsid))(params, input)
+        logger.debug(f'Got: {output}')
 
         # validate output
         logger.debug('Validating output')
@@ -85,7 +92,6 @@ class Server():
         if output_schema:
             jsonschema.validate(output, output_schema)
 
-        logger.debug(f'Returning: {output}')
         return output
 
     @staticmethod
