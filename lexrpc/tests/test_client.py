@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import requests
 
-from .schemas import SCHEMAS
+from .lexicons import LEXICONS
 from .. import Client
 
 
@@ -34,7 +34,7 @@ def response(body=None, status=200, headers=None):
 class ClientTest(TestCase):
 
     def setUp(self):
-        self.client = Client('http://ser.ver', SCHEMAS)
+        self.client = Client('http://ser.ver', LEXICONS)
         self.call = self.client.call
 
     @patch('requests.get')

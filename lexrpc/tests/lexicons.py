@@ -1,9 +1,9 @@
-"""Test Lexicon schemas.
+"""Test Lexicons.
 
 Based on:
 https://github.com/bluesky-social/atproto/blob/main/packages/xrpc-server/tests/bodies.test.ts
 """
-SCHEMAS = [
+LEXICONS = [
   {
     'lexicon': 1,
     'id': 'io.example.procedure',

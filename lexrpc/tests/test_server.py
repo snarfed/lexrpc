@@ -7,7 +7,7 @@ from unittest import TestCase
 
 from jsonschema import ValidationError
 
-from .schemas import SCHEMAS
+from .lexicons import LEXICONS
 from ..server import Server
 
 
@@ -28,7 +28,7 @@ class ServerTest(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.server = ExampleServer(SCHEMAS)
+        self.server = ExampleServer(LEXICONS)
         self.call = self.server.call
 
     def test_procedure(self):
@@ -62,4 +62,4 @@ class ServerTest(TestCase):
             class Empty(Server):
                 pass
 
-            Empty(SCHEMAS)
+            Empty(LEXICONS)
