@@ -33,6 +33,7 @@ setup(name='lexrpc',
       ],
       keywords=['XRPC', 'Lexicon', 'AT Protocol', 'ATP'],
       install_requires=[
+          'jsonschema>=4.0',
           'requests>=2.0',
       ],
 )
