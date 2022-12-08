@@ -51,7 +51,7 @@ class ServerTest(TestCase):
         self.server.BAR = 'not an integer'
 
         with self.assertRaises(ValidationError):
-            self.call('io.example.query', {}, {'foo': 'abc'})
+            self.call('io.example.query', {'foo': 'abc'})
 
     def test_unknown_methods(self):
         with self.assertRaises(NotImplementedError):

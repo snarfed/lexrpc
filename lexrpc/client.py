@@ -2,20 +2,17 @@
 
 TODO: usage description
 """
-import copy
-import json
 import logging
 
-import jsonschema
 import requests
+
+from .base import XrpcBase
 
 logger = logging.getLogger(__name__)
 
 
-class Client():
-    """XRPC client class."""
-
-    _lexicons = None  # dict mapping NSID to lexicon object
+class Client(XrpcBase):
+    """XRPC client."""
 
     def __init__(self, address, lexicons):
         """Constructor.
@@ -26,30 +23,12 @@ class Client():
         Raises:
           :class:`jsonschema.SchemaError` if any schema is invalid
         """
+        super().__init__(lexicons)
+
         logger.debug(f'Using server at {address}')
         assert address.startswith('http://') or address.startswith('https://'), \
             f"{address} doesn't start with http:// or https://"
         self._address = address
-
-        logger.debug(f'Got lexicons: {json.dumps(lexicons, indent=2)}')
-        assert isinstance(lexicons, (list, tuple))
-
-        self._lexicons = {s['id']: s for s in copy.deepcopy(lexicons)}
-
-        # validate schemas
-        for i, lexicon in enumerate(self._lexicons.values()):
-            id = lexicon.get('id')
-            assert id, f'Lexicon {i} missing id field'
-            type = lexicon.get('type')
-            assert type in ('query', 'procedure'), f'Bad type for lexicon {id}: {type}'
-            for field in 'input', 'output':
-                schema = lexicon.get(field, {}).get('schema')
-                if schema:
-                    try:
-                        jsonschema.validate(None, schema)
-                    except jsonschema.ValidationError as e:
-                        # schema passed validation, None instance failed
-                        pass
 
     def call(self, nsid, params=None, input=None):
         """Makes a remote XRPC method call.
@@ -71,20 +50,11 @@ class Client():
         """
         logger.debug(f'{nsid}: {params} {input}')
 
-        lexicon = self._lexicons.get(nsid)
-        if not lexicon:
-            msg = f'{nsid} not found'
-            logger.error(msg)
-            raise NotImplementedError(msg)
-
-        # validate input
-        input_schema = lexicon.get('input', {}).get('schema')
-        if input_schema:
-            logger.debug('Validating input')
-            jsonschema.validate(input, input_schema)
+        self._validate(nsid, 'input', input)
 
         # run method
         url = f'{self._address}/xrpc/{nsid}'
+        lexicon = self._get_lexicon(nsid)
         fn = requests.get if lexicon['type'] == 'query' else requests.post
         logger.debug(f'Running method')
         resp = fn(url, params=params,
@@ -96,9 +66,5 @@ class Client():
 
         if resp.headers.get('Content-Type') == 'application/json' and resp.content:
             output = resp.json()
-            # validate
-            logger.debug('Validating output')
-            output_schema = lexicon.get('output', {}).get('schema')
-            if output_schema:
-                jsonschema.validate(output, output_schema)
+            self._validate(nsid, 'output', output)
             return output
