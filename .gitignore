@@ -110,6 +110,7 @@ ENV/
 env.bak/
 venv.bak/
 local/
+/l
 
 # Spyder project settings
 .spyderproject
@@ -128,3 +129,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Other
+circleci_token
+.coverage
+private_notes
+TAGS

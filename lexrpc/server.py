@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class Server():
+    """XRPC server base class. Subclass to implement specific methods."""
 
     _lexicons = None  # dict mapping NSID to lexicon object
 
