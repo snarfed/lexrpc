@@ -2,6 +2,7 @@
 
 TODO: separate schema validation from object validation, remove None special
 case in _validate()
+TODO: validate records in input/output
 """
 import copy
 import logging
@@ -9,6 +10,17 @@ import logging
 import jsonschema
 
 logger = logging.getLogger(__name__)
+
+LEXICON_TYPES = frozenset((
+    'query',
+    'procedure',
+    'record',
+    'token',
+))
+LEXICON_METHOD_TYPES = frozenset((
+    'query',
+    'procedure',
+))
 
 
 def fail(msg, exc=NotImplementedError):
@@ -40,7 +52,7 @@ class XrpcBase():
             id = lexicon.get('id')
             assert id, f'Lexicon {i} missing id field'
             type = lexicon.get('type')
-            assert type in ('query', 'procedure'), f'Bad type for lexicon {id}: {type}'
+            assert type in LEXICON_TYPES, f'Bad type for lexicon {id}: {type}'
 
             # preprocesses parameters
             props = lexicon.get('parameters', {})
@@ -56,7 +68,7 @@ class XrpcBase():
                     lexicon['parameters']['schema']['required'].append(name)
 
             # validate schemas
-            for field in 'input', 'output', 'parameters':
+            for field in 'input', 'output', 'parameters', 'record':
                 self._validate(id, field, None)
 
     def _get_lexicon(self, nsid):
@@ -87,7 +99,7 @@ class XrpcBase():
           :class:`jsonschema.SchemaError`, if the schema is invalid
           :class:`jsonschema.ValidationError`, if the object is invalid
         """
-        assert type in ('input', 'output', 'parameters'), type
+        assert type in ('input', 'output', 'parameters', 'record'), type
 
         schema = self._get_lexicon(nsid).get(type, {}).get('schema')
         if not schema:

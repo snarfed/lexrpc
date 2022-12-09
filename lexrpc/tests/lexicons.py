@@ -8,6 +8,7 @@ LEXICONS = [
     'lexicon': 1,
     'id': 'io.example.procedure',
     'type': 'procedure',
+    'description': 'Whatever you want',
     'parameters': {
       'x': { 'type': 'string' },
       'z': { 'type': 'boolean' },
@@ -71,5 +72,28 @@ LEXICONS = [
       'foo': { 'type': 'string' },
       'bar': { 'type': 'number', 'required': True },
     },
+  },
+
+  {
+    'lexicon': 1,
+    'id': 'io.example.record',
+    'type': 'record',
+    'record': {
+      'required': ['baz'],
+      'baz': { 'type': 'integer', },
+      'biff': {
+        'type': 'object',
+        'properties': {
+          'baj': { 'type': 'string' },
+         },
+      },
+    },
+  },
+
+  {
+    'lexicon': 1,
+    'id': 'io.example.token',
+    'type': 'token',
+    'description': 'Undefined!',
   },
 ]

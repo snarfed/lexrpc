@@ -7,7 +7,7 @@ import logging
 
 import jsonschema
 
-from .base import fail, XrpcBase
+from .base import fail, LEXICON_METHOD_TYPES, XrpcBase
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,9 @@ class Server(XrpcBase):
         # check that all methods are implemented
         methods = {}  # maps method name to NSID
         missing = []
-        for nsid in self._lexicons.keys():
+        for nsid, lexicon in self._lexicons.items():
+            if lexicon['type'] not in LEXICON_METHOD_TYPES:
+                continue
             name = self._method_name(nsid)
             existing = methods.get(name)
             if existing:
