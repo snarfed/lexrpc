@@ -96,4 +96,15 @@ LEXICONS = [
         'type': 'token',
         'description': 'Undefined!',
     },
+
+    {
+        'lexicon': 1,
+        'id': 'io.example.error',
+        'type': 'query',
+        'errors': [
+            {'name': 'OneBad'},
+            {'name': 'AnotherBad'},
+            {'name': 'ThirdBad'},
+        ],
+    },
 ]

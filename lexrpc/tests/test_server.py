@@ -29,6 +29,9 @@ class ExampleServer(Server):
     def io_example_params(self, params, input):
         pass
 
+    def io_example_error(self, params, input):
+        pass
+
 
 class ServerTest(TestCase):
     maxDiff = None
