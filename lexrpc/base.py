@@ -1,9 +1,4 @@
-"""Base code shared by both server and client.
-
-TODO: separate schema validation from object validation, remove None special
-case in _validate()
-TODO: validate records in input/output
-"""
+"""Base code shared by both server and client."""
 import copy
 import logging
 

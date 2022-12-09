@@ -1,7 +1,4 @@
-"""XRPC server implementation.
-
-TODO: usage description
-"""
+"""XRPC server implementation."""
 import copy
 import logging
 

@@ -1,7 +1,4 @@
-"""XRPC client implementation.
-
-TODO: usage description
-"""
+"""XRPC client implementation."""
 import logging
 
 import requests
