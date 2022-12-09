@@ -28,7 +28,7 @@ class XrpcBase():
           :class:`jsonschema.SchemaError` if any schema is invalid
         """
         assert isinstance(lexicons, (list, tuple))
-        self._lexicons = {s['id']: s for s in copy.deepcopy(lexicons)}
+        self._lexicons = {l['id']: l for l in copy.deepcopy(lexicons)}
         logger.debug(f'Got lexicons for: {self._lexicons.keys()}')
 
         # validate schemas

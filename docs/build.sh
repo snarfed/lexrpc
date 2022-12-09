@@ -22,7 +22,7 @@ lexrpc
 
 EOF
 
-tail -n +21 ../README.md \
+tail -n +4 ../README.md \
   | pandoc --from=markdown --to=rst \
   | sed -E 's/```/`/; s/`` </ </' \
   >> index.rst

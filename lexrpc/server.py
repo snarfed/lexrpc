@@ -23,12 +23,23 @@ class Server(XrpcBase):
 
         Raises:
           :class:`jsonschema.SchemaError` if any schema is invalid
+          ValueError if any method NSIDs are ambiguous
         """
         super().__init__(lexicons)
 
         # check that all methods are implemented
-        methods = set(self._method_name(nsid) for nsid in self._lexicons.keys())
-        missing = methods - set(dir(self))
+        methods = {}  # maps method name to NSID
+        missing = []
+        for nsid in self._lexicons.keys():
+            name = self._method_name(nsid)
+            existing = methods.get(name)
+            if existing:
+                fail(f'{existing} and {nsid} map to the same method name {name}',
+                     ValueError)
+            methods[name] = nsid
+            if not hasattr(self, name):
+                missing.append(name)
+
         if missing:
             fail(f'{self.__class__} is missing methods: {missing}')
 

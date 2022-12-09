@@ -69,3 +69,11 @@ class ServerTest(TestCase):
                 pass
 
             Empty(LEXICONS)
+
+    def test_ambiguous_nsids(self):
+        with self.assertRaises(ValueError):
+            Server(LEXICONS + [{
+                'lexicon': 1,
+                'id': 'io.example.no.params.input.output',
+                'type': 'procedure',
+            }])
