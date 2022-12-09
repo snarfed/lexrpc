@@ -59,13 +59,18 @@ class Server(XrpcBase):
         """
         logger.debug(f'{nsid}: {params} {input}')
 
+        # validate params and input, then encode params. pass non-null object to
+        # validate to force it to actually validate the object.
+        params = params or {}
+        input = input or {}
+        self._validate(nsid, 'parameters', params)
         self._validate(nsid, 'input', input)
 
         logger.debug('Running method')
         output = getattr(self, self._method_name(nsid))(params, input)
         logger.debug(f'Got: {output}')
 
-        self._validate(nsid, 'output', output)
+        self._validate(nsid, 'output', output or {})
         return output
 
     @staticmethod

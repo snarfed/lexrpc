@@ -8,6 +8,10 @@ LEXICONS = [
     'lexicon': 1,
     'id': 'io.example.procedure',
     'type': 'procedure',
+    'parameters': {
+      'x': { 'type': 'string' },
+      'z': { 'type': 'boolean' },
+    },
     'input': {
       'encoding': 'application/json',
       'schema': {
@@ -31,10 +35,15 @@ LEXICONS = [
       },
     },
   },
+
   {
     'lexicon': 1,
     'id': 'io.example.query',
     'type': 'query',
+    'parameters': {
+      'x': { 'type': 'string' },
+      'z': { 'type': 'boolean' },
+    },
     'output': {
       'encoding': 'application/json',
       'schema': {
@@ -47,9 +56,20 @@ LEXICONS = [
       },
     },
   },
+
   {
     'lexicon': 1,
     'id': 'io.example.no-params-input-output',
     'type': 'procedure',
+  },
+
+  {
+    'lexicon': 1,
+    'id': 'io.example.params',
+    'type': 'procedure',
+    'parameters': {
+      'foo': { 'type': 'string' },
+      'bar': { 'type': 'number', 'required': True },
+    },
   },
 ]

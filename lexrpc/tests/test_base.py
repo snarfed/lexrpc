@@ -8,16 +8,19 @@ from ..base import XrpcBase
 
 
 class BaseTest(TestCase):
+    maxDiff = None
 
     def setUp(self):
         super().setUp()
         self.base = XrpcBase(LEXICONS)
 
     def test_get_lexicon(self):
-        self.assertEqual(LEXICONS[0], self.base._get_lexicon('io.example.procedure'))
-        self.assertEqual(LEXICONS[1], self.base._get_lexicon('io.example.query'))
-        self.assertEqual(LEXICONS[2], self.base._get_lexicon(
-            'io.example.no-params-input-output'))
+        self.assertEqual('io.example.procedure',
+                         self.base._get_lexicon('io.example.procedure')['id'])
+        self.assertEqual('io.example.query',
+                         self.base._get_lexicon('io.example.query')['id'])
+        self.assertEqual('io.example.no-params-input-output',
+                         self.base._get_lexicon('io.example.no-params-input-output')['id'])
 
     def test_validate_lexicon_schema(self):
         with self.assertRaises(SchemaError):
@@ -29,3 +32,15 @@ class BaseTest(TestCase):
                     'schema': 'foo bar',
                 },
             }])
+
+    def test_preprocess_params(self):
+        self.assertEqual({
+            'schema': {
+                'type': 'object',
+                'required': ['bar'],
+                'properties': {
+                    'foo': { 'type': 'string' },
+                    'bar': { 'type': 'number' },
+                },
+            },
+        }, self.base._lexicons['io.example.params']['parameters'])

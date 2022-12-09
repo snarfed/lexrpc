@@ -1,4 +1,8 @@
-"""Base code shared by both server and client."""
+"""Base code shared by both server and client.
+
+TODO: separate schema validation from object validation, remove None special
+case in _validate()
+"""
 import copy
 import logging
 
@@ -31,13 +35,28 @@ class XrpcBase():
         self._lexicons = {l['id']: l for l in copy.deepcopy(lexicons)}
         logger.debug(f'Got lexicons for: {self._lexicons.keys()}')
 
-        # validate schemas
+        # validate schemas, convert parameters field into full JSON schema
         for i, lexicon in enumerate(self._lexicons.values()):
             id = lexicon.get('id')
             assert id, f'Lexicon {i} missing id field'
             type = lexicon.get('type')
             assert type in ('query', 'procedure'), f'Bad type for lexicon {id}: {type}'
-            for field in 'input', 'output':
+
+            # preprocesses parameters
+            props = lexicon.get('parameters', {})
+            lexicon['parameters'] = {
+                'schema': {
+                    'type': 'object',
+                    'required': [],
+                    'properties': props,
+                },
+            }
+            for name, schema in props.items():
+                if schema.pop('required', False):
+                    lexicon['parameters']['schema']['required'].append(name)
+
+            # validate schemas
+            for field in 'input', 'output', 'parameters':
                 self._validate(id, field, None)
 
     def _get_lexicon(self, nsid):
@@ -68,7 +87,7 @@ class XrpcBase():
           :class:`jsonschema.SchemaError`, if the schema is invalid
           :class:`jsonschema.ValidationError`, if the object is invalid
         """
-        assert type in ('input', 'output'), type
+        assert type in ('input', 'output', 'parameters'), type
 
         schema = self._get_lexicon(nsid).get(type, {}).get('schema')
         if not schema:

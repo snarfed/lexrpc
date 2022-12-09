@@ -23,14 +23,15 @@ class ExampleServer(Server):
     def io_example_procedure(self, params, input):
         return input
 
-    def io_example_procedure(self, params, input):
-        return input
-
     def io_example_no_params_input_output(self, params, input):
+        pass
+
+    def io_example_params(self, params, input):
         pass
 
 
 class ServerTest(TestCase):
+    maxDiff = None
 
     def setUp(self):
         super().setUp()
@@ -49,6 +50,16 @@ class ServerTest(TestCase):
         output = self.call('io.example.query', {'foo': 'abc'})
         self.assertEqual({'foo': 'abc', 'bar': 5}, output)
 
+    def test_no_params_input_output(self):
+        self.assertIsNone(self.call('io.example.no-params-input-output'))
+
+    def test_procedure_missing_input(self):
+        with self.assertRaises(ValidationError):
+            self.call('io.example.procedure', {}, {})
+
+        with self.assertRaises(ValidationError):
+            self.call('io.example.procedure', {}, {'bar': 3})
+
     def test_procedure_bad_input(self):
         with self.assertRaises(ValidationError):
             self.call('io.example.procedure', {}, {'foo': 2, 'bar': 3})
@@ -58,6 +69,17 @@ class ServerTest(TestCase):
 
         with self.assertRaises(ValidationError):
             self.call('io.example.query', {'foo': 'abc'})
+
+    def test_missing_params(self):
+        with self.assertRaises(ValidationError):
+            self.call('io.example.params')
+
+        with self.assertRaises(ValidationError):
+            self.call('io.example.params', params={'foo': 'a'})
+
+    def test_invalid_params(self):
+        with self.assertRaises(ValidationError):
+            self.call('io.example.params', params={'bar': 'c'})
 
     def test_unknown_methods(self):
         with self.assertRaises(NotImplementedError):

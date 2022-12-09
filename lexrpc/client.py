@@ -50,28 +50,31 @@ class Client(XrpcBase):
         """
         logger.debug(f'{nsid}: {params} {input}')
 
+        # validate params and input, then encode params. pass non-null object to
+        # validate to force it to actually validate the object.
+        params = params or {}
+        input = input or {}
+        self._validate(nsid, 'parameters', params)
         self._validate(nsid, 'input', input)
 
-        # encode params
-        if params:
-            params = {name: self._encode_param(val) for name, val in params.items()}
+        params = {name: self._encode_param(val) for name, val in params.items()}
 
         # run method
         url = f'{self._address}/xrpc/{nsid}'
         lexicon = self._get_lexicon(nsid)
         fn = requests.get if lexicon['type'] == 'query' else requests.post
         logger.debug(f'Running method')
-        resp = fn(url, params=params,
-                  json=input if input else None,
-                  headers={'Content-Type': 'application/json'},
-                  )
+        resp = fn(url, params=params, json=input,
+                  headers={'Content-Type': 'application/json'})
         logger.debug(f'Got: {resp}')
         resp.raise_for_status()
 
+        output = None
         if resp.headers.get('Content-Type') == 'application/json' and resp.content:
             output = resp.json()
-            self._validate(nsid, 'output', output)
-            return output
+
+        self._validate(nsid, 'output', output or {})
+        return output
 
     @staticmethod
     def _encode_param(param):
