@@ -52,6 +52,10 @@ class Client(XrpcBase):
 
         self._validate(nsid, 'input', input)
 
+        # encode params
+        if params:
+            params = {name: self._encode_param(val) for name, val in params.items()}
+
         # run method
         url = f'{self._address}/xrpc/{nsid}'
         lexicon = self._get_lexicon(nsid)
@@ -68,3 +72,14 @@ class Client(XrpcBase):
             output = resp.json()
             self._validate(nsid, 'output', output)
             return output
+
+    @staticmethod
+    def _encode_param(param):
+        """Encodes a parameter value.
+
+        Based on https://atproto.com/specs/xrpc#path
+
+        requests URL-encodes all query parameters, so here we only need to
+        handle booleans.
+        """
+        return 'true' if param is True else 'false' if param is False else param

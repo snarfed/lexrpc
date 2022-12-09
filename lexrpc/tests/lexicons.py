@@ -47,4 +47,9 @@ LEXICONS = [
       },
     },
   },
+  {
+    'lexicon': 1,
+    'id': 'io.example.no-params-input-output',
+    'type': 'procedure',
+  },
 ]

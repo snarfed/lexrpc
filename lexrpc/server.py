@@ -66,4 +66,4 @@ class Server(XrpcBase):
 
         Returns: str
         """
-        return nsid.replace('.', '_')
+        return nsid.replace('.', '_').replace('-', '_')

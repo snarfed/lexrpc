@@ -41,7 +41,6 @@ class ClientTest(TestCase):
     def test_query(self, mock_get):
         params = {'x': 'y'}
         output = {'foo': 'asdf', 'bar': 3}
-
         mock_get.return_value = response(output)
 
         got = self.call('io.example.query', params)
@@ -59,7 +58,6 @@ class ClientTest(TestCase):
         params = {'x': 'y'}
         input = {'foo': 'asdf', 'bar': 3}
         output = {'foo': 'baz', 'bar': 4}
-
         mock_post.return_value = response(output)
 
         got = self.call('io.example.procedure', params, input)
@@ -74,8 +72,41 @@ class ClientTest(TestCase):
 
     @patch('requests.get')
     def test_boolean_param(self, mock_get):
-        pass
+        params = {'x': True}
+        output = {'foo': 'asdf', 'bar': 3}
+        mock_get.return_value = response(output)
+
+        got = self.call('io.example.query', params)
+        self.assertEqual(output, got)
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query',
+            params={'x': 'true'},
+            json=None,
+            headers={'Content-Type': 'application/json'},
+        )
+
+    @patch('requests.get')
+    def test_no_output_error(self, mock_get):
+        mock_get.return_value = response()
+        got = self.call('io.example.query')
+        self.assertIsNone(got)
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query',
+            params=None,
+            json=None,
+            headers={'Content-Type': 'application/json'},
+        )
 
     @patch('requests.post')
-    def test_no_output(self, mock_post):
-        pass
+    def test_no_params_input_output(self, mock_post):
+        mock_post.return_value = response()
+        self.assertIsNone(self.call('io.example.no-params-input-output'))
+
+        mock_post.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.no-params-input-output',
+            params=None,
+            json=None,
+            headers={'Content-Type': 'application/json'},
+        )

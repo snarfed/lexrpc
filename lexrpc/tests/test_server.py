@@ -23,6 +23,12 @@ class ExampleServer(Server):
     def io_example_procedure(self, params, input):
         return input
 
+    def io_example_procedure(self, params, input):
+        return input
+
+    def io_example_no_params_input_output(self, params, input):
+        pass
+
 
 class ServerTest(TestCase):
 
