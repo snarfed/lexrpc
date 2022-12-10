@@ -12,7 +12,6 @@ Python implementation of [AT Protocol](https://atproto.com/)'s [XRPC](https://at
 * validate records (and tokens?) in input/output
 * fill in server.py and client.py docstrings, and/or getting started guide here
 * extensions, https://atproto.com/guides/lexicon#extensibility . is there anything to do? ah, it's currently TODO in the spec: https://atproto.com/specs/xrpc#todos
-* switch underscore-based method names to NSID-based using dynamic attributes? as described in https://atproto.com/guides/lexicon#rpc-methods
 * Flask-based server with URL route handlers
 * "binary blob" support, as in https://atproto.com/specs/xrpc . is it currently undefined?
 * authentication, currently TODO in the spec: https://atproto.com/specs/xrpc#todos
