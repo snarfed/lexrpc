@@ -18,6 +18,7 @@ LEXICON_METHOD_TYPES = frozenset((
     'procedure',
 ))
 NSID_SEGMENT_RE = re.compile('[a-z0-9-]+')
+NSID_RE = re.compile(f'({NSID_SEGMENT_RE.pattern})+')
 
 
 def fail(msg, exc=NotImplementedError):
