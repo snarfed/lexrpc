@@ -1,8 +1,4 @@
-"""Unit tests for server.py.
-
-Based on:
-https://github.com/bluesky-social/atproto/blob/main/packages/xrpc-server/tests/bodies.test.ts
-"""
+"""Unit tests for server.py."""
 from unittest import TestCase
 
 from jsonschema import ValidationError

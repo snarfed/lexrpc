@@ -1,6 +1,7 @@
 """Base code shared by both server and client."""
 import copy
 import logging
+import re
 
 import jsonschema
 
@@ -16,6 +17,7 @@ LEXICON_METHOD_TYPES = frozenset((
     'query',
     'procedure',
 ))
+NSID_SEGMENT_RE = re.compile('[a-z0-9-]+')
 
 
 def fail(msg, exc=NotImplementedError):

@@ -3,9 +3,34 @@ import logging
 
 import requests
 
-from .base import XrpcBase
+from .base import NSID_SEGMENT_RE, XrpcBase
 
 logger = logging.getLogger(__name__)
+
+
+class _NsidClient():
+    """Internal helper class to implement dynamic attribute-based method calls.
+
+    eg client.com.example.my_method(...)
+    """
+    client = None
+    nsid = None
+
+    def __init__(self, client, nsid):
+        assert client and nsid
+        self.client = client
+        self.nsid = nsid
+
+    def __getattr__(self, attr):
+        if NSID_SEGMENT_RE.match(attr):
+            segment = attr.replace('-', '_')
+            return _NsidClient(self.client, f'{self.nsid}.{segment}')
+
+        return getattr(super(), attr)
+
+    def __call__(self, *args, **kwargs):
+        nsid = self.nsid.replace('_', '-')
+        return self.client.call(nsid, *args, **kwargs)
 
 
 class Client(XrpcBase):
@@ -26,6 +51,12 @@ class Client(XrpcBase):
         assert address.startswith('http://') or address.startswith('https://'), \
             f"{address} doesn't start with http:// or https://"
         self._address = address
+
+    def __getattr__(self, attr):
+        if NSID_SEGMENT_RE.match(attr):
+            return _NsidClient(self, attr)
+
+        return getattr(super(), attr)
 
     def call(self, nsid, params=None, input=None):
         """Makes a remote XRPC method call.
