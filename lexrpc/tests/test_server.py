@@ -10,13 +10,11 @@ from ..server import Server
 # test server and methods
 server = Server(LEXICONS)
 
-BAR = 5
-
 @server.method('io.example.query')
 def query(params, input):
     return {
-        'foo': params.get('foo'),
-        'bar': BAR,
+        'foo': params.get('x'),
+        'bar': ServerTest.QUERY_BAR,
     }
 
 
@@ -42,6 +40,11 @@ def error(params, input):
 
 class ServerTest(TestCase):
     maxDiff = None
+    QUERY_BAR = None
+
+    def setUp(self):
+        super().setUp()
+        ServerTest.QUERY_BAR = 5
 
     def test_procedure(self):
         input = {
@@ -52,8 +55,8 @@ class ServerTest(TestCase):
         self.assertEqual(input, output)
 
     def test_query(self):
-        output = server.call('io.example.query', {'foo': 'abc'})
-        self.assertEqual({'foo': 'abc', 'bar': 5}, output)
+        output = server.call('io.example.query', {'x': 'y'})
+        self.assertEqual({'foo': 'y', 'bar': 5}, output)
 
     def test_no_params_input_output(self):
         self.assertIsNone(server.call('io.example.no-params-input-output'))
@@ -71,7 +74,7 @@ class ServerTest(TestCase):
 
     def test_query_bad_output(self):
         global BAR
-        BAR = 'not an integer'
+        self.QUERY_BAR = 'not an integer'
 
         with self.assertRaises(ValidationError):
             server.call('io.example.query', {'foo': 'abc'})
