@@ -22,15 +22,14 @@ class _NsidClient():
         self.nsid = nsid
 
     def __getattr__(self, attr):
-        if NSID_SEGMENT_RE.match(attr):
-            segment = attr.replace('-', '_')
+        segment = attr.replace('_', '-')
+        if NSID_SEGMENT_RE.match(segment):
             return _NsidClient(self.client, f'{self.nsid}.{segment}')
 
         return getattr(super(), attr)
 
     def __call__(self, *args, **kwargs):
-        nsid = self.nsid.replace('_', '-')
-        return self.client.call(nsid, *args, **kwargs)
+        return self.client.call(self.nsid, *args, **kwargs)
 
 
 class Client(XrpcBase):

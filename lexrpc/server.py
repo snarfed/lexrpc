@@ -1,9 +1,6 @@
 """XRPC server implementation."""
-import copy
 from functools import wraps
 import logging
-
-import jsonschema
 
 from .base import fail, LEXICON_METHOD_TYPES, NSID_RE, XrpcBase
 

@@ -40,7 +40,7 @@ def error(params, input):
 
 class ServerTest(TestCase):
     maxDiff = None
-    QUERY_BAR = None
+    QUERY_BAR = 5
 
     def setUp(self):
         super().setUp()

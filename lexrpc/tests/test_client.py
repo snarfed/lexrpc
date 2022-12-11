@@ -32,7 +32,6 @@ class ClientTest(TestCase):
 
     def setUp(self):
         self.client = Client('http://ser.ver', LEXICONS)
-        self.call = self.client.call
 
     @patch('requests.get')
     def test_call(self, mock_get):
@@ -40,7 +39,7 @@ class ClientTest(TestCase):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
 
-        got = self.client.io.example.query(params)
+        got = self.client.call('io.example.query', params)
         self.assertEqual(output, got)
 
         mock_get.assert_called_once_with(

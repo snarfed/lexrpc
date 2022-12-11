@@ -17,8 +17,9 @@ LEXICON_METHOD_TYPES = frozenset((
     'query',
     'procedure',
 ))
-NSID_SEGMENT_RE = re.compile('[a-z0-9-]+')
-NSID_RE = re.compile(f'({NSID_SEGMENT_RE.pattern})+')
+NSID_SEGMENT = '[a-z0-9-]+'
+NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
+NSID_RE = re.compile(f'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
 
 
 def fail(msg, exc=NotImplementedError):
@@ -111,4 +112,5 @@ class XrpcBase():
         except jsonschema.ValidationError as e:
             # schema passed validation, obj failed
             if obj is not None:
+                e.message = f'Error validating {nsid} {type}: {e.message}'
                 raise
