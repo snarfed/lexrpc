@@ -21,7 +21,7 @@ jobs:
           command: |
             pip install -U pip
             pip -V
-            pip install -U .
+            pip install -U .[flask]
             pip install coverage coveralls
 
       - run:

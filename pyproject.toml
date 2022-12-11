@@ -18,7 +18,6 @@ readme = 'README.md'
 requires-python = '>=3.7'
 keywords = ['XRPC', 'Lexicon', 'AT Protocol', 'ATP']
 dependencies = [
-    'Flask>=2.0',
     'jsonschema>=4.0',
     'requests>=2.0',
 ]
@@ -32,4 +31,6 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-flask = ['Flask']
+flask = [
+    'Flask>=2.0',
+]
