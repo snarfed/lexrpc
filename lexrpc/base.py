@@ -28,7 +28,7 @@ def fail(msg, exc=NotImplementedError):
     raise exc(msg)
 
 
-class XrpcBase():
+class Base():
     """Base class for both XRPC client and server."""
 
     _lexicons = None  # dict mapping NSID to lexicon object

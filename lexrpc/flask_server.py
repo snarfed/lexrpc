@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 def init_flask(xrpc_server, app):
-    """Connects an XrpcServer to serve on /xrpc/... on a Flask app.
+    """Connects a Server to serve on /xrpc/... on a Flask app.
 
     Args:
-      xrpc_server: :class:`lexrpc.XrpcServer`
+      xrpc_server: :class:`lexrpc.Server`
       app: :class:`flask.Flask`
     """
     logger.info(f'Registering {xrpc_server} with {app}')
@@ -28,7 +28,7 @@ class XrpcEndpoint(View):
     """Handles inbound XRPC requests.
 
     Attributes:
-      server: :class:`lexrpc.XrpcServer`
+      server: :class:`lexrpc.Server`
     """
     server = None
 

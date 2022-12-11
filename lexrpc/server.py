@@ -2,12 +2,12 @@
 from functools import wraps
 import logging
 
-from .base import fail, LEXICON_METHOD_TYPES, NSID_RE, XrpcBase
+from .base import fail, LEXICON_METHOD_TYPES, NSID_RE, Base
 
 logger = logging.getLogger(__name__)
 
 
-class Server(XrpcBase):
+class Server(Base):
     """XRPC server base class. Subclass to implement specific methods."""
     _methods = None  # dict, maps string NSID to Python callable
 

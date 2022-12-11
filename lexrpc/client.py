@@ -3,7 +3,7 @@ import logging
 
 import requests
 
-from .base import NSID_SEGMENT_RE, XrpcBase
+from .base import NSID_SEGMENT_RE, Base
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class _NsidClient():
         return self.client.call(self.nsid, *args, **kwargs)
 
 
-class Client(XrpcBase):
+class Client(Base):
     """XRPC client."""
 
     def __init__(self, address, lexicons):

@@ -4,7 +4,7 @@ from unittest import TestCase
 from jsonschema import SchemaError, ValidationError
 
 from .lexicons import LEXICONS
-from ..base import XrpcBase
+from ..base import Base
 
 
 class BaseTest(TestCase):
@@ -12,7 +12,7 @@ class BaseTest(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.base = XrpcBase(LEXICONS)
+        self.base = Base(LEXICONS)
 
     def test_get_lexicon(self):
         self.assertEqual('io.example.procedure',
@@ -24,7 +24,7 @@ class BaseTest(TestCase):
 
     def test_validate_lexicon_schema(self):
         with self.assertRaises(SchemaError):
-            XrpcBase([{
+            Base([{
                 'lexicon': 1,
                 'id': 'io.example.procedure',
                 'type': 'procedure',
