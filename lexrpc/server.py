@@ -68,7 +68,6 @@ class Server(Base):
 
         # validate params and input, then encode params. pass non-null object to
         # validate to force it to actually validate the object.
-        input = input or {}
         self._validate(nsid, 'parameters', params)
         self._validate(nsid, 'input', input)
 
@@ -76,5 +75,5 @@ class Server(Base):
         output = fn(input, **params)
         logger.debug(f'Got: {output}')
 
-        self._validate(nsid, 'output', output or {})
+        self._validate(nsid, 'output', output)
         return output

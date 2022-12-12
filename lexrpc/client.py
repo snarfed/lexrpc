@@ -98,5 +98,5 @@ class Client(Base):
         if resp.headers.get('Content-Type') == 'application/json' and resp.content:
             output = resp.json()
 
-        self._validate(nsid, 'output', output or {})
+        self._validate(nsid, 'output', output)
         return output

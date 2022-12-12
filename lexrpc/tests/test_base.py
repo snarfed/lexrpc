@@ -23,15 +23,16 @@ class BaseTest(TestCase):
                          self.base._get_lexicon('io.example.no-params-input-output')['id'])
 
     def test_validate_lexicon_schema(self):
-        with self.assertRaises(SchemaError):
-            Base([{
-                'lexicon': 1,
-                'id': 'io.example.procedure',
-                'type': 'procedure',
-                'input': {
-                    'schema': 'foo bar',
-                },
-            }])
+        for bad in 'foo bar', {'type': 'foo', 'properties': 3}:
+            with self.assertRaises(SchemaError):
+                Base([{
+                    'lexicon': 1,
+                    'id': 'io.example.procedure',
+                    'type': 'procedure',
+                    'input': {
+                        'schema': bad,
+                    },
+                }])
 
     def test_preprocess_params(self):
         self.assertEqual({

@@ -4,6 +4,7 @@ import logging
 import re
 
 import jsonschema
+from jsonschema.validators import validator_for
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ class Base():
             type = lexicon.get('type')
             assert type in LEXICON_TYPES, f'Bad type for lexicon {id}: {type}'
 
-            # preprocesses parameters
+            # preprocess parameters properties into full JSON Schema
             props = lexicon.get('parameters', {})
             lexicon['parameters'] = {
                 'schema': {
@@ -74,7 +75,10 @@ class Base():
 
             # validate schemas
             for field in 'input', 'output', 'parameters', 'record':
-                self._validate(id, field, None)
+                logger.debug(f'Validating {id} {field} schema')
+                schema = lexicon.get(field, {}).get('schema')
+                if schema:
+                    validator_for(schema).check_schema(schema)
 
     def _get_lexicon(self, nsid):
         """Returns the given lexicon object.
@@ -94,14 +98,13 @@ class Base():
         Args:
           nsid: str, method NSID
           type: either 'input' or 'output'
-          obj: decoded JSON object, or None to only validate the schema itself
+          obj: decoded JSON object
 
         Returns: None
 
         Raises:
           NotImplementedError, if no lexicon exists for the given NSID, or the
             lexicon does not define a schema for the given type
-          :class:`jsonschema.SchemaError`, if the schema is invalid
           :class:`jsonschema.ValidationError`, if the object is invalid
         """
         assert type in ('input', 'output', 'parameters', 'record'), type
@@ -116,10 +119,8 @@ class Base():
         try:
             jsonschema.validate(obj, schema)
         except jsonschema.ValidationError as e:
-            # schema passed validation, obj failed
-            if obj is not None:
-                e.message = f'Error validating {nsid} {type}: {e.message}'
-                raise
+            e.message = f'Error validating {nsid} {type}: {e.message}'
+            raise
 
     @staticmethod
     def _encode_param(param):

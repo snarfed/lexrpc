@@ -6,8 +6,6 @@ Python implementation of [AT Protocol](https://atproto.com/)'s [XRPC](https://at
 License: This project is placed in the public domain.
 
 ## TODO
-* use kwargs for params in server and client call APIs
-* separate schema validation from object validation, remove None special case in _validate()
 * validate records (and tokens?) in input/output
 * fill in server.py and client.py docstrings, and/or getting started guide here
 * extensions, https://atproto.com/guides/lexicon#extensibility . is there anything to do? ah, it's currently TODO in the spec: https://atproto.com/specs/xrpc#todos
