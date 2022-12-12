@@ -70,15 +70,14 @@ class Client(Base):
         Raises:
           NotImplementedError, if the given NSID is not found in any of the
             loaded lexicons
-          :class:`jsonschema.ValidationError`, if the input or output returned
-            by the method doesn't validate against the method's schemas
+          :class:`jsonschema.ValidationError`, if the parameters, input, or
+            returned output don't validate against the method's schemas
           :class:`requests.Exception`, if the connection or HTTP request to the
             remote server failed
         """
         logger.debug(f'{nsid}: {params} {input}')
 
-        # validate params and input, then encode params. pass non-null object to
-        # validate to force it to actually validate the object.
+        # validate params and input, then encode params
         self._validate(nsid, 'parameters', params)
         self._validate(nsid, 'input', input)
 

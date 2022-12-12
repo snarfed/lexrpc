@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def init_flask(xrpc_server, app):
-    """Connects a Server to serve on /xrpc/... on a Flask app.
+    """Connects a :class:`lexrpc.Server` to serve on /xrpc/... on a Flask app.
 
     Args:
       xrpc_server: :class:`lexrpc.Server`
@@ -35,7 +35,7 @@ class XrpcEndpoint(View):
     def __init__(self, server):
         self.server = server
 
-    def dispatch_request(self, nsid=None):
+    def dispatch_request(self, nsid):
         if not NSID_RE.match(nsid):
             return {'message': f'{nsid} is not a valid NSID'}, 400
 
@@ -57,9 +57,10 @@ class XrpcEndpoint(View):
                 return {'message': str(e)}, 400
 
         # run method
+        input = request.json if request.content_length else {}
         try:
-            input = request.json if request.content_length else {}
             output = self.server.call(nsid, input=input, **params)
-            return jsonify(output or '')
         except ValidationError as e:
             return {'message': str(e)}, 400
+
+        return jsonify(output or '')
