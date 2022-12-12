@@ -57,13 +57,13 @@ class Client(Base):
 
         return getattr(super(), attr)
 
-    def call(self, nsid, params=None, input=None):
+    def call(self, nsid, input, **params):
         """Makes a remote XRPC method call.
 
         Args:
           nsid: str, method NSID
-          params: dict, optional method parameters
-          input: dict, optional input body
+          input: dict, input body
+          params: optional method parameters
 
         Returns: decoded JSON object, or None if the method has no output
 
@@ -79,8 +79,6 @@ class Client(Base):
 
         # validate params and input, then encode params. pass non-null object to
         # validate to force it to actually validate the object.
-        params = params or {}
-        input = input or {}
         self._validate(nsid, 'parameters', params)
         self._validate(nsid, 'input', input)
 

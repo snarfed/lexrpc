@@ -35,11 +35,10 @@ class ClientTest(TestCase):
 
     @patch('requests.get')
     def test_call(self, mock_get):
-        params = {'x': 'y'}
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
 
-        got = self.client.call('io.example.query', params)
+        got = self.client.call('io.example.query', {}, x='y')
         self.assertEqual(output, got)
 
         mock_get.assert_called_once_with(
@@ -51,11 +50,10 @@ class ClientTest(TestCase):
 
     @patch('requests.get')
     def test_query(self, mock_get):
-        params = {'x': 'y'}
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
 
-        got = self.client.io.example.query(params)
+        got = self.client.io.example.query({}, x='y')
         self.assertEqual(output, got)
 
         mock_get.assert_called_once_with(
@@ -67,28 +65,26 @@ class ClientTest(TestCase):
 
     @patch('requests.post')
     def test_procedure(self, mock_post):
-        params = {'x': 'y'}
         input = {'foo': 'asdf', 'bar': 3}
         output = {'foo': 'baz', 'bar': 4}
         mock_post.return_value = response(output)
 
-        got = self.client.io.example.procedure(params, input)
+        got = self.client.io.example.procedure(input, x='y')
         self.assertEqual(output, got)
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure',
-            params=params,
+            params={'x': 'y'},
             json=input,
             headers={'Content-Type': 'application/json'},
         )
 
     @patch('requests.get')
     def test_boolean_param(self, mock_get):
-        params = {'z': True}
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
 
-        got = self.client.io.example.query(params)
+        got = self.client.io.example.query({}, z=True)
         self.assertEqual(output, got)
 
         mock_get.assert_called_once_with(
@@ -103,7 +99,7 @@ class ClientTest(TestCase):
         mock_get.return_value = response()
 
         with self.assertRaises(ValidationError):
-            got = self.client.io.example.query()
+            got = self.client.io.example.query({})
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
@@ -115,7 +111,7 @@ class ClientTest(TestCase):
     @patch('requests.post')
     def test_no_params_input_output(self, mock_post):
         mock_post.return_value = response()
-        self.assertIsNone(self.client.io.example.no_params_input_output())
+        self.assertIsNone(self.client.io.example.no_params_input_output({}))
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.no-params-input-output',
@@ -126,11 +122,11 @@ class ClientTest(TestCase):
 
     def test_missing_params(self):
         with self.assertRaises(ValidationError):
-            self.client.io.example.params()
+            self.client.io.example.params({})
 
         with self.assertRaises(ValidationError):
-            self.client.io.example.params(params={'foo': 'a'})
+            self.client.io.example.params({}, foo='a')
 
     def test_invalid_params(self):
         with self.assertRaises(ValidationError):
-            self.client.io.example.params(params={'bar': 'c'})
+            self.client.io.example.params({}, bar='c')
