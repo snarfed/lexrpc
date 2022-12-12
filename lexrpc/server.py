@@ -46,13 +46,13 @@ class Server(Base):
 
         return decorated
 
-    def call(self, nsid, params=None, input=None):
+    def call(self, nsid, input, **params):
         """Calls an XRPC query or procedure method.
 
         Args:
           nsid: str, method NSID
-          params: dict, optional method parameters
-          input: dict, optional input body
+          input: dict, input body
+          params: optional parameters
 
         Raises:
           NotImplementedError, if the given NSID is not implemented or found in
@@ -68,13 +68,12 @@ class Server(Base):
 
         # validate params and input, then encode params. pass non-null object to
         # validate to force it to actually validate the object.
-        params = params or {}
         input = input or {}
         self._validate(nsid, 'parameters', params)
         self._validate(nsid, 'input', input)
 
         logger.debug('Running method')
-        output = fn(params, input)
+        output = fn(input, **params)
         logger.debug(f'Got: {output}')
 
         self._validate(nsid, 'output', output or {})

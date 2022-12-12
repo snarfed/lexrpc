@@ -59,7 +59,7 @@ class XrpcEndpoint(View):
         # run method
         try:
             input = request.json if request.content_length else {}
-            output = self.server.call(nsid, params=params, input=input)
+            output = self.server.call(nsid, input=input, **params)
             return jsonify(output or '')
         except ValidationError as e:
             return {'message': str(e)}, 400
