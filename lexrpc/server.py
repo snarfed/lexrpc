@@ -18,7 +18,8 @@ class Server(Base):
           lexicon: sequence of dict lexicons
 
         Raises:
-          :class:`jsonschema.SchemaError`, if any schema is invalid
+          :class:`jsonschema.SchemaError`
+            if any schema is invalid
         """
         super().__init__(lexicons)
         self._methods = {}
@@ -54,10 +55,12 @@ class Server(Base):
           params: optional parameters
 
         Raises:
-          NotImplementedError, if the given NSID is not implemented or found in
-            any of the loaded lexicons
-          :class:`jsonschema.ValidationError`, if the parameters, input, or
-            returned output don't validate against the method's schemas
+          NotImplementedError
+            if the given NSID is not implemented or found in any of the loaded
+            lexicons
+          :class:`jsonschema.ValidationError`
+            if the parameters, input, or returned output don't validate against
+            the method's schemas
         """
         logger.debug(f'{nsid}: {params} {input}')
 

@@ -47,7 +47,8 @@ class Base():
           lexicons: sequence of dict lexicons
 
         Raises:
-          :class:`jsonschema.SchemaError` if any schema is invalid
+          :class:`jsonschema.SchemaError`
+            if any schema is invalid
         """
         assert isinstance(lexicons, (list, tuple))
         self._lexicons = {l['id']: l for l in copy.deepcopy(lexicons)}
@@ -84,7 +85,8 @@ class Base():
         """Returns the given lexicon object.
 
         Raises:
-          NotImplementedError, if no lexicon exists for the given NSID
+          NotImplementedError
+            if no lexicon exists for the given NSID
         """
         lexicon = self._lexicons.get(nsid)
         if not lexicon:
@@ -103,9 +105,11 @@ class Base():
         Returns: None
 
         Raises:
-          NotImplementedError, if no lexicon exists for the given NSID, or the
-            lexicon does not define a schema for the given type
-          :class:`jsonschema.ValidationError`, if the object is invalid
+          NotImplementedError
+            if no lexicon exists for the given NSID, or the lexicon does not
+            define a schema for the given type
+          :class:`jsonschema.ValidationError`
+            if the object is invalid
         """
         assert type in ('input', 'output', 'parameters', 'record'), type
 

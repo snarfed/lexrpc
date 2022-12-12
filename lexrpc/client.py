@@ -42,7 +42,8 @@ class Client(Base):
           lexicon: sequence of dict lexicons
 
         Raises:
-          :class:`jsonschema.SchemaError` if any schema is invalid
+          :class:`jsonschema.SchemaError`
+            if any schema is invalid
         """
         super().__init__(lexicons)
 
@@ -68,12 +69,13 @@ class Client(Base):
         Returns: decoded JSON object, or None if the method has no output
 
         Raises:
-          NotImplementedError, if the given NSID is not found in any of the
-            loaded lexicons
-          :class:`jsonschema.ValidationError`, if the parameters, input, or
-            returned output don't validate against the method's schemas
-          :class:`requests.Exception`, if the connection or HTTP request to the
-            remote server failed
+          NotImplementedError
+            if the given NSID is not found in any of the loaded lexicons
+          :class:`jsonschema.ValidationError`
+            if the parameters, input, or returned output don't validate against
+            the method's schemas
+          :class:`requests.RequestException`
+            if the connection or HTTP request to the remote server failed
         """
         logger.debug(f'{nsid}: {params} {input}')
 
