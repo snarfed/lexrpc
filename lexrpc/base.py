@@ -17,6 +17,12 @@ LEXICON_METHOD_TYPES = frozenset((
     'query',
     'procedure',
 ))
+PARAMETER_TYPES = frozenset((
+    'boolean',
+    'integer',
+    'number',
+    'string',
+))
 NSID_SEGMENT = '[a-z0-9-]+'
 NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
 NSID_RE = re.compile(f'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
@@ -114,3 +120,53 @@ class Base():
             if obj is not None:
                 e.message = f'Error validating {nsid} {type}: {e.message}'
                 raise
+
+    @staticmethod
+    def _encode_param(param):
+        """Encodes a parameter value to a string.
+
+        Based on https://atproto.com/specs/xrpc#path
+
+        requests URL-encodes all query parameters, so here we only need to
+        handle booleans.
+
+        Args:
+          param: boolean, number, or str
+
+        Returns: str
+        """
+        return 'true' if param is True else 'false' if param is False else str(param)
+
+    @staticmethod
+    def _decode_param(param, name, type):
+        """Decodes a parameter value from string.
+
+        Based on https://atproto.com/specs/xrpc#path
+
+        Args:
+          param: str
+          type: str, 'string' or 'number' or 'integer' or 'boolean'
+
+        Returns: boolean, number, or str, depending on type
+        """
+        assert type in PARAMETER_TYPES
+
+        if type == 'boolean':
+            if param == 'true':
+                return True
+            if param == 'false':
+                return False
+            else:
+                raise jsonschema.ValidationError(
+                    f'Got {param!r} for boolean parameter {name}, expected true or false')
+
+        try:
+            if type == 'number':
+                return float(param)
+            elif type == 'int':
+                return int(param)
+        except ValueError:
+            raise jsonschema.ValidationError(f'Got {param!r} for {type} parameter {name}')
+
+        assert type == 'string'
+        return param

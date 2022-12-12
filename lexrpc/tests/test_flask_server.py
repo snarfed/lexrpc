@@ -8,7 +8,7 @@ from .lexicons import LEXICONS
 from .test_server import server
 
 
-class ServerTest(TestCase):
+class XrpcEndpointTest(TestCase):
     maxDiff = None
 
     @classmethod
@@ -43,6 +43,15 @@ class ServerTest(TestCase):
         self.assertEqual(400, resp.status_code)
         self.assertEqual('application/json', resp.headers['Content-Type'])
         self.assertEqual({'message': 'not_an*nsid is not a valid NSID'}, resp.json)
+
+    def test_query_boolean_param(self):
+        resp = self.client.get('/xrpc/io.example.query?x=&z=false')
+        self.assertEqual(200, resp.status_code, resp.json)
+
+        resp = self.client.get('/xrpc/io.example.query?z=foolz')
+        self.assertEqual(400, resp.status_code)
+        self.assertEqual("Got 'foolz' for boolean parameter z, expected true or false",
+                         resp.json['message'])
 
     def test_procedure_missing_input(self):
         resp = self.client.post('/xrpc/io.example.procedure')
@@ -84,8 +93,12 @@ class ServerTest(TestCase):
     def test_invalid_params(self):
         resp = self.client.post('/xrpc/io.example.params?bar=c')
         self.assertEqual(400, resp.status_code)
-        self.assertTrue(resp.json['message'].startswith(
-            'Error validating io.example.params parameters:'))
+        self.assertEqual("Got 'c' for number parameter bar",
+                         resp.json['message'])
+
+    def test_integer_param(self):
+        resp = self.client.post('/xrpc/io.example.params?bar=5')
+        self.assertEqual(200, resp.status_code, resp.json)
 
     def test_unknown_methods(self):
         resp = self.client.get('/xrpc/io.unknown')
