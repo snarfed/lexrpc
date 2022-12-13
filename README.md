@@ -27,7 +27,7 @@ from jsonschema import Client
 
 lexicons = [...]
 client = Client('https://xrpc.example.com', lexicons)
-output = client.com.example.my_query({'foo': 'bar'}, a_param=False)
+output = client.com.example.my_query({'foo': 'bar'}, param_a=5)
 ```
 
 Note that `-` characters in method NSIDs are converted to `_`s, eg the call above is for the method `com.example.my-query`.
@@ -77,7 +77,9 @@ This configures the Flask app to serve the methods registered with the lexrpc se
 TODO
 ---
 * fix readthedocs build
-* validate records/tokens in input/output? or are those only primitives?
+* migrate to defs and refs. these seem to be the newer lexicon fields/format, but the docs on https://atproto.com/ haven't quite caught up with them.  
+  eg type "ref" and ref field pointing to the nsid in https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13 , which points to app.bsky.actor.ref , which is defined in https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/actor/ref.json  
+  ref isn't documented on https://atproto.com/docs yet though, and these lexicons also use a defs field, which is in schemas in the Lexicon guide and spec but not really documented either. I'm guessing these parts are still under active development.
 * extensions, https://atproto.com/guides/lexicon#extensibility . is there anything to do? ah, it's currently TODO in the spec: https://atproto.com/specs/xrpc#todos
 * "binary blob" support, as in https://atproto.com/specs/xrpc . is it currently undefined?
 * authentication, currently TODO in the spec: https://atproto.com/specs/xrpc#todos

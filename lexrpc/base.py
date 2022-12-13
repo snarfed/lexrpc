@@ -24,7 +24,7 @@ PARAMETER_TYPES = frozenset((
     'number',
     'string',
 ))
-NSID_SEGMENT = '[a-z0-9-]+'
+NSID_SEGMENT = '[a-zA-Z0-9-]+'
 NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
 NSID_RE = re.compile(f'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
 

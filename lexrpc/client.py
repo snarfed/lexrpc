@@ -90,13 +90,14 @@ class Client(Base):
         lexicon = self._get_lexicon(nsid)
         fn = requests.get if lexicon['type'] == 'query' else requests.post
         logger.debug(f'Running method')
-        resp = fn(url, params=params, json=input,
+        resp = fn(url, params=params, json=input if input else None,
                   headers={'Content-Type': 'application/json'})
         logger.debug(f'Got: {resp}')
         resp.raise_for_status()
 
         output = None
-        if resp.headers.get('Content-Type') == 'application/json' and resp.content:
+        content_type = resp.headers.get('Content-Type', '').split(';')[0]
+        if content_type == 'application/json' and resp.content:
             output = resp.json()
 
         self._validate(nsid, 'output', output)
