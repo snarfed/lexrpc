@@ -3,7 +3,7 @@ import logging
 
 import requests
 
-from .base import NSID_SEGMENT_RE, Base
+from .base import Base, NSID_SEGMENT_RE
 
 logger = logging.getLogger(__name__)
 
@@ -81,9 +81,9 @@ class Client(Base):
 
         # validate params and input, then encode params
         self._validate(nsid, 'parameters', params)
-        self._validate(nsid, 'input', input)
+        params = self.encode_params(params)
 
-        params = {name: self._encode_param(val) for name, val in params.items()}
+        self._validate(nsid, 'input', input)
 
         # run method
         url = f'{self._address}/xrpc/{nsid}'

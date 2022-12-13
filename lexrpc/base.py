@@ -2,6 +2,7 @@
 import copy
 import logging
 import re
+import urllib.parse
 
 import jsonschema
 from jsonschema.validators import validator_for
@@ -24,6 +25,8 @@ PARAMETER_TYPES = frozenset((
     'number',
     'string',
 ))
+
+# https://atproto.com/specs/nsid
 NSID_SEGMENT = '[a-zA-Z0-9-]+'
 NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
 NSID_RE = re.compile(f'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
@@ -132,52 +135,67 @@ class Base():
             e.message = f'Error validating {nsid} {type}: {e.message}'
             raise
 
-    @staticmethod
-    def _encode_param(param):
-        """Encodes a parameter value to a string.
-
-        Based on https://atproto.com/specs/xrpc#path
-
-        requests URL-encodes all query parameters, so here we only need to
-        handle booleans.
-
-        Args:
-          param: boolean, number, or str
-
-        Returns: str
-        """
-        return 'true' if param is True else 'false' if param is False else str(param)
-
-    @staticmethod
-    def _decode_param(param, name, type):
-        """Decodes a parameter value from string.
+    def encode_params(self, params):
+        """Encodes decoded parameter values.
 
         Based on https://atproto.com/specs/xrpc#path
 
         Args:
-          param: str
-          type: str, 'string' or 'number' or 'integer' or 'boolean'
+          params: dict mapping str names to boolean, number, or str values
 
-        Returns: boolean, number, or str, depending on type
+        Returns: dict mapping str names to str encoded values
         """
-        assert type in PARAMETER_TYPES
+        return {name: ('true' if val is True
+                       else 'false' if val is False
+                       else urllib.parse.quote(str(val)))
+                for name, val in params.items()}
 
-        if type == 'boolean':
-            if param == 'true':
-                return True
-            if param == 'false':
-                return False
-            else:
-                raise jsonschema.ValidationError(
-                    f'Got {param!r} for boolean parameter {name}, expected true or false')
+    def decode_params(self, method_nsid, params):
+        """Decodes encoded parameter values.
 
-        try:
-            if type == 'number':
-                return float(param)
-            elif type == 'int':
-                return int(param)
-        except ValueError:
-            raise jsonschema.ValidationError(f'Got {param!r} for {type} parameter {name}')
+        Based on https://atproto.com/specs/xrpc#path
 
-        assert type == 'string'
-        return param
+        Args:
+          method_nsid: str
+          params: dict mapping str names to encoded str values
+
+        Returns: dict mapping str names to decoded boolean, number, and str values
+
+        Raises:
+          ValueError
+            if a parameter value can't be decoded
+          NotImplementedError
+            if no method lexicon is registered for the given NSID
+        """
+        lexicon = self._get_lexicon(method_nsid)
+        params_schema = lexicon.get('parameters', {})\
+                               .get('schema', {})\
+                               .get('properties', {})
+
+        decoded = {}
+        for name, val in params.items():
+            type = params_schema.get(name, {}).get('type') or 'string'
+            assert type in PARAMETER_TYPES
+
+            if type == 'boolean':
+                if val == 'true':
+                    decoded[name] = True
+                elif val == 'false':
+                    decoded[name] = False
+                else:
+                    raise ValueError(
+                        f'Got {val!r} for boolean parameter {name}, expected true or false')
+
+            try:
+                if type == 'number':
+                    decoded[name] = float(val)
+                elif type == 'int':
+                    decoded[name] = int(val)
+            except ValueError as e:
+                e.args = [f'{e.args[0]} for {type} parameter {name}']
+                raise e
+
+            if type == 'string':
+                decoded[name] = val
+
+        return decoded

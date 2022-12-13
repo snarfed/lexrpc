@@ -97,8 +97,7 @@ class XrpcEndpointTest(TestCase):
     def test_invalid_params(self):
         resp = self.client.post('/xrpc/io.example.params?bar=c')
         self.assertEqual(400, resp.status_code)
-        self.assertEqual("Got 'c' for number parameter bar",
-                         resp.json['message'])
+        self.assertIn("'c' for number parameter bar", resp.json['message'])
 
     def test_integer_param(self):
         resp = self.client.post('/xrpc/io.example.params?bar=5')

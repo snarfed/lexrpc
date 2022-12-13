@@ -21,4 +21,5 @@ flask_server
 base
 ----
 .. automodule:: lexrpc.base
+    :exclude-members: fail
 

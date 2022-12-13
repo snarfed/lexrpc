@@ -15,10 +15,10 @@ License: This project is placed in the public domain.
 
 ## Client
 
-The lexrpc client let you [call methods dynamically by their NSIDs](https://atproto.com/guides/lexicon#rpc-methods). To make a call, first instantiate a [`Client`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.client.Client) object with the server address and method lexicons, then use NSIDs to make calls, passing input as a dict and parameters as kwargs:
+The lexrpc client let you [call methods dynamically by their NSIDs](https://atproto.com/guides/lexicon#rpc-methods). To make a call, first instantiate a [`Client`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.client.Client) object with the server address and method lexicons, then use method NSIDs to make calls, passing input as a dict and parameters as kwargs:
 
 ```py
-from jsonschema import Client
+from lexrpc import Client
 
 lexicons = [...]
 client = Client('https://xrpc.example.com', lexicons)
@@ -30,24 +30,24 @@ Note that `-` characters in method NSIDs are converted to `_`s, eg the call abov
 
 ## Server
 
-To implement an XRPC server, use the [`Server`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server) class. It validates parameters, inputs, and outputs. Use the [`method`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server.method) decorator to register handlers for each NSID, [`Server.call`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server.call) to call a method from your web framework or anywhere else.
+To implement an XRPC server, use the [`Server`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server) class. It validates parameters, inputs, and outputs. Use the [`method`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server.method) decorator to register method handlers and [`call`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server.call) to call them, whether from your web framework or anywhere else.
 
 ```py
-from jsonschema import Server
+from lexrpc import Server
 
 lexicons = [...]
 server = Server(lexicons)
 
 @server.method('com.example.my-query')
 def my_query_hander(input, **params):
-    ...
-    output = ...
+    output = {'foo': input['foo'], 'b': params['param_a'] + 1}
     return output
 
-# In your web framework, use Server.call to run a method
+# Extract nsid and decode query parameters from an HTTP request,
+# call the method, return the output in an HTTP response
+nsid = request.path.removeprefix('/xrpc/')
 input = request.json()
-params = request.query_params()
-# decode params here
+params = server.decode_params(nsid, request.query_params())
 output = server.call(input, **params)
 response.write_json(output)
 ```
@@ -55,14 +55,16 @@ response.write_json(output)
 
 ## Flask server
 
-First, instantiate a `Server` and register method handlers as described above. Then, attach the server to your Flask app with [`init_flask`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.flask_server.init_flask).
+To serve XRPC methods in a [Flask](https://flask.palletsprojects.com/) web app, first instantiate a [`Server`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server) and register method handlers as described above. Then, attach the server to your Flask app with [`init_flask`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.flask_server.init_flask).
 
 ```py
 from flask import Flask
 from lexrpc import init_flask
 
+# instantiate a Server like above
+server = ...
+
 app = Flask('my-server')
-...
 init_flask(server, app)
 ```
 
@@ -71,11 +73,10 @@ This configures the Flask app to serve the methods registered with the lexrpc se
 
 ## TODO
 
-* support record types, eg via type "ref" and ref field pointing to the nsid in https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13 , which points to app.bsky.actor.ref , which is defined in https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/actor/ref.json  
-  ref isn't documented on https://atproto.com/docs yet though, and these lexicons also use a defs field, which is in schemas in the Lexicon guide and spec but not really documented either. I'm guessing these parts are still under active development.
-* extensions, https://atproto.com/guides/lexicon#extensibility . is there anything to do? ah, it's currently TODO in the spec: https://atproto.com/specs/xrpc#todos
-* "binary blob" support, as in https://atproto.com/specs/xrpc . is it currently undefined?
-* authentication, currently TODO in the spec: https://atproto.com/specs/xrpc#todos
+* support record types, eg via type "ref" and ref field pointing to the nsid [example here](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13), ref points to [`app.bsky.actor.ref`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/actor/ref.json). ref isn't documented yet though, and these lexicons also use a `defs` field, which isn't really documented either. [they plan to update the docs and specs soon.](https://github.com/bluesky-social/atproto/pull/409#issuecomment-1348766856)
+* [extensions](https://atproto.com/guides/lexicon#extensibility). is there anything to do? ah, [they're currently TODO in the spec](https://atproto.com/specs/xrpc#todos).
+* ["binary blob" support.](https://atproto.com/specs/xrpc) currently undefined ish? is it based on the `encoding` field?
+* [authentication, currently TODO in the spec](https://atproto.com/specs/xrpc#todos)
 
 
 ## Changelog

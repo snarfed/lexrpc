@@ -39,28 +39,14 @@ class XrpcEndpoint(View):
         if not NSID_RE.match(nsid):
             return {'message': f'{nsid} is not a valid NSID'}, 400
 
-        # decode typed method params from string query params
-        try:
-            lexicon = self.server._get_lexicon(nsid)
-        except NotImplementedError as e:
-            return {'message': str(e)}, 501
-
-        param_schema = lexicon.get('parameters', {})\
-                              .get('schema', {})\
-                              .get('properties', {})
-        params = {}
-        for name, value in request.args.items():
-            type = param_schema.get(name, {}).get('type') or 'string'
-            try:
-                params[name] = self.server._decode_param(value, name=name, type=type)
-            except ValidationError as e:
-                return {'message': str(e)}, 400
-
         # run method
         input = request.json if request.content_length else {}
         try:
+            params = self.server.decode_params(nsid, request.args)
             output = self.server.call(nsid, input=input, **params)
-        except ValidationError as e:
+        except NotImplementedError as e:
+            return {'message': str(e)}, 501
+        except (ValidationError, ValueError) as e:
             return {'message': str(e)}, 400
 
         return jsonify(output or '')
