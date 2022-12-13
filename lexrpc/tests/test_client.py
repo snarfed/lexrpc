@@ -132,6 +132,19 @@ class ClientTest(TestCase):
             headers={'Content-Type': 'application/json'},
         )
 
+    @patch('requests.get')
+    def test_defs(self, mock_get):
+        mock_get.return_value = response({'out': 'foo'})
+        self.assertEqual({'out': 'foo'},
+                         self.client.io.example.defs({'in': 'bar'}))
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.defs',
+            params={},
+            json={'in': 'bar'},
+            headers={'Content-Type': 'application/json'},
+        )
+
     def test_missing_params(self):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({})

@@ -38,6 +38,10 @@ class XrpcEndpointTest(TestCase):
         resp = self.client.post('/xrpc/io.example.noParamsInputOutput')
         self.assertEqual(200, resp.status_code)
 
+    def test_dashed_name(self):
+        resp = self.client.post('/xrpc/io.example.dashed-name')
+        self.assertEqual(200, resp.status_code)
+
     def test_not_nsid(self):
         resp = self.client.post('/xrpc/not_an*nsid')
         self.assertEqual(400, resp.status_code)

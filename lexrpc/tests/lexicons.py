@@ -105,6 +105,28 @@ LEXICONS = [
 
     {
         'lexicon': 1,
+        'id': 'io.example.defs',
+        'defs': {
+            'main': {
+                'type': 'query',
+                'input': {
+                    'schema': {
+                        'type': 'object',
+                        'properties': {'in': {'type': 'string'}},
+                    },
+                },
+                'output': {
+                    'schema': {
+                        'type': 'object',
+                        'properties': {'out': {'type': 'string'}},
+                    },
+                },
+            },
+        },
+    },
+
+    {
+        'lexicon': 1,
         'id': 'io.example.error',
         'type': 'query',
         'errors': [

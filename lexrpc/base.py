@@ -58,6 +58,12 @@ class Base():
         for i, lexicon in enumerate(self._lexicons.values()):
             id = lexicon.get('id')
             assert id, f'Lexicon {i} missing id field'
+
+            # support new defs format
+            defs_main = lexicon.get('defs', {}).get('main')
+            if defs_main:
+                lexicon = self._lexicons[id] = defs_main
+
             type = lexicon.get('type')
             assert type in LEXICON_TYPES, f'Bad type for lexicon {id}: {type}'
 

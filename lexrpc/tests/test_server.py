@@ -38,6 +38,11 @@ def params(input, **params):
     pass
 
 
+@server.method('io.example.defs')
+def defs(input, **params):
+    return {'out': 'bar'}
+
+
 @server.method('io.example.error')
 def error(input, **params):
     pass
@@ -68,6 +73,10 @@ class ServerTest(TestCase):
 
     def test_dashed_name(self):
         self.assertIsNone(server.call('io.example.dashed-name', {}))
+
+    def test_defs(self):
+        output = server.call('io.example.defs', {'in': 'foo'})
+        self.assertEqual({'out': 'bar'}, output)
 
     def test_procedure_missing_input(self):
         with self.assertRaises(ValidationError):
