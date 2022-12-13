@@ -11,7 +11,7 @@ import requests
 from lexrpc import Client
 
 LEXICONS = [{
-    'xrpc': 1,
+    'lexicon': 1,
     'id': 'io.example.ping',
     'type': 'query',
     'description': 'Ping the server',
