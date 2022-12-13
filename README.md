@@ -55,11 +55,11 @@ response.write_json(output)
 
 ## Flask server
 
-To serve XRPC methods in a [Flask](https://flask.palletsprojects.com/) web app, first instantiate a [`Server`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server) and register method handlers as described above. Then, attach the server to your Flask app with [`init_flask`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.flask_server.init_flask).
+To serve XRPC methods in a [Flask](https://flask.palletsprojects.com/) web app, first install the lexrpc package with the `flask` extra, eg `pip install lexrpc[flask]`. Then, instantiate a [`Server`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server) and register method handlers as described above. Finally, attach the server to your Flask app with [`flask_server.init_flask`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.flask_server.init_flask).
 
 ```py
 from flask import Flask
-from lexrpc import init_flask
+from lexrpc.flask_server import init_flask
 
 # instantiate a Server like above
 server = ...
