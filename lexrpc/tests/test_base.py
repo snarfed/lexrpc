@@ -19,8 +19,6 @@ class BaseTest(TestCase):
                          self.base._get_lexicon('io.example.procedure')['id'])
         self.assertEqual('io.example.query',
                          self.base._get_lexicon('io.example.query')['id'])
-        self.assertEqual('io.example.no-params-input-output',
-                         self.base._get_lexicon('io.example.no-params-input-output')['id'])
 
     def test_validate_lexicon_schema(self):
         for bad in 'foo bar', {'type': 'foo', 'properties': 3}:

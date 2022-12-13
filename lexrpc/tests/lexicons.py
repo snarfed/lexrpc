@@ -60,7 +60,13 @@ LEXICONS = [
 
     {
         'lexicon': 1,
-        'id': 'io.example.no-params-input-output',
+        'id': 'io.example.noParamsInputOutput',
+        'type': 'procedure',
+    },
+
+    {
+        'lexicon': 1,
+        'id': 'io.example.dashed-name',
         'type': 'procedure',
     },
 

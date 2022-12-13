@@ -23,8 +23,13 @@ def procedure(input, **params):
     return input
 
 
-@server.method('io.example.no-params-input-output')
+@server.method('io.example.noParamsInputOutput')
 def no_params_input_output(input, **params):
+    pass
+
+
+@server.method('io.example.dashed-name')
+def dashed_name_fn(input, **params):
     pass
 
 
@@ -59,7 +64,10 @@ class ServerTest(TestCase):
         self.assertEqual({'foo': 'y', 'bar': 5}, output)
 
     def test_no_params_input_output(self):
-        self.assertIsNone(server.call('io.example.no-params-input-output', {}))
+        self.assertIsNone(server.call('io.example.noParamsInputOutput', {}))
+
+    def test_dashed_name(self):
+        self.assertIsNone(server.call('io.example.dashed-name', {}))
 
     def test_procedure_missing_input(self):
         with self.assertRaises(ValidationError):

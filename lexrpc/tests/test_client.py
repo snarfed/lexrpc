@@ -111,10 +111,22 @@ class ClientTest(TestCase):
     @patch('requests.post')
     def test_no_params_input_output(self, mock_post):
         mock_post.return_value = response()
-        self.assertIsNone(self.client.io.example.no_params_input_output({}))
+        self.assertIsNone(self.client.io.example.noParamsInputOutput({}))
 
         mock_post.assert_called_once_with(
-            'http://ser.ver/xrpc/io.example.no-params-input-output',
+            'http://ser.ver/xrpc/io.example.noParamsInputOutput',
+            params={},
+            json=None,
+            headers={'Content-Type': 'application/json'},
+        )
+
+    @patch('requests.post')
+    def test_dashed_name(self, mock_post):
+        mock_post.return_value = response()
+        self.assertIsNone(self.client.io.example.dashed_name({}))
+
+        mock_post.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.dashed-name',
             params={},
             json=None,
             headers={'Content-Type': 'application/json'},

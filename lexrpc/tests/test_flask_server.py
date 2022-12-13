@@ -35,7 +35,7 @@ class XrpcEndpointTest(TestCase):
         self.assertEqual({'foo': 'y', 'bar': 5}, resp.json)
 
     def test_no_params_input_output(self):
-        resp = self.client.post('/xrpc/io.example.no-params-input-output')
+        resp = self.client.post('/xrpc/io.example.noParamsInputOutput')
         self.assertEqual(200, resp.status_code)
 
     def test_not_nsid(self):
