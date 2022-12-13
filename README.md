@@ -95,7 +95,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     ```sh
     python3 -m build
     setenv ver X.Y
-    twine upload -r pypitest dist/lexrpc-$ver.tar.gz
+    twine upload -r pypitest dist/lexrpc-$ver*
     ```
 1. Install from test.pypi.org.
     ```sh
@@ -142,7 +142,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     def ping(input, message=''):
         return {'message': message}
 
-    print(server.call('io.example.ping', message='hello world')
+    print(server.call('io.example.ping', {}, message='hello world'))
     ```
 1. Tag the release in git. In the tag message editor, delete the generated comments at bottom, leave the first line blank (to omit the release "title" in github), put `### Notable changes` on the second line, then copy and paste this version's changelog contents below it.
     ```sh
@@ -152,7 +152,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 1. [Click here to draft a new release on GitHub.](https://github.com/snarfed/lexrpc/releases/new) Enter `vX.Y` in the _Tag version_ box. Leave _Release title_ empty. Copy `### Notable changes` and the changelog contents into the description text box.
 1. Upload to [pypi.org](https://pypi.org/)!
     ```sh
-    twine upload dist/lexrpc-$ver.tar.gz
+    twine upload dist/lexrpc-$ver*
     ```
 1. [Wait for the docs to build on Read the Docs](https://readthedocs.org/projects/lexrpc/builds/), then check that they look ok.
 1. On the [Versions page](https://readthedocs.org/projects/lexrpc/versions/), check that the new version is active, If it's not, activate it in the _Activate a Version_ section.
@@ -160,6 +160,8 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 
 ## Changelog
 
-### 0.1 - unreleased
+### 0.1 - 2022-12-13
 
 Initial release!
+
+Tested interoperability with the `lexicon`, `xprc`, and `xrpc-server` packages in [bluesky-social/atproto](https://github.com/bluesky-social/atproto). Lexicon and XRPC are still very early and under active development; caveat hacker!
