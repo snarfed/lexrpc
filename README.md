@@ -11,7 +11,6 @@ License: This project is placed in the public domain.
 * [Server](#server)
 * [Flask server](#flask-server)
 * [Reference docs](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html)
-* [PyPI](https://pypi.org/project/lexrpc/)
 * [TODO](#todo)
 * [Release instructions](#release-instructions)
 * [Changelog](#changelog)
@@ -85,7 +84,7 @@ This configures the Flask app to serve the methods registered with the lexrpc se
 
 Release instructions
 ---
-Here's how to package, test, and ship a new release. (Note that this is [largely duplicated in the oauth-dropins readme too](https://github.com/snarfed/oauth-dropins#release-instructions).)
+Here's how to package, test, and ship a new release.
 
 1. Run the unit tests.
     ```sh
