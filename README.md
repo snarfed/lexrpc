@@ -3,14 +3,18 @@ lexrpc [![Circle CI](https://circleci.com/gh/snarfed/lexrpc.svg?style=svg)](http
 
 Python implementation of [AT Protocol](https://atproto.com/)'s [XRPC](https://atproto.com/specs/xrpc) + [Lexicon](https://atproto.com/guides/lexicon). lexrpc includes a simple [XRPC](https://atproto.com/specs/xrpc) client, server, and [Flask](https://flask.palletsprojects.com/) web server integration. All three include full [Lexicon](https://atproto.com/guides/lexicon) support for validating inputs, outputs, and parameters against their schemas.
 
+Install from [PyPI](https://pypi.org/project/lexrpc/) with `pip install lexrpc` or `pip install lexrpc[flask]`.
+
+License: This project is placed in the public domain.
+
 * [Client](#client)
 * [Server](#server)
 * [Flask server](#flask-server)
-* [Reference](https://lexrpc.readthedocs.io/en/docs/source/lexrpc.html)
+* [Reference docs](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html)
+* [PyPI](https://pypi.org/project/lexrpc/)
 * [TODO](#todo)
+* [Release instructions](#release-instructions)
 * [Changelog](#changelog)
-
-License: This project is placed in the public domain.
 
 
 ## Client
@@ -152,7 +156,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 1. [Click here to draft a new release on GitHub.](https://github.com/snarfed/lexrpc/releases/new) Enter `vX.Y` in the _Tag version_ box. Leave _Release title_ empty. Copy `### Notable changes` and the changelog contents into the description text box.
 1. Upload to [pypi.org](https://pypi.org/)!
     ```sh
-    twine upload dist/lexrpc-$ver*
+    twine upload dist/lexrpc-$ver.tar.gz dist/lexrpc-$ver-py3-none-any.whl
     ```
 1. [Wait for the docs to build on Read the Docs](https://readthedocs.org/projects/lexrpc/builds/), then check that they look ok.
 1. On the [Versions page](https://readthedocs.org/projects/lexrpc/versions/), check that the new version is active, If it's not, activate it in the _Activate a Version_ section.
@@ -164,4 +168,4 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 
 Initial release!
 
-Tested interoperability with the `lexicon`, `xprc`, and `xrpc-server` packages in [bluesky-social/atproto](https://github.com/bluesky-social/atproto). Lexicon and XRPC are still very early and under active development; caveat hacker!
+Tested interoperability with the `lexicon`, `xprc`, and `xrpc-server` packages in [bluesky-social/atproto](https://github.com/bluesky-social/atproto). Lexicon and XRPC themselves are still very early and under active development; caveat hacker!
