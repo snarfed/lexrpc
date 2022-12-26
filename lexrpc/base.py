@@ -61,32 +61,31 @@ class Base():
         for i, lexicon in enumerate(self._lexicons.values()):
             id = lexicon.get('id')
             assert id, f'Lexicon {i} missing id field'
+            logger.debug(f'Validating {id}')
 
-            # support new defs format
-            defs_main = lexicon.get('defs', {}).get('main')
-            if defs_main:
-                lexicon = self._lexicons[id] = defs_main
+            main = lexicon.get('defs', {}).get('main')
+            if not main:
+                logger.warning(f'Ignoring lexicon {id} with no defs.main')
+                continue
+            method = self._lexicons[id] = main
 
-            type = lexicon.get('type')
+            type = method.get('type')
             assert type in LEXICON_TYPES, f'Bad type for lexicon {id}: {type}'
 
             # preprocess parameters properties into full JSON Schema
-            props = lexicon.get('parameters', {})
-            lexicon['parameters'] = {
+            params = method.get('parameters', {})
+            method['parameters'] = {
                 'schema': {
                     'type': 'object',
-                    'required': [],
-                    'properties': props,
+                    'required': params.get('required', []),
+                    'properties': params.get('properties', {}),
                 },
             }
-            for name, schema in props.items():
-                if schema.pop('required', False):
-                    lexicon['parameters']['schema']['required'].append(name)
 
             # validate schemas
             for field in 'input', 'output', 'parameters', 'record':
                 logger.debug(f'Validating {id} {field} schema')
-                schema = lexicon.get(field, {}).get('schema')
+                schema = method.get(field, {}).get('schema')
                 if schema:
                     validator_for(schema).check_schema(schema)
 

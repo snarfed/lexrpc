@@ -77,6 +77,7 @@ This configures the Flask app to serve the methods registered with the lexrpc se
 ## TODO
 
 * support record types, eg via type "ref" and ref field pointing to the nsid [example here](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13), ref points to [`app.bsky.actor.ref`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/actor/ref.json). ref isn't documented yet though, and these lexicons also use a `defs` field, which isn't really documented either. [they plan to update the docs and specs soon.](https://github.com/bluesky-social/atproto/pull/409#issuecomment-1348766856)
+  * check out [atproto@63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab](https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab)!
 * [extensions](https://atproto.com/guides/lexicon#extensibility). is there anything to do? ah, [they're currently TODO in the spec](https://atproto.com/specs/xrpc#todos).
 * ["binary blob" support.](https://atproto.com/specs/xrpc) currently undefined ish? is it based on the `encoding` field?
 * [authentication, currently TODO in the spec](https://atproto.com/specs/xrpc#todos)

@@ -7,31 +7,38 @@ LEXICONS = [
     {
         'lexicon': 1,
         'id': 'io.example.procedure',
-        'type': 'procedure',
-        'description': 'Whatever you want',
-        'parameters': {
-            'x': { 'type': 'string' },
-            'z': { 'type': 'boolean' },
-        },
-        'input': {
-            'encoding': 'application/json',
-            'schema': {
-                'type': 'object',
-                'required': ['foo'],
-                'properties': {
-                    'foo': { 'type': 'string' },
-                    'bar': { 'type': 'number' },
+        'defs': {
+            'main': {
+                'type': 'procedure',
+                'description': 'Whatever you want',
+                'parameters': {
+                    'type': 'params',
+                    'properties': {
+                        'x': { 'type': 'string' },
+                        'z': { 'type': 'boolean' },
+                    },
                 },
-            },
-        },
-        'output': {
-            'encoding': 'application/json',
-            'schema': {
-                'type': 'object',
-                'required': ['foo'],
-                'properties': {
-                    'foo': { 'type': 'string' },
-                    'bar': { 'type': 'number' },
+                'input': {
+                    'encoding': 'application/json',
+                    'schema': {
+                        'type': 'object',
+                        'required': ['foo'],
+                        'properties': {
+                            'foo': { 'type': 'string' },
+                            'bar': { 'type': 'number' },
+                        },
+                    },
+                },
+                'output': {
+                    'encoding': 'application/json',
+                    'schema': {
+                        'type': 'object',
+                        'required': ['foo'],
+                        'properties': {
+                            'foo': { 'type': 'string' },
+                            'bar': { 'type': 'number' },
+                        },
+                    },
                 },
             },
         },
@@ -40,19 +47,26 @@ LEXICONS = [
     {
         'lexicon': 1,
         'id': 'io.example.query',
-        'type': 'query',
-        'parameters': {
-            'x': { 'type': 'string' },
-            'z': { 'type': 'boolean' },
-        },
-        'output': {
-            'encoding': 'application/json',
-            'schema': {
-                'type': 'object',
-                'required': ['foo'],
-                'properties': {
-                    'foo': { 'type': 'string' },
-                    'bar': { 'type': 'number' },
+        'defs': {
+            'main': {
+                'type': 'query',
+                'parameters': {
+                    'type': 'params',
+                    'properties': {
+                        'x': { 'type': 'string' },
+                        'z': { 'type': 'boolean' },
+                    },
+                },
+                'output': {
+                    'encoding': 'application/json',
+                    'schema': {
+                        'type': 'object',
+                        'required': ['foo'],
+                        'properties': {
+                            'foo': { 'type': 'string' },
+                            'bar': { 'type': 'number' },
+                        },
+                    },
                 },
             },
         },
@@ -61,37 +75,57 @@ LEXICONS = [
     {
         'lexicon': 1,
         'id': 'io.example.noParamsInputOutput',
-        'type': 'procedure',
+        'defs': {
+            'main': {
+                'type': 'procedure',
+            },
+        },
     },
 
     {
         'lexicon': 1,
         'id': 'io.example.dashed-name',
-        'type': 'procedure',
+        'defs': {
+            'main': {
+                'type': 'procedure',
+            },
+        },
     },
 
     {
         'lexicon': 1,
         'id': 'io.example.params',
-        'type': 'procedure',
-        'parameters': {
-            'foo': { 'type': 'string' },
-            'bar': { 'type': 'number', 'required': True },
+        'defs': {
+            'main': {
+                'type': 'procedure',
+                'parameters': {
+                    'type': 'params',
+                    'required': ['bar'],
+                    'properties': {
+                        'foo': { 'type': 'string' },
+                        'bar': { 'type': 'number', },
+                    },
+                },
+            },
         },
     },
 
     {
         'lexicon': 1,
         'id': 'io.example.record',
-        'type': 'record',
-        'record': {
-            'required': ['baz'],
-            'baz': { 'type': 'integer', },
-            'biff': {
-                'type': 'object',
-                'properties': {
-                    'baj': { 'type': 'string' },
-                 },
+        'defs': {
+            'main': {
+                'type': 'record',
+                'record': {
+                    'required': ['baz'],
+                    'baz': { 'type': 'integer', },
+                    'biff': {
+                        'type': 'object',
+                        'properties': {
+                            'baj': { 'type': 'string' },
+                        },
+                    },
+                },
             },
         },
     },
@@ -99,8 +133,12 @@ LEXICONS = [
     {
         'lexicon': 1,
         'id': 'io.example.token',
-        'type': 'token',
-        'description': 'Undefined!',
+        'defs': {
+            'main': {
+                'type': 'token',
+                'description': 'Undefined!',
+            },
+        },
     },
 
     {
@@ -110,12 +148,14 @@ LEXICONS = [
             'main': {
                 'type': 'query',
                 'input': {
+                    'encoding': 'application/json',
                     'schema': {
                         'type': 'object',
                         'properties': {'in': {'type': 'string'}},
                     },
                 },
                 'output': {
+                    'encoding': 'application/json',
                     'schema': {
                         'type': 'object',
                         'properties': {'out': {'type': 'string'}},
@@ -128,11 +168,15 @@ LEXICONS = [
     {
         'lexicon': 1,
         'id': 'io.example.error',
-        'type': 'query',
-        'errors': [
-            {'name': 'OneBad'},
-            {'name': 'AnotherBad'},
-            {'name': 'ThirdBad'},
-        ],
+        'defs': {
+            'main': {
+                'type': 'query',
+                'errors': [
+                    {'name': 'OneBad'},
+                    {'name': 'AnotherBad'},
+                    {'name': 'ThirdBad'},
+                ],
+            },
+        },
     },
 ]

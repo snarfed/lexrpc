@@ -15,10 +15,18 @@ class BaseTest(TestCase):
         self.base = Base(LEXICONS)
 
     def test_get_lexicon(self):
-        self.assertEqual('io.example.procedure',
-                         self.base._get_lexicon('io.example.procedure')['id'])
-        self.assertEqual('io.example.query',
-                         self.base._get_lexicon('io.example.query')['id'])
+        expected = {
+            'type': 'procedure',
+            'parameters': {
+                'schema': {
+                    'type': 'object',
+                    'properties': {},
+                    'required': [],
+                },
+            },
+        }
+        for nsid in 'io.example.dashed-name', 'io.example.noParamsInputOutput':
+            self.assertEqual(expected, self.base._get_lexicon(nsid))
 
     def test_validate_lexicon_schema(self):
         for bad in 'foo bar', {'type': 'foo', 'properties': 3}:
@@ -26,9 +34,13 @@ class BaseTest(TestCase):
                 Base([{
                     'lexicon': 1,
                     'id': 'io.example.procedure',
-                    'type': 'procedure',
-                    'input': {
-                        'schema': bad,
+                    'defs': {
+                        'main': {
+                            'type': 'procedure',
+                            'input': {
+                                'schema': bad,
+                            },
+                        },
                     },
                 }])
 
