@@ -164,6 +164,13 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
+### 0.2 - unreleased
+
+_Breaking changes:_
+
+* Fully migrate to [new lexicon format](https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab). Original format is no longer supported.
+
+
 ### 0.1 - 2022-12-13
 
 Initial release!

@@ -14,7 +14,7 @@ class BaseTest(TestCase):
         super().setUp()
         self.base = Base(LEXICONS)
 
-    def test_get_lexicon(self):
+    def test_get_def(self):
         expected = {
             'type': 'procedure',
             'parameters': {
@@ -26,7 +26,15 @@ class BaseTest(TestCase):
             },
         }
         for nsid in 'io.example.dashed-name', 'io.example.noParamsInputOutput':
-            self.assertEqual(expected, self.base._get_lexicon(nsid))
+            self.assertEqual(expected, self.base._get_def(nsid))
+
+        # self.assertEqual({
+        #     'type': 'object',
+        #     'required': ['boolean'],
+        #     'properties': {
+        #         'boolean': {'type': 'boolean'},
+        #     },
+        # }, self.base._get_def('com.example.kitchenSink#subobject'))
 
     def test_validate_lexicon_schema(self):
         for bad in 'foo bar', {'type': 'foo', 'properties': 3}:
@@ -54,4 +62,4 @@ class BaseTest(TestCase):
                     'bar': { 'type': 'number' },
                 },
             },
-        }, self.base._lexicons['io.example.params']['parameters'])
+        }, self.base._defs['io.example.params']['parameters'])

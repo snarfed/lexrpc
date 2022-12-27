@@ -5,17 +5,19 @@ import re
 import urllib.parse
 
 import jsonschema
-from jsonschema.validators import validator_for
+from jsonschema import validators
 
 logger = logging.getLogger(__name__)
 
 LEXICON_TYPES = frozenset((
+    'object',
     'query',
     'procedure',
     'record',
+    'ref',
     'token',
 ))
-LEXICON_METHOD_TYPES = frozenset((
+METHOD_TYPES = frozenset((
     'query',
     'procedure',
 ))
@@ -32,6 +34,25 @@ NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
 NSID_RE = re.compile(f'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
 
 
+# TODO: drop jsonschema, implement from scratch? maybe skip until some methods
+# are implemented? probably not?
+
+# in progress code to extend jsonschema validator to support ref etc
+#
+# def is_ref(checker, instance):
+#     return True
+
+# class CustomValidator(validators._LATEST_VERSION):
+#     TYPE_CHECKER = validators._LATEST_VERSION.TYPE_CHECKER.redefine('ref', is_ref)
+
+# # CustomValidator.META_SCHEMA['type'] += ['record', 'ref', 'token']
+# import json; print(json.dumps(CustomValidator.META_SCHEMA, indent=2))
+
+# CustomValidator._META_SCHEMAS\
+#     ['https://json-schema.org/draft/2020-12/meta/validation']\
+#     ['$defs']['simpleTypes'].append('ref')
+
+
 def fail(msg, exc=NotImplementedError):
     """Logs an error and raises an exception with the given message."""
     logger.error(msg)
@@ -41,69 +62,74 @@ def fail(msg, exc=NotImplementedError):
 class Base():
     """Base class for both XRPC client and server."""
 
-    _lexicons = None  # dict mapping NSID to lexicon object
+    _defs = None  # dict mapping id to lexicon def
+    _validate = True
 
-    def __init__(self, lexicons):
+    def __init__(self, lexicons, validate=True):
         """Constructor.
 
         Args:
           lexicons: sequence of dict lexicons
+          validate: boolean, whether to validate schemas, parameters, and input
+            and output bodies
 
         Raises:
           :class:`jsonschema.SchemaError`
             if any schema is invalid
         """
-        assert isinstance(lexicons, (list, tuple))
-        self._lexicons = {l['id']: l for l in copy.deepcopy(lexicons)}
-        logger.debug(f'Got lexicons for: {self._lexicons.keys()}')
+        self._validate = validate
+        self._defs = {}
 
-        # validate schemas, convert parameters field into full JSON schema
-        for i, lexicon in enumerate(self._lexicons.values()):
-            id = lexicon.get('id')
-            assert id, f'Lexicon {i} missing id field'
-            logger.debug(f'Validating {id}')
+        for i, lexicon in enumerate(copy.deepcopy(lexicons)):
+            nsid = lexicon.get('id')
+            assert nsid, f'Lexicon {i} missing id field'
+            logger.debug(f'Loading lexicon {nsid}')
 
-            main = lexicon.get('defs', {}).get('main')
-            if not main:
-                logger.warning(f'Ignoring lexicon {id} with no defs.main')
-                continue
-            method = self._lexicons[id] = main
+            for name, defn in lexicon.get('defs', {}).items():
+                id = nsid if name == 'main' else f'{nsid}#name'
+                self._defs[id] = defn
 
-            type = method.get('type')
-            assert type in LEXICON_TYPES, f'Bad type for lexicon {id}: {type}'
+                type = defn.get('type')
+                assert type in LEXICON_TYPES, f'Bad type for lexicon {id}: {type}'
 
-            # preprocess parameters properties into full JSON Schema
-            params = method.get('parameters', {})
-            method['parameters'] = {
-                'schema': {
-                    'type': 'object',
-                    'required': params.get('required', []),
-                    'properties': params.get('properties', {}),
-                },
-            }
+                if type in METHOD_TYPES:
+                    # preprocess parameters properties into full JSON Schema
+                    params = defn.get('parameters', {})
+                    defn['parameters'] = {
+                        'schema': {
+                            'type': 'object',
+                            'required': params.get('required', []),
+                            'properties': params.get('properties', {}),
+                        },
+                    }
 
-            # validate schemas
-            for field in 'input', 'output', 'parameters', 'record':
-                logger.debug(f'Validating {id} {field} schema')
-                schema = method.get(field, {}).get('schema')
-                if schema:
-                    validator_for(schema).check_schema(schema)
+                    if validate:
+                        # validate schemas
+                        for field in 'input', 'output', 'parameters', 'record':
+                            logger.debug(f'Validating {id} {field} schema')
+                            schema = defn.get(field, {}).get('schema')
+                            if schema:
+                                validators.validator_for(schema).check_schema(schema)
 
-    def _get_lexicon(self, nsid):
-        """Returns the given lexicon object.
+                self._defs[id] = defn
+
+    def _get_def(self, id):
+        """Returns the given lexicon def.
 
         Raises:
           NotImplementedError
-            if no lexicon exists for the given NSID
+            if no def exists for the given id
         """
-        lexicon = self._lexicons.get(nsid)
+        lexicon = self._defs.get(id)
         if not lexicon:
-            fail(f'{nsid} not found')
+            fail(f'{id} not found')
 
         return lexicon
 
-    def _validate(self, nsid, type, obj):
-        """Validates a JSON object against a given schema.
+    def _maybe_validate(self, nsid, type, obj):
+        """If configured to do so, validates a JSON object against a given schema.
+
+        Does nothing if this object was initialized with validate=False.
 
         Args:
           nsid: str, method NSID
@@ -119,9 +145,12 @@ class Base():
           :class:`jsonschema.ValidationError`
             if the object is invalid
         """
+        if not self._validate:
+            return
+
         assert type in ('input', 'output', 'parameters', 'record'), type
 
-        schema = self._get_lexicon(nsid).get(type, {}).get('schema')
+        schema = self._get_def(nsid).get(type, {}).get('schema')
         if not schema:
             if not obj:
                 return
@@ -166,7 +195,7 @@ class Base():
           NotImplementedError
             if no method lexicon is registered for the given NSID
         """
-        lexicon = self._get_lexicon(method_nsid)
+        lexicon = self._get_def(method_nsid)
         params_schema = lexicon.get('parameters', {})\
                                .get('schema', {})\
                                .get('properties', {})

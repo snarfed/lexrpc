@@ -80,15 +80,15 @@ class Client(Base):
         logger.debug(f'{nsid}: {params} {input}')
 
         # validate params and input, then encode params
-        self._validate(nsid, 'parameters', params)
+        self._maybe_validate(nsid, 'parameters', params)
         params = self.encode_params(params)
 
-        self._validate(nsid, 'input', input)
+        self._maybe_validate(nsid, 'input', input)
 
         # run method
         url = f'{self._address}/xrpc/{nsid}'
-        lexicon = self._get_lexicon(nsid)
-        fn = requests.get if lexicon['type'] == 'query' else requests.post
+        defn = self._get_def(nsid)
+        fn = requests.get if defn['type'] == 'query' else requests.post
         logger.debug(f'Running method')
         resp = fn(url, params=params, json=input if input else None,
                   headers={'Content-Type': 'application/json'})
@@ -100,5 +100,5 @@ class Client(Base):
         if content_type == 'application/json' and resp.content:
             output = resp.json()
 
-        self._validate(nsid, 'output', output)
+        self._maybe_validate(nsid, 'output', output)
         return output

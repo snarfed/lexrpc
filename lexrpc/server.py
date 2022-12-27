@@ -2,7 +2,7 @@
 from functools import wraps
 import logging
 
-from .base import fail, LEXICON_METHOD_TYPES, NSID_RE, Base
+from .base import fail, METHOD_TYPES, NSID_RE, Base
 
 logger = logging.getLogger(__name__)
 
@@ -69,12 +69,12 @@ class Server(Base):
             fail(f'{nsid} not implemented', NotImplementedError)
 
         # validate params and input, then encode params
-        self._validate(nsid, 'parameters', params)
-        self._validate(nsid, 'input', input)
+        self._maybe_validate(nsid, 'parameters', params)
+        self._maybe_validate(nsid, 'input', input)
 
         logger.debug('Running method')
         output = fn(input, **params)
         logger.debug(f'Got: {output}')
 
-        self._validate(nsid, 'output', output)
+        self._maybe_validate(nsid, 'output', output)
         return output
