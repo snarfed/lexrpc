@@ -35,7 +35,7 @@ class _NsidClient():
 class Client(Base):
     """XRPC client."""
 
-    def __init__(self, address, lexicons):
+    def __init__(self, address, lexicons, **kwargs):
         """Constructor.
 
         Args:
@@ -45,7 +45,7 @@ class Client(Base):
           :class:`jsonschema.SchemaError`
             if any schema is invalid
         """
-        super().__init__(lexicons)
+        super().__init__(lexicons, **kwargs)
 
         logger.debug(f'Using server at {address}')
         assert address.startswith('http://') or address.startswith('https://'), \

@@ -155,3 +155,22 @@ class ClientTest(TestCase):
     def test_invalid_params(self):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({}, bar='c')
+
+    @patch('requests.post')
+    def test_validate_false(self, mock_post):
+        client = Client('http://ser.ver', LEXICONS, validate=False)
+
+        input = {'funky': 'chicken'}
+        output = {'O': 'K'}
+        mock_post.return_value = response(output)
+
+        got = client.io.example.procedure(input)
+        self.assertEqual(output, got)
+
+        mock_post.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.procedure',
+            params={},
+            json=input,
+            headers={'Content-Type': 'application/json'},
+        )
+

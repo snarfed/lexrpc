@@ -11,7 +11,7 @@ class Server(Base):
     """XRPC server base class. Subclass to implement specific methods."""
     _methods = None  # dict, maps string NSID to Python callable
 
-    def __init__(self, lexicons):
+    def __init__(self, *args, **kwargs):
         """Constructor.
 
         Args:
@@ -21,7 +21,7 @@ class Server(Base):
           :class:`jsonschema.SchemaError`
             if any schema is invalid
         """
-        super().__init__(lexicons)
+        super().__init__(*args, **kwargs)
         self._methods = {}
 
     def method(self, nsid):

@@ -120,3 +120,14 @@ class ServerTest(TestCase):
             @server.method('io.example.query')
             def other(input, **params):
                 pass
+
+    def test_validate_false(self):
+        server = Server(LEXICONS, validate=False)
+
+        @server.method('io.example.procedure')
+        def procedure(input, **params):
+            return input
+
+        input = {'funky': 'chicken'}
+        output = server.call('io.example.procedure', input)
+        self.assertEqual(input, output)
