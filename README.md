@@ -51,7 +51,7 @@ def my_query_hander(input, **params):
 nsid = request.path.removeprefix('/xrpc/')
 input = request.json()
 params = server.decode_params(nsid, request.query_params())
-output = server.call(input, **params)
+output = server.call(nsid, input, **params)
 response.write_json(output)
 ```
 
@@ -92,7 +92,7 @@ Here's how to package, test, and ship a new release.
     source local/bin/activate.csh
     python3 -m unittest discover
     ```
-1. Bump the version number in `setup.py` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
+1. Bump the version number in `pyproject.toml` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
 1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`. Check that the generated HTML looks fine by opening `docs/_build/html/index.html` and looking around.
 1. `git commit -am 'release vX.Y'`
 1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
