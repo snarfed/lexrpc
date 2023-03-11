@@ -46,7 +46,10 @@ class XrpcEndpoint(View):
             output = self.server.call(nsid, input=input, **params)
         except NotImplementedError as e:
             return {'message': str(e)}, 501
-        except (ValidationError, ValueError) as e:
+        except ValidationError as e:
+            return {'message': str(e)}, 400
+        except ValueError as e:
+            logging.info(f'Method raised', exc_info=True)
             return {'message': str(e)}, 400
 
         return jsonify(output or '')
