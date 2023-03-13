@@ -137,7 +137,11 @@ Release instructions
 Here’s how to package, test, and ship a new release.
 
 1.  Run the unit tests.
-    ``sh     source local/bin/activate.csh     python3 -m unittest discover``
+
+    .. code:: sh
+
+       source local/bin/activate.csh
+       python3 -m unittest discover
 
 2.  Bump the version number in ``pyproject.toml`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
@@ -152,35 +156,76 @@ Here’s how to package, test, and ship a new release.
 4.  ``git commit -am 'release vX.Y'``
 
 5.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
-    ``sh     python3 -m build     setenv ver X.Y     twine upload -r pypitest dist/lexrpc-$ver*``
+
+    .. code:: sh
+
+       python3 -m build
+       setenv ver X.Y
+       twine upload -r pypitest dist/lexrpc-$ver*
 
 6.  Install from test.pypi.org.
-    ``sh     cd /tmp     python3 -m venv local     source local/bin/activate.csh     pip3 uninstall lexrpc # make sure we force pip to use the uploaded version     pip3 install --upgrade pip     pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver     deactivate``
+
+    .. code:: sh
+
+       cd /tmp
+       python3 -m venv local
+       source local/bin/activate.csh
+       pip3 uninstall lexrpc # make sure we force pip to use the uploaded version
+       pip3 install --upgrade pip
+       pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver
+       deactivate
 
 7.  Smoke test that the code trivially loads and runs.
-    ``sh     source local/bin/activate.csh     python3     # run test code below     deactivate``
-    Test code to paste into the interpreter: \`py from lexrpc import
-    Server
 
-    server = Server([{ ‘lexicon’: 1, ‘id’: ‘io.example.ping’, ‘defs’: {
-    ‘main’: { ‘type’: ‘query’, ‘description’: ‘Ping the server’,
-    ‘parameters’: {‘message’: { ‘type’: ‘string’ }}, ‘output’: {
-    ‘encoding’: ‘application/json’, ‘schema’: { ‘type’: ‘object’,
-    ‘required’: [‘message’], ‘properties’: {‘message’: { ‘type’:
-    ‘string’ }}, }, }, }, }, }])
+    .. code:: sh
 
-    @server.method(‘io.example.ping’) def ping(input, message=’‘):
-    return {’message’: message}
+       source local/bin/activate.csh
+       python3
+       # run test code below
+       deactivate
 
-    print(server.call(‘io.example.ping’, {}, message=‘hello world’))
-    \``\`
+    Test code to paste into the interpreter:
+
+    .. code:: py
+
+       from lexrpc import Server
+
+       server = Server([{
+           'lexicon': 1,
+           'id': 'io.example.ping',
+           'defs': {
+               'main': {
+                   'type': 'query',
+                   'description': 'Ping the server',
+                   'parameters': {'message': { 'type': 'string' }},
+                   'output': {
+                       'encoding': 'application/json',
+                       'schema': {
+                           'type': 'object',
+                           'required': ['message'],
+                           'properties': {'message': { 'type': 'string' }},
+                       },
+                   },
+               },
+           },
+       }])
+
+       @server.method('io.example.ping')
+       def ping(input, message=''):
+           return {'message': message}
+
+       print(server.call('io.example.ping', {}, message='hello world'))
 
 8.  Tag the release in git. In the tag message editor, delete the
     generated comments at bottom, leave the first line blank (to omit
     the release “title” in github), put ``### Notable changes`` on the
     second line, then copy and paste this version’s changelog contents
     below it.
-    ``sh     git tag -a v$ver --cleanup=verbatim     git push && git push --tags``
+
+    .. code:: sh
+
+       git tag -a v$ver --cleanup=verbatim
+       git push && git push --tags
 
 9.  `Click here to draft a new release on
     GitHub. <https://github.com/snarfed/lexrpc/releases/new>`__ Enter
@@ -189,7 +234,10 @@ Here’s how to package, test, and ship a new release.
     description text box.
 
 10. Upload to `pypi.org <https://pypi.org/>`__!
-    ``sh     twine upload dist/lexrpc-$ver.tar.gz dist/lexrpc-$ver-py3-none-any.whl``
+
+    .. code:: sh
+
+       twine upload dist/lexrpc-$ver.tar.gz dist/lexrpc-$ver-py3-none-any.whl
 
 11. `Wait for the docs to build on Read the
     Docs <https://readthedocs.org/projects/lexrpc/builds/>`__, then
