@@ -10,14 +10,19 @@ All three include full `Lexicon <https://atproto.com/guides/lexicon>`__
 support for validating inputs, outputs, and parameters against their
 schemas.
 
+Install from `PyPI <https://pypi.org/project/lexrpc/>`__ with
+``pip install lexrpc`` or ``pip install lexrpc[flask]``.
+
+License: This project is placed in the public domain.
+
 -  `Client <#client>`__
 -  `Server <#server>`__
 -  `Flask server <#flask-server>`__
--  `Reference <https://lexrpc.readthedocs.io/en/docs/source/lexrpc.html>`__
+-  `Reference
+   docs <https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html>`__
 -  `TODO <#todo>`__
+-  `Release instructions <#release-instructions>`__
 -  `Changelog <#changelog>`__
-
-License: This project is placed in the public domain.
 
 Client
 ------
@@ -68,7 +73,7 @@ to call them, whether from your web framework or anywhere else.
    nsid = request.path.removeprefix('/xrpc/')
    input = request.json()
    params = server.decode_params(nsid, request.query_params())
-   output = server.call(input, **params)
+   output = server.call(nsid, input, **params)
    response.write_json(output)
 
 Flask server
@@ -114,6 +119,10 @@ TODO
    ``defs`` field, which isn’t really documented either. `they plan to
    update the docs and specs
    soon. <https://github.com/bluesky-social/atproto/pull/409#issuecomment-1348766856>`__
+
+   -  check out
+      `atproto@63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__!
+
 -  `extensions <https://atproto.com/guides/lexicon#extensibility>`__. is
    there anything to do? ah, `they’re currently TODO in the
    spec <https://atproto.com/specs/xrpc#todos>`__.
@@ -125,14 +134,12 @@ TODO
 Release instructions
 --------------------
 
-Here’s how to package, test, and ship a new release. (Note that this is
-`largely duplicated in the oauth-dropins readme
-too <https://github.com/snarfed/oauth-dropins#release-instructions>`__.)
+Here’s how to package, test, and ship a new release.
 
 1.  Run the unit tests.
     ``sh     source local/bin/activate.csh     python3 -m unittest discover``
 
-2.  Bump the version number in ``setup.py`` and ``docs/conf.py``.
+2.  Bump the version number in ``pyproject.toml`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
     the changelog. Change the current changelog entry in ``README.md``
     for this new version from *unreleased* to the current date.
@@ -182,7 +189,7 @@ too <https://github.com/snarfed/oauth-dropins#release-instructions>`__.)
     description text box.
 
 10. Upload to `pypi.org <https://pypi.org/>`__!
-    ``sh     twine upload dist/lexrpc-$ver*``
+    ``sh     twine upload dist/lexrpc-$ver.tar.gz dist/lexrpc-$ver-py3-none-any.whl``
 
 11. `Wait for the docs to build on Read the
     Docs <https://readthedocs.org/projects/lexrpc/builds/>`__, then
@@ -196,6 +203,23 @@ too <https://github.com/snarfed/oauth-dropins#release-instructions>`__.)
 Changelog
 ---------
 
+0.2 - 2023-03-13
+~~~~~~~~~~~~~~~~
+
+Bluesky’s Lexicon design and schema handling is still actively changing,
+so this is an interim release. It generally supports the current lexicon
+design, but not full schema validation yet. I’m not yet trying to fast
+follow the changes too closely; as they settle down and stabilize, I’ll
+put more effort into matching and fully implementing them. Stay tuned!
+
+*Breaking changes:*
+
+-  Fully migrate to `new lexicon
+   format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
+   Original format is no longer supported.
+
+.. _section-1:
+
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~
 
@@ -204,5 +228,5 @@ Initial release!
 Tested interoperability with the ``lexicon``, ``xprc``, and
 ``xrpc-server`` packages in
 `bluesky-social/atproto <https://github.com/bluesky-social/atproto>`__.
-Lexicon and XRPC are still very early and under active development;
-caveat hacker!
+Lexicon and XRPC themselves are still very early and under active
+development; caveat hacker!

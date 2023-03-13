@@ -9,7 +9,7 @@ packages = ['lexrpc']
 
 [project]
 name = 'lexrpc'
-version = '0.1'
+version = '0.2'
 authors = [
     { name='Ryan Barrett', email='lexrpc@ryanb.org' },
 ]
