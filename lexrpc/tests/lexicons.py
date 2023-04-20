@@ -181,6 +181,22 @@ LEXICONS = [
         },
     },
 
+    {
+        'lexicon': 1,
+        'id': 'io.example.encodings',
+        'defs': {
+            'main': {
+                'type': 'procedure',
+                'input': {
+                    'encoding': 'number/int',
+                },
+                'output': {
+                    'encoding': 'number/int',
+                },
+            },
+        },
+    },
+
     # TODO
 
     # {

@@ -48,6 +48,14 @@ def error(input, **params):
     pass
 
 
+@server.method('io.example.encodings')
+def encodings(input, **params):
+    assert isinstance(input, bytes)
+    val = int.from_bytes(input, 'big')
+    val += 1
+    return val.to_bytes((val.bit_length() + 7) // 8, 'big')
+
+
 class ServerTest(TestCase):
     maxDiff = None
     QUERY_BAR = 5
@@ -131,3 +139,10 @@ class ServerTest(TestCase):
         input = {'funky': 'chicken'}
         output = server.call('io.example.procedure', input)
         self.assertEqual(input, output)
+
+    def test_byte_encodings(self):
+        val = 234892348203948
+        val_bytes = val.to_bytes((val.bit_length() + 7) // 8, 'big')
+        got = server.call('io.example.encodings', val_bytes)
+        self.assertTrue(isinstance(got, bytes))
+        self.assertEqual(val + 1, int.from_bytes(got, 'big'))

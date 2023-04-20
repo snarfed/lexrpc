@@ -171,6 +171,10 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
+### 0.3 - unreleased
+
+* Add support for non-JSON input and output encodings.
+
 ### 0.2 - 2023-03-13
 
 Bluesky's Lexicon design and schema handling is still actively changing, so this is an interim release. It generally supports the current lexicon design, but not full schema validation yet. I'm not yet trying to fast follow the changes too closely; as they settle down and stabilize, I'll put more effort into matching and fully implementing them. Stay tuned!

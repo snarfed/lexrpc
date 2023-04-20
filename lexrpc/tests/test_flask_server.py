@@ -110,3 +110,10 @@ class XrpcEndpointTest(TestCase):
     def test_undefined_method(self):
         resp = self.client.post('/xrpc/not.defined')
         self.assertEqual(501, resp.status_code)
+
+    def test_encodings(self):
+        val = 234892348203948
+        val_bytes = val.to_bytes((val.bit_length() + 7) // 8, 'big')
+        resp = self.client.post('/xrpc/io.example.encodings', data=val_bytes)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(val + 1, int.from_bytes(resp.get_data(), 'big'))

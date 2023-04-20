@@ -152,7 +152,13 @@ class Base():
 
         assert type in ('input', 'output', 'parameters', 'record'), type
 
-        schema = self._get_def(nsid).get(type, {}).get('schema')
+        base = self._get_def(nsid).get(type, {})
+        encoding = base.get('encoding')
+        if encoding and encoding != 'application/json':
+            # binary or other non-JSON data, pass through
+            return
+
+        schema = base.get('schema')
         if not schema:
             if not obj:
                 return

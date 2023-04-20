@@ -51,7 +51,7 @@ class Server(Base):
 
         Args:
           nsid: str, method NSID
-          input: dict, input body
+          input: dict or bytes, input body
           params: optional parameters
 
         Raises:
@@ -62,7 +62,10 @@ class Server(Base):
             if the parameters, input, or returned output don't validate against
             the method's schemas
         """
-        logger.debug(f'{nsid}: {params} {input}')
+        def loggable(val):
+            return f'{len(val)} bytes' if isinstance(val, bytes) else val
+
+        logger.debug(f'{nsid}: {params} {loggable(input)}')
 
         fn = self._methods.get(nsid)
         if not fn:
@@ -74,7 +77,7 @@ class Server(Base):
 
         logger.debug('Running method')
         output = fn(input, **params)
-        logger.debug(f'Got: {output}')
+        logger.debug(f'Got: {loggable(output)}')
 
         self._maybe_validate(nsid, 'output', output)
         return output
