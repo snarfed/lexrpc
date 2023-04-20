@@ -14,6 +14,7 @@ LEXICON_TYPES = frozenset((
     'query',
     'procedure',
     'record',
+    'subscription',  # ??? eg com/atproto/label/subscribeLabels.json #main
     'ref',
     'token',
 ))
@@ -86,11 +87,12 @@ class Base():
             logger.debug(f'Loading lexicon {nsid}')
 
             for name, defn in lexicon.get('defs', {}).items():
-                id = nsid if name == 'main' else f'{nsid}#name'
+                id = nsid if name == 'main' else f'{nsid}#{name}'
                 self._defs[id] = defn
 
                 type = defn.get('type')
-                assert type in LEXICON_TYPES, f'Bad type for lexicon {id}: {type}'
+                assert type in LEXICON_TYPES | PARAMETER_TYPES, \
+                    f'Bad type for lexicon {id}: {type}'
 
                 if type in METHOD_TYPES:
                     # preprocess parameters properties into full JSON Schema
