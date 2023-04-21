@@ -23,6 +23,7 @@ METHOD_TYPES = frozenset((
     'procedure',
 ))
 PARAMETER_TYPES = frozenset((
+    'array',
     'boolean',
     'integer',
     'number',
@@ -211,7 +212,7 @@ class Base():
         decoded = {}
         for name, val in params.items():
             type = params_schema.get(name, {}).get('type') or 'string'
-            assert type in PARAMETER_TYPES
+            assert type in PARAMETER_TYPES, type
 
             if type == 'boolean':
                 if val == 'true':
@@ -231,7 +232,7 @@ class Base():
                 e.args = [f'{e.args[0]} for {type} parameter {name}']
                 raise e
 
-            if type == 'string':
+            if type in ('string', 'array'):
                 decoded[name] = val
 
         return decoded

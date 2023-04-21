@@ -38,6 +38,12 @@ def params(input, **params):
     pass
 
 
+@server.method('io.example.array')
+def array(input, foo=None):
+    assert isinstance(foo, list)
+    return foo + ['z']
+
+
 @server.method('io.example.defs')
 def defs(input, **params):
     return {'out': 'bar'}
@@ -114,6 +120,10 @@ class ServerTest(TestCase):
     def test_invalid_params(self):
         with self.assertRaises(ValidationError):
             server.call('io.example.params', {}, bar='c')
+
+    def test_array(self):
+        self.assertEqual(['a', 'b', 'z'],
+                         server.call('io.example.array', {}, foo=['a', 'b']))
 
     def test_unknown_methods(self):
         with self.assertRaises(NotImplementedError):

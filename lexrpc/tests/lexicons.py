@@ -113,6 +113,35 @@ LEXICONS = [
 
     {
         'lexicon': 1,
+        'id': 'io.example.array',
+        'defs': {
+            'main': {
+                'type': 'procedure',
+                'parameters': {
+                    'type': 'params',
+                    'properties': {
+                        'foo': {'type': 'array', 'items': {'type': 'string'}},
+                    },
+                },
+                'input': {
+                    'encoding': 'application/json',
+                    'schema': {
+                        'type': 'object',
+                    },
+                },
+                'output': {
+                    'encoding': 'application/json',
+                    'schema': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                    },
+                },
+            },
+        },
+    },
+
+    {
+        'lexicon': 1,
         'id': 'io.example.record',
         'defs': {
             'main': {

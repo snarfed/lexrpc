@@ -173,6 +173,7 @@ Here's how to package, test, and ship a new release.
 
 ### 0.3 - unreleased
 
+* Add array type support.
 * Add support for non-JSON input and output encodings.
 
 ### 0.2 - 2023-03-13

@@ -2,6 +2,7 @@
 import json
 from unittest import TestCase
 from unittest.mock import patch
+import urllib.parse
 
 from jsonschema import ValidationError
 import requests
@@ -155,6 +156,19 @@ class ClientTest(TestCase):
     def test_invalid_params(self):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({}, bar='c')
+
+    @patch('requests.post')
+    def test_array(self, mock_post):
+        mock_post.return_value = response(['z'])
+
+        self.assertEqual(['z'], self.client.io.example.array({'foo': ['a', 'b']}))
+
+        mock_post.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.array',
+            params={},
+            json={'foo': ['a', 'b']},
+            headers={'Content-Type': 'application/json'},
+        )
 
     @patch('requests.post')
     def test_validate_false(self, mock_post):
