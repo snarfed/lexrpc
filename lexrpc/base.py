@@ -178,14 +178,16 @@ class Base():
         Based on https://atproto.com/specs/xrpc#path
 
         Args:
-          params: dict mapping str names to boolean, number, or str values
+          params: dict mapping str names to boolean, number, str, or list values
 
-        Returns: dict mapping str names to str encoded values
+        Returns: bytes, URL-encoded query parameter string
         """
-        return {name: ('true' if val is True
-                       else 'false' if val is False
-                       else urllib.parse.quote(str(val)))
-                for name, val in params.items()}
+        return urllib.parse.urlencode({
+            name: ('true' if val is True
+                   else 'false' if val is False
+                   else val)
+            for name, val in params.items()
+        }, doseq=True)
 
     def decode_params(self, method_nsid, params):
         """Decodes encoded parameter values.
@@ -194,9 +196,10 @@ class Base():
 
         Args:
           method_nsid: str
-          params: dict mapping str names to encoded str values
+          params: sequence of (str name, str encoded value) tuples
 
-        Returns: dict mapping str names to decoded boolean, number, and str values
+        Returns:
+          dict mapping str names to decoded boolean, number, str, and array values
 
         Raises:
           ValueError
@@ -210,7 +213,7 @@ class Base():
                                .get('properties', {})
 
         decoded = {}
-        for name, val in params.items():
+        for name, val in params:
             type = params_schema.get(name, {}).get('type') or 'string'
             assert type in PARAMETER_TYPES, type
 
@@ -232,7 +235,10 @@ class Base():
                 e.args = [f'{e.args[0]} for {type} parameter {name}']
                 raise e
 
-            if type in ('string', 'array'):
+            if type == 'string':
                 decoded[name] = val
+
+            if type == 'array':
+                decoded.setdefault(name, []).append(val)
 
         return decoded

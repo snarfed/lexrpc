@@ -55,7 +55,7 @@ class XrpcEndpoint(View):
 
         # run method
         try:
-            params = self.server.decode_params(nsid, request.args)
+            params = self.server.decode_params(nsid, request.args.items(multi=True))
             output = self.server.call(nsid, input=input, **params)
         except NotImplementedError as e:
             return {'message': str(e)}, 501

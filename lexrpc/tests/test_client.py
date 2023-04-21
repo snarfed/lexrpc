@@ -44,7 +44,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            params={'x': 'y'},
+            params='x=y',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -59,7 +59,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            params={'x': 'y'},
+            params='x=y',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -75,7 +75,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure',
-            params={'x': 'y'},
+            params='x=y',
             json=input,
             headers={'Content-Type': 'application/json'},
         )
@@ -90,7 +90,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            params={'z': 'true'},
+            params='z=true',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -104,7 +104,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            params={},
+            params='',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -116,7 +116,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.noParamsInputOutput',
-            params={},
+            params='',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -128,7 +128,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.dashed-name',
-            params={},
+            params='',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -141,7 +141,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.defs',
-            params={},
+            params='',
             json={'in': 'bar'},
             headers={'Content-Type': 'application/json'},
         )
@@ -161,12 +161,12 @@ class ClientTest(TestCase):
     def test_array(self, mock_post):
         mock_post.return_value = response(['z'])
 
-        self.assertEqual(['z'], self.client.io.example.array({'foo': ['a', 'b']}))
+        self.assertEqual(['z'], self.client.io.example.array({}, foo=['a', 'b']))
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.array',
-            params={},
-            json={'foo': ['a', 'b']},
+            params='foo=a&foo=b',
+            json=None,
             headers={'Content-Type': 'application/json'},
         )
 
@@ -183,7 +183,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure',
-            params={},
+            params='',
             json=input,
             headers={'Content-Type': 'application/json'},
         )
