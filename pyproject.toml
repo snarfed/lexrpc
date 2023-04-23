@@ -30,6 +30,9 @@ classifiers = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
+[project.urls]
+'Homepage' = 'https://github.com/snarfed/lexrpc'
+
 [project.optional-dependencies]
 flask = [
     'Flask>=2.0',
