@@ -111,8 +111,9 @@ class Base():
                         for field in 'input', 'output', 'parameters', 'record':
                             logger.debug(f'Validating {id} {field} schema')
                             schema = defn.get(field, {}).get('schema')
-                            if schema:
-                                validators.validator_for(schema).check_schema(schema)
+                            # if schema:
+                                # TODO: adapt jsonschema to support Lexicon, or drop
+                                # validators.validator_for(schema).check_schema(schema)
 
                 self._defs[id] = defn
 
@@ -167,7 +168,9 @@ class Base():
 
         logger.debug(f'Validating {nsid} {type}')
         try:
-            jsonschema.validate(obj, schema)
+            # TODO: adapt jsonschema to support Lexicon, or drop
+            # jsonschema.validate(obj, schema)
+            pass
         except jsonschema.ValidationError as e:
             e.message = f'Error validating {nsid} {type}: {e.message}'
             raise
