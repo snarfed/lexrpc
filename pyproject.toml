@@ -32,6 +32,7 @@ classifiers = [
 
 [project.urls]
 'Homepage' = 'https://github.com/snarfed/lexrpc'
+'Documentation' = 'https://lexrpc.readthedocs.io/'
 
 [project.optional-dependencies]
 flask = [
