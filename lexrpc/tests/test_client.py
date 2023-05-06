@@ -194,3 +194,21 @@ class ClientTest(TestCase):
             headers={'Content-Type': 'application/json'},
         )
 
+    @patch('requests.get')
+    def test_headers(self, mock_get):
+        output = {'foo': 'asdf', 'bar': 3}
+        mock_get.return_value = response(output)
+
+        client = Client('http://ser.ver', LEXICONS, headers={'Baz': 'biff'})
+        got = client.call('io.example.query', {}, x='y')
+        self.assertEqual(output, got)
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query',
+            params='x=y',
+            json=None,
+            headers={
+                'Content-Type': 'application/json',
+                'Baz': 'biff',
+            },
+        )

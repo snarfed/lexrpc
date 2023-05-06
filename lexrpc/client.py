@@ -33,9 +33,14 @@ class _NsidClient():
 
 
 class Client(Base):
-    """XRPC client."""
+    """XRPC client.
 
-    def __init__(self, address, lexicons, **kwargs):
+    Attributes:
+      _address: str, server URL
+      _headers: dict, HTTP headers to include in every request
+    """
+
+    def __init__(self, address, lexicons, headers=None, **kwargs):
         """Constructor.
 
         Args:
@@ -51,6 +56,7 @@ class Client(Base):
         assert address.startswith('http://') or address.startswith('https://'), \
             f"{address} doesn't start with http:// or https://"
         self._address = address
+        self._headers = headers or {}
 
     def __getattr__(self, attr):
         if NSID_SEGMENT_RE.match(attr):
@@ -85,13 +91,17 @@ class Client(Base):
 
         self._maybe_validate(nsid, 'input', input)
 
+        headers = {
+            **self._headers,
+            'Content-Type': 'application/json',
+        }
+
         # run method
         url = f'{self._address}/xrpc/{nsid}'
         defn = self._get_def(nsid)
         fn = requests.get if defn['type'] == 'query' else requests.post
         logger.debug(f'Running method')
-        resp = fn(url, params=params, json=input if input else None,
-                  headers={'Content-Type': 'application/json'})
+        resp = fn(url, params=params, json=input if input else None, headers=headers)
         logger.debug(f'Got: {resp}')
         resp.raise_for_status()
 
