@@ -100,7 +100,7 @@ class Client(Base):
         url = f'{self._address}/xrpc/{nsid}'
         defn = self._get_def(nsid)
         fn = requests.get if defn['type'] == 'query' else requests.post
-        logger.debug(f'Running method')
+        logger.debug(f'Running {fn} {url} {input} {params} {headers}')
         resp = fn(url, params=params, json=input if input else None, headers=headers)
         logger.debug(f'Got: {resp}')
         resp.raise_for_status()
