@@ -56,6 +56,8 @@ class XrpcEndpoint(View):
         # run method
         try:
             params = self.server.decode_params(nsid, request.args.items(multi=True))
+            # TODO: for binary input/output, support streaming with eg
+            # io.BufferedReader/Writer?
             output = self.server.call(nsid, input=input, **params)
         except NotImplementedError as e:
             return {'message': str(e)}, 501

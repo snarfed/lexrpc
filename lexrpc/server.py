@@ -41,7 +41,7 @@ class Server(Base):
 
             @wraps(fn)
             def wrapped(*args, **kwargs):
-                return fn(*args, **kwarg)
+                return fn(*args, **kwargs)
             return wrapped
 
         return decorated

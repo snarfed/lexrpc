@@ -166,3 +166,19 @@ class ServerTest(TestCase):
         got = server.call('io.example.encodings', val_bytes)
         self.assertTrue(isinstance(got, bytes))
         self.assertEqual(val + 1, int.from_bytes(got, 'big'))
+
+    def test_decorator_call(self):
+        output = query({}, x='y')
+        self.assertEqual({'foo': 'y', 'bar': 5}, output)
+
+    def test_decorator_bad_method_name(self):
+        with self.assertRaises(AssertionError):
+            @server.method('not an NSID')
+            def foo(input, **params):
+                pass
+
+    def test_decorator_method_name_already_registered(self):
+        with self.assertRaises(AssertionError):
+            @server.method('io.example.query')
+            def query(input, **params):
+                pass

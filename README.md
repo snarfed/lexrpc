@@ -176,6 +176,7 @@ Here's how to package, test, and ship a new release.
 * Add array type support.
 * Add support for non-JSON input and output encodings.
 * Add `headers` kwarg to `Client` constructor.
+* Bug fix for server `@method` decorator.
 
 ### 0.2 - 2023-03-13
 
