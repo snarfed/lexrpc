@@ -28,16 +28,10 @@ class Server(Base):
         """XRPC method decorator. Use on each function that implements a method.
 
         Args:
-          fn: callable
           nsid: str
         """
-        assert NSID_RE.match(nsid)
-
         def decorated(fn):
-            existing = self._methods.get(nsid)
-            if existing:
-                fail(f'{nsid} already registered with {existing}',  AssertionError)
-            self._methods[nsid] = fn
+            self.register(nsid, fn)
 
             @wraps(fn)
             def wrapped(*args, **kwargs):
@@ -45,6 +39,21 @@ class Server(Base):
             return wrapped
 
         return decorated
+
+    def register(self, nsid, fn):
+        """Registers an XRPC method decorator. Alternative to :meth:`method`.
+
+        Args:
+          nsid: str
+          fn: callable
+        """
+        assert NSID_RE.match(nsid)
+
+        existing = self._methods.get(nsid)
+        if existing:
+            fail(f'{nsid} already registered with {existing}',  AssertionError)
+        self._methods[nsid] = fn
+
 
     def call(self, nsid, input, **params):
         """Calls an XRPC query or procedure method.

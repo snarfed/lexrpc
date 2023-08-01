@@ -182,3 +182,11 @@ class ServerTest(TestCase):
             @server.method('io.example.query')
             def query(input, **params):
                 pass
+
+    def test_register(self):
+        del server._methods['io.example.query']
+
+        server.register('io.example.query', query)
+        output = server.call('io.example.query', {}, x='y')
+        self.assertEqual({'foo': 'y', 'bar': 5}, output)
+

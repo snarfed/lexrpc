@@ -55,6 +55,12 @@ output = server.call(nsid, input, **params)
 response.write_json(output)
 ```
 
+You can also register a method handler with [`Server.register`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server.register):
+
+```
+server.register('com.example.my-query', my_query_handler)
+```
+
 
 ## Flask server
 
@@ -176,6 +182,7 @@ Here's how to package, test, and ship a new release.
 * Add array type support.
 * Add support for non-JSON input and output encodings.
 * Add `headers` kwarg to `Client` constructor.
+* Add new `Server.register` method for manually registering handlers.
 * Bug fix for server `@method` decorator.
 
 ### 0.2 - 2023-03-13
