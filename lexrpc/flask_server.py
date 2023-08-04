@@ -28,7 +28,7 @@ def init_flask(xrpc_server, app):
     logger.info(f'Registering {xrpc_server} with {app}')
     app.add_url_rule('/xrpc/<nsid>',
                      view_func=XrpcEndpoint.as_view('xrpc-endpoint', xrpc_server),
-                     methods=['GET', 'POST'])
+                     methods=['GET', 'POST', 'OPTIONS'])
 
 
 class XrpcEndpoint(View):
@@ -49,6 +49,9 @@ class XrpcEndpoint(View):
             lexicon = self.server._get_def(nsid)
         except NotImplementedError as e:
             return {'message': str(e)}, 501, RESPONSE_HEADERS
+
+        if request.method == 'OPTIONS':
+            return '', 200, RESPONSE_HEADERS
 
         # prepare input
         in_encoding = lexicon.get('input', {}).get('encoding')

@@ -34,6 +34,12 @@ class XrpcEndpointTest(TestCase):
         self.assertEqual('application/json', resp.headers['Content-Type'])
         self.assertEqual({'foo': 'y', 'bar': 5}, resp.json)
 
+    def test_options(self):
+        resp = self.client.options('/xrpc/io.example.query')
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual('*', resp.headers['Access-Control-Allow-Origin'])
+        self.assertEqual('', resp.text)
+
     def test_no_params_input_output(self):
         resp = self.client.post('/xrpc/io.example.noParamsInputOutput')
         self.assertEqual(200, resp.status_code)
