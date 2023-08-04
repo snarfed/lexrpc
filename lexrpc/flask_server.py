@@ -10,6 +10,13 @@ from .base import NSID_RE
 
 logger = logging.getLogger(__name__)
 
+RESPONSE_HEADERS = {
+    # wide open CORS to allow client-side apps like https://bsky.app/
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': '*',
+    'Access-Control-Allow-Origin': '*',
+}
+
 
 def init_flask(xrpc_server, app):
     """Connects a :class:`lexrpc.Server` to serve on /xrpc/... on a Flask app.
@@ -37,11 +44,11 @@ class XrpcEndpoint(View):
 
     def dispatch_request(self, nsid):
         if not NSID_RE.match(nsid):
-            return {'message': f'{nsid} is not a valid NSID'}, 400
+            return {'message': f'{nsid} is not a valid NSID'}, 400, RESPONSE_HEADERS
         try:
             lexicon = self.server._get_def(nsid)
         except NotImplementedError as e:
-            return {'message': str(e)}, 501
+            return {'message': str(e)}, 501, RESPONSE_HEADERS
 
         # prepare input
         in_encoding = lexicon.get('input', {}).get('encoding')
@@ -60,19 +67,19 @@ class XrpcEndpoint(View):
             # io.BufferedReader/Writer?
             output = self.server.call(nsid, input=input, **params)
         except NotImplementedError as e:
-            return {'message': str(e)}, 501
+            return {'message': str(e)}, 501, RESPONSE_HEADERS
         except ValidationError as e:
-            return {'message': str(e)}, 400
+            return {'message': str(e)}, 400, RESPONSE_HEADERS
         except ValueError as e:
             logging.info(f'Method raised', exc_info=True)
-            return {'message': str(e)}, 400
+            return {'message': str(e)}, 400, RESPONSE_HEADERS
 
         # prepare output
         out_encoding = lexicon.get('output', {}).get('encoding')
         if out_encoding in ('application/json', None):
-            return jsonify(output or '')
+            return jsonify(output or ''), RESPONSE_HEADERS
         else:
             # binary
             if not isinstance(output, (str, bytes)):
                 return {'message': f'Expected str or bytes output to match {out_encoding}, got {output.__class__}'}, 500
-            return output
+            return output, RESPONSE_HEADERS

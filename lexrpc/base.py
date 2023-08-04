@@ -85,7 +85,7 @@ class Base():
         for i, lexicon in enumerate(copy.deepcopy(lexicons)):
             nsid = lexicon.get('id')
             assert nsid, f'Lexicon {i} missing id field'
-            logger.debug(f'Loading lexicon {nsid}')
+            # logger.debug(f'Loading lexicon {nsid}')
 
             for name, defn in lexicon.get('defs', {}).items():
                 id = nsid if name == 'main' else f'{nsid}#{name}'
@@ -109,7 +109,7 @@ class Base():
                     if validate:
                         # validate schemas
                         for field in 'input', 'output', 'parameters', 'record':
-                            logger.debug(f'Validating {id} {field} schema')
+                            # logger.debug(f'Validating {id} {field} schema')
                             schema = defn.get(field, {}).get('schema')
                             # if schema:
                                 # TODO: adapt jsonschema to support Lexicon, or drop
