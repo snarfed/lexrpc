@@ -4,6 +4,7 @@ import logging
 from flask import request
 from flask.json import jsonify
 from flask.views import View
+from flask_sock import Sock
 from jsonschema import ValidationError
 
 from .base import NSID_RE
@@ -26,6 +27,12 @@ def init_flask(xrpc_server, app):
       app: :class:`flask.Flask`
     """
     logger.info(f'Registering {xrpc_server} with {app}')
+
+    sock = Sock(app)
+    for nsid, fn in xrpc_server._methods.items():
+        if xrpc_server._defs[nsid]['type'] == 'subscription':
+            sock.route(f'/xrpc/{nsid}')(fn)
+
     app.add_url_rule('/xrpc/<nsid>',
                      view_func=XrpcEndpoint.as_view('xrpc-endpoint', xrpc_server),
                      methods=['GET', 'POST', 'OPTIONS'])

@@ -64,6 +64,14 @@ class XrpcEndpointTest(TestCase):
                          resp.json['message'])
 
     # TODO
+    # needs websocket test client, but flask-sock doesn't have one yet
+    # https://github.com/miguelgrinberg/flask-sock/issues/23
+    @skip
+    def test_subscription(self):
+        resp = self.client.get('/xrpc/io.example.subscribe?start=3&end=6')
+        self.assertEqual(200, resp.status_code, resp.json)
+
+    # TODO
     @skip
     def test_procedure_missing_input(self):
         resp = self.client.post('/xrpc/io.example.procedure')
