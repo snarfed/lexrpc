@@ -30,6 +30,13 @@ output = client.com.example.my_query({'foo': 'bar'}, param_a=5)
 
 Note that `-` characters in method NSIDs are converted to `_`s, eg the call above is for the method `com.example.my-query`.
 
+[Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) are generators that `yield` messages sent by the server. They take parameters as kwargs, but no positional `input`.
+
+```
+for msg in client.com.example.count(start=1, end=10):
+    print(msg['num'])
+```
+
 
 ## Server
 
@@ -61,7 +68,7 @@ You can also register a method handler with [`Server.register`](https://lexrpc.r
 server.register('com.example.my-query', my_query_handler)
 ```
 
-[Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) are generators that `yield` messages to send to the client. They take parameters as kwargs, but no positional `input`.
+[Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) should be generators that `yield` messages to send to the client. They take parameters as kwargs, but no positional `input`.
 
 ```
 @server.method('com.example.count')
@@ -94,7 +101,6 @@ This configures the Flask app to serve the methods registered with the lexrpc se
 * support record types, eg via type "ref" and ref field pointing to the nsid [example here](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13), ref points to [`app.bsky.actor.ref`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/actor/ref.json). ref isn't documented yet though, and these lexicons also use a `defs` field, which isn't really documented either. [they plan to update the docs and specs soon.](https://github.com/bluesky-social/atproto/pull/409#issuecomment-1348766856)
   * check out [atproto@63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab](https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab)!
 * [extensions](https://atproto.com/guides/lexicon#extensibility). is there anything to do? ah, [they're currently TODO in the spec](https://atproto.com/specs/xrpc#todos).
-* ["binary blob" support.](https://atproto.com/specs/xrpc) currently undefined ish? is it based on the `encoding` field?
 * [authentication, currently TODO in the spec](https://atproto.com/specs/xrpc#todos)
 
 

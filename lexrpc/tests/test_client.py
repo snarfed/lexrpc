@@ -6,6 +6,7 @@ import urllib.parse
 
 from jsonschema import ValidationError
 import requests
+import simple_websocket
 
 from .lexicons import LEXICONS
 from .. import Client
@@ -28,11 +29,31 @@ def response(body=None, status=200, headers=None):
     return resp
 
 
+class FakeWebsocketClient:
+    """Fake of :class:`simple_websocket.Client`."""
+
+    def __init__(self, url):
+        FakeWebsocketClient.url = url
+
+    def send(self, msg):
+        self.sent.append(json.loads(msg))
+
+    def receive(self):
+        if not self.to_receive:
+            raise simple_websocket.ConnectionClosed(message='foo')
+
+        return json.dumps(self.to_receive.pop(0))
+
+
 class ClientTest(TestCase):
     maxDiff = None
 
     def setUp(self):
         self.client = Client('http://ser.ver', LEXICONS)
+
+        simple_websocket.Client = FakeWebsocketClient
+        FakeWebsocketClient.sent = []
+        FakeWebsocketClient.to_receive = []
 
     @patch('requests.get')
     def test_call(self, mock_get):
@@ -43,8 +64,7 @@ class ClientTest(TestCase):
         self.assertEqual(output, got)
 
         mock_get.assert_called_once_with(
-            'http://ser.ver/xrpc/io.example.query',
-            params='x=y',
+            'http://ser.ver/xrpc/io.example.query?x=y',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -58,8 +78,7 @@ class ClientTest(TestCase):
         self.assertEqual(output, got)
 
         mock_get.assert_called_once_with(
-            'http://ser.ver/xrpc/io.example.query',
-            params='x=y',
+            'http://ser.ver/xrpc/io.example.query?x=y',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -74,8 +93,7 @@ class ClientTest(TestCase):
         self.assertEqual(output, got)
 
         mock_post.assert_called_once_with(
-            'http://ser.ver/xrpc/io.example.procedure',
-            params='x=y',
+            'http://ser.ver/xrpc/io.example.procedure?x=y',
             json=input,
             headers={'Content-Type': 'application/json'},
         )
@@ -89,8 +107,7 @@ class ClientTest(TestCase):
         self.assertEqual(output, got)
 
         mock_get.assert_called_once_with(
-            'http://ser.ver/xrpc/io.example.query',
-            params='z=true',
+            'http://ser.ver/xrpc/io.example.query?z=true',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -106,7 +123,6 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            params='',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -118,7 +134,6 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.noParamsInputOutput',
-            params='',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -130,7 +145,6 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.dashed-name',
-            params='',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
@@ -143,7 +157,6 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.defs',
-            params='',
             json={'in': 'bar'},
             headers={'Content-Type': 'application/json'},
         )
@@ -170,11 +183,23 @@ class ClientTest(TestCase):
         self.assertEqual(['z'], self.client.io.example.array({}, foo=['a', 'b']))
 
         mock_post.assert_called_once_with(
-            'http://ser.ver/xrpc/io.example.array',
-            params='foo=a&foo=b',
+            'http://ser.ver/xrpc/io.example.array?foo=a&foo=b',
             json=None,
             headers={'Content-Type': 'application/json'},
         )
+
+    def test_subscription(self):
+        msgs = [
+            {'num': 3},
+            {'num': 4},
+            {'num': 5},
+        ]
+        FakeWebsocketClient.to_receive = list(msgs)
+
+        gen = self.client.io.example.subscribe(start=3, end=6)
+        self.assertEqual(msgs, list(gen))
+        self.assertEqual('http://ser.ver/xrpc/io.example.subscribe?start=3&end=6',
+                         FakeWebsocketClient.url)
 
     @patch('requests.post')
     def test_validate_false(self, mock_post):
@@ -189,7 +214,6 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure',
-            params='',
             json=input,
             headers={'Content-Type': 'application/json'},
         )
@@ -204,8 +228,7 @@ class ClientTest(TestCase):
         self.assertEqual(output, got)
 
         mock_get.assert_called_once_with(
-            'http://ser.ver/xrpc/io.example.query',
-            params='x=y',
+            'http://ser.ver/xrpc/io.example.query?x=y',
             json=None,
             headers={
                 'Content-Type': 'application/json',

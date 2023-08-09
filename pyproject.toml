@@ -20,6 +20,7 @@ keywords = ['XRPC', 'Lexicon', 'AT Protocol', 'ATP']
 dependencies = [
     'jsonschema>=4.0',
     'requests>=2.0',
+    'simple-websocket',
 ]
 classifiers = [
     'Programming Language :: Python :: 3',

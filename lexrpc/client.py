@@ -1,7 +1,13 @@
-"""XRPC client implementation."""
+"""XRPC client implementation.
+
+TODO:
+* asyncio support for subscription websockets
+"""
+import json
 import logging
 
 import requests
+import simple_websocket
 
 from .base import Base, NSID_SEGMENT_RE
 
@@ -64,15 +70,18 @@ class Client(Base):
 
         return getattr(super(), attr)
 
-    def call(self, nsid, input, **params):
+    def call(self, nsid, input=None, **params):
         """Makes a remote XRPC method call.
 
         Args:
           nsid: str, method NSID
-          input: dict, input body
+          input: dict, input body, optional for subscriptions
           params: optional method parameters
 
-        Returns: decoded JSON object, or None if the method has no output
+        Returns:
+          For queries and procedures: decoded JSON object, or None if the method
+            has no output
+          For subscriptions: generator iterator of messages from server
 
         Raises:
           NotImplementedError
@@ -89,7 +98,9 @@ class Client(Base):
         self._maybe_validate(nsid, 'parameters', params)
         params = self.encode_params(params)
 
-        self._maybe_validate(nsid, 'input', input)
+        type = self._get_def(nsid)['type']
+        if type == 'subscription':
+            self._maybe_validate(nsid, 'input', input)
 
         headers = {
             **self._headers,
@@ -98,17 +109,33 @@ class Client(Base):
 
         # run method
         url = f'{self._address}/xrpc/{nsid}'
-        defn = self._get_def(nsid)
-        fn = requests.get if defn['type'] == 'query' else requests.post
-        logger.debug(f'Running {fn} {url} {input} {params} {headers}')
-        resp = fn(url, params=params, json=input if input else None, headers=headers)
-        logger.debug(f'Got: {resp}')
-        resp.raise_for_status()
+        if params:
+            url += f'?{params}'
 
-        output = None
-        content_type = resp.headers.get('Content-Type', '').split(';')[0]
-        if content_type == 'application/json' and resp.content:
-            output = resp.json()
+        if type == 'subscription':
+            return self._subscribe(url)
+        else:
+            # query or procedure
+            fn = requests.get if type == 'query' else requests.post
+            logger.debug(f'Running {fn} {url} {input} {params} {headers}')
+            resp = fn(url, json=input if input else None, headers=headers)
+            logger.debug(f'Got: {resp}')
+            resp.raise_for_status()
 
-        self._maybe_validate(nsid, 'output', output)
-        return output
+            output = None
+            content_type = resp.headers.get('Content-Type', '').split(';')[0]
+            if content_type == 'application/json' and resp.content:
+                output = resp.json()
+
+            self._maybe_validate(nsid, 'output', output)
+            return output
+
+    def _subscribe(self, url):
+        """Connects to a subscription websocket, yields the returned messages."""
+        ws = simple_websocket.Client(url)
+
+        try:
+            while True:
+                yield json.loads(ws.receive())
+        except simple_websocket.ConnectionClosed as cc:
+            logger.debug(cc)
