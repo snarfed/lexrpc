@@ -9,18 +9,16 @@ from jsonschema import validators
 
 logger = logging.getLogger(__name__)
 
-LEXICON_TYPES = frozenset((
-    'object',
-    'query',
-    'procedure',
-    'record',
-    'subscription',  # ??? eg com/atproto/label/subscribeLabels.json #main
-    'ref',
-    'token',
-))
 METHOD_TYPES = frozenset((
     'query',
     'procedure',
+    'subscription',
+))
+LEXICON_TYPES = METHOD_TYPES | frozenset((
+    'object',
+    'record',
+    'ref',
+    'token',
 ))
 PARAMETER_TYPES = frozenset((
     'array',
@@ -91,7 +89,7 @@ class Base():
                 id = nsid if name == 'main' else f'{nsid}#{name}'
                 self._defs[id] = defn
 
-                type = defn.get('type')
+                type = defn['type']
                 assert type in LEXICON_TYPES | PARAMETER_TYPES, \
                     f'Bad type for lexicon {id}: {type}'
 
@@ -108,7 +106,8 @@ class Base():
 
                     if validate:
                         # validate schemas
-                        for field in 'input', 'output', 'parameters', 'record':
+                        for field in ('input', 'output', 'message',
+                                      'parameters', 'record'):
                             # logger.debug(f'Validating {id} {field} schema')
                             schema = defn.get(field, {}).get('schema')
                             # if schema:

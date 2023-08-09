@@ -226,6 +226,32 @@ LEXICONS = [
         },
     },
 
+    {
+        'lexicon': 1,
+        'id': 'io.example.subscribe',
+        'defs': {
+            'main': {
+                'type': 'subscription',
+                'parameters': {
+                    'type': 'params',
+                    'properties': {
+                        'start': {'type': 'integer'},
+                        'end': {'type': 'integer'},
+                    },
+                },
+                'message': {
+                    'schema': {
+                        'type': 'object',
+                        'properties': {'num': {'type': 'integer'}},
+                    },
+                },
+                'errors': {
+                    'Unhappy',
+                },
+            },
+        },
+    },
+
     # TODO
 
     # {

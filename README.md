@@ -42,8 +42,8 @@ lexicons = [...]
 server = Server(lexicons)
 
 @server.method('com.example.my-query')
-def my_query_hander(input, **params):
-    output = {'foo': input['foo'], 'b': params['param_a'] + 1}
+def my_query(input, num=None):
+    output = {'foo': input['foo'], 'b': num + 1}
     return output
 
 # Extract nsid and decode query parameters from an HTTP request,
@@ -59,6 +59,15 @@ You can also register a method handler with [`Server.register`](https://lexrpc.r
 
 ```
 server.register('com.example.my-query', my_query_handler)
+```
+
+[Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) are generators that `yield` messages to send to the client. They take parameters as kwargs, but no positional `input`.
+
+```
+@server.method('com.example.count')
+def count(start=None, end=None):
+    for num in range(start, end):
+        yield {'num': num}
 ```
 
 
@@ -181,6 +190,7 @@ Here's how to package, test, and ship a new release.
 
 * Add array type support.
 * Add support for non-JSON input and output encodings.
+* Add `subscription` method type support.
 * Add `headers` kwarg to `Client` constructor.
 * Add new `Server.register` method for manually registering handlers.
 * Bug fix for server `@method` decorator.

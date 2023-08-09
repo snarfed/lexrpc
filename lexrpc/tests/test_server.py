@@ -62,6 +62,12 @@ def encodings(input, **params):
     return val.to_bytes((val.bit_length() + 7) // 8, 'big')
 
 
+@server.method('io.example.subscribe')
+def subscribe(start=None, end=None):
+    for num in range(start, end):
+        yield {'num': num}
+
+
 class ServerTest(TestCase):
     maxDiff = None
     QUERY_BAR = 5
@@ -134,6 +140,14 @@ class ServerTest(TestCase):
     def test_array(self):
         self.assertEqual(['a', 'b', 'z'],
                          server.call('io.example.array', {}, foo=['a', 'b']))
+
+    def test_subscription(self):
+        gen = server.call('io.example.subscribe', start=3, end=6)
+        self.assertEqual([
+            {'num': 3},
+            {'num': 4},
+            {'num': 5},
+        ], list(gen))
 
     def test_unknown_methods(self):
         with self.assertRaises(NotImplementedError):

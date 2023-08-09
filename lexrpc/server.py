@@ -55,12 +55,12 @@ class Server(Base):
         self._methods[nsid] = fn
 
 
-    def call(self, nsid, input, **params):
+    def call(self, nsid, input=None, **params):
         """Calls an XRPC query or procedure method.
 
         Args:
           nsid: str, method NSID
-          input: dict or bytes, input body
+          input: dict or bytes, input body, optional for subscriptions
           params: optional parameters
 
         Raises:
@@ -80,13 +80,20 @@ class Server(Base):
         if not fn:
             fail(f'{nsid} not implemented', NotImplementedError)
 
+        subscription = self._defs[nsid]['type'] == 'subscription'
+
         # validate params and input, then encode params
         self._maybe_validate(nsid, 'parameters', params)
-        self._maybe_validate(nsid, 'input', input)
+        if not subscription:
+            self._maybe_validate(nsid, 'input', input)
 
         logger.debug('Running method')
-        output = fn(input, **params)
+        args = [] if subscription else [input]
+        output = fn(*args, **params)
         logger.debug(f'Got: {loggable(output)}')
 
-        self._maybe_validate(nsid, 'output', output)
+        if not subscription:
+            self._maybe_validate(nsid, 'output', output)
+        # TODO: validate subscription yielded items against message
+
         return output

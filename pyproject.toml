@@ -37,4 +37,5 @@ classifiers = [
 [project.optional-dependencies]
 flask = [
     'Flask>=2.0',
+    'flask-sock',
 ]
