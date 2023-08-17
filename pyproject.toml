@@ -37,6 +37,7 @@ classifiers = [
 
 [project.optional-dependencies]
 flask = [
+    'dag-cbor',
     'Flask>=2.0',
     'flask-sock',
 ]
