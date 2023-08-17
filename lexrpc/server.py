@@ -58,6 +58,9 @@ class Server(Base):
     def call(self, nsid, input=None, **params):
         """Calls an XRPC query or procedure method.
 
+        For subscriptions, returns a generator that yields (header dict, payload
+        dict) tuples to be DAG-CBOR encoded and sent to the websocket client.
+
         Args:
           nsid: str, method NSID
           input: dict or bytes, input body, optional for subscriptions
@@ -94,6 +97,5 @@ class Server(Base):
 
         if not subscription:
             self._maybe_validate(nsid, 'output', output)
-        # TODO: validate subscription yielded items against message
 
         return output

@@ -231,7 +231,7 @@ class Base():
             try:
                 if type == 'number':
                     decoded[name] = float(val)
-                elif type == 'int':
+                elif type in ('int', 'integer'):
                     decoded[name] = int(val)
             except ValueError as e:
                 e.args = [f'{e.args[0]} for {type} parameter {name}']

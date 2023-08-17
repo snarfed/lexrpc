@@ -1,11 +1,13 @@
 """Flask handler for /xrpc/... endpoint."""
 import logging
 
+import dag_cbor
 from flask import request
 from flask.json import jsonify
 from flask.views import View
 from flask_sock import Sock
 from jsonschema import ValidationError
+from simple_websocket import ConnectionClosed
 
 from .base import NSID_RE
 
@@ -29,9 +31,10 @@ def init_flask(xrpc_server, app):
     logger.info(f'Registering {xrpc_server} with {app}')
 
     sock = Sock(app)
-    for nsid, fn in xrpc_server._methods.items():
+    for nsid, _ in xrpc_server._methods.items():
         if xrpc_server._defs[nsid]['type'] == 'subscription':
-            sock.route(f'/xrpc/{nsid}')(fn)
+            sock.route(f'/xrpc/{nsid}')(
+                lambda ws: subscription(ws, xrpc_server, nsid))
 
     app.add_url_rule('/xrpc/<nsid>',
                      view_func=XrpcEndpoint.as_view('xrpc-endpoint', xrpc_server),
@@ -39,7 +42,7 @@ def init_flask(xrpc_server, app):
 
 
 class XrpcEndpoint(View):
-    """Handles inbound XRPC requests.
+    """Handles inbound XRPC query and procedure (but not subscription) methods.
 
     Attributes:
       server: :class:`lexrpc.Server`
@@ -93,3 +96,23 @@ class XrpcEndpoint(View):
             if not isinstance(output, (str, bytes)):
                 return {'message': f'Expected str or bytes output to match {out_encoding}, got {output.__class__}'}, 500
             return output, RESPONSE_HEADERS
+
+
+def subscription(ws, xrpc_server, nsid):
+    """Handles inbound XRPC subscription methods over websocket.
+
+    Args:
+      ws: :class:`simple_websocket.ws.WSConnection`
+      xrpc_server: :class:`lexrpc.Server`
+      nsid: str, XRPC method NSID
+    """
+    logger.debug(f'New websocket client for {nsid}')
+    params = xrpc_server.decode_params(nsid, request.args.items(multi=True))
+
+    try:
+        for header, payload in xrpc_server.call(nsid, **params):
+            # TODO: validate header, payload?
+            logger.debug(f'Sending to {nsid} websocket client: {header} {payload}')
+            ws.send(dag_cbor.encode(header) + dag_cbor.encode(payload))
+    except ConnectionClosed as cc:
+        logger.debug(f'Websocket client disconnected from {nsid}: {cc}')

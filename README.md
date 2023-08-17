@@ -68,7 +68,7 @@ You can also register a method handler with [`Server.register`](https://lexrpc.r
 server.register('com.example.my-query', my_query_handler)
 ```
 
-[Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) should be generators that `yield` messages to send to the client. They take parameters as kwargs, but no positional `input`.
+[Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) should be generators that `yield` frames to send to the client. [Each frame is a `(header dict, payload dict)` tuple](https://atproto.com/specs/event-stream#framing) that will be DAG-CBOR encoded and sent to the websocket client. Subscription methods take parameters as kwargs, but no positional `input`.
 
 ```
 @server.method('com.example.count')

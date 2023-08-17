@@ -65,7 +65,7 @@ def encodings(input, **params):
 @server.method('io.example.subscribe')
 def subscribe(start=None, end=None):
     for num in range(start, end):
-        yield {'num': num}
+        yield {'hea': 'der'}, {'num': num}
 
 
 class ServerTest(TestCase):
@@ -144,9 +144,9 @@ class ServerTest(TestCase):
     def test_subscription(self):
         gen = server.call('io.example.subscribe', start=3, end=6)
         self.assertEqual([
-            {'num': 3},
-            {'num': 4},
-            {'num': 5},
+            ({'hea': 'der'}, {'num': 3}),
+            ({'hea': 'der'}, {'num': 4}),
+            ({'hea': 'der'}, {'num': 5}),
         ], list(gen))
 
     def test_unknown_methods(self):

@@ -1,11 +1,26 @@
 """Unit tests for flask_server.py."""
+from threading import Thread
 from unittest import skip, TestCase
 
+import dag_cbor
 from flask import Flask
+from simple_websocket import ConnectionClosed
 
-from ..flask_server import init_flask
+from ..flask_server import init_flask, subscription
 from .lexicons import LEXICONS
 from .test_server import server
+
+
+class FakeConnection:
+    """Fake of :class:`simple_websocket.ws.WSConnection`."""
+    exc = None
+    sent = []
+
+    @classmethod
+    def send(cls, msg):
+        if cls.exc:
+            raise cls.exc
+        cls.sent.append(msg)
 
 
 class XrpcEndpointTest(TestCase):
@@ -18,6 +33,8 @@ class XrpcEndpointTest(TestCase):
 
     def setUp(self):
         self.client = self.app.test_client()
+        FakeConnection.exc = None
+        FakeConnection.sent = []
 
     def test_procedure(self):
         input = {
@@ -60,16 +77,38 @@ class XrpcEndpointTest(TestCase):
 
         resp = self.client.get('/xrpc/io.example.query?z=foolz')
         self.assertEqual(400, resp.status_code)
-        self.assertEqual("Got 'foolz' for boolean parameter z, expected true or false",
-                         resp.json['message'])
+        self.assertEqual(
+            "Got 'foolz' for boolean parameter z, expected true or false",
+            resp.json['message'])
 
-    # TODO
-    # needs websocket test client, but flask-sock doesn't have one yet
-    # https://github.com/miguelgrinberg/flask-sock/issues/23
-    @skip
     def test_subscription(self):
-        resp = self.client.get('/xrpc/io.example.subscribe?start=3&end=6')
-        self.assertEqual(200, resp.status_code, resp.json)
+        def subscribe():
+            with self.app.test_request_context(query_string={'start': 3, 'end': 6}):
+                subscription(FakeConnection, server, 'io.example.subscribe')
+
+        subscriber = Thread(target=subscribe)
+        subscriber.start()
+        subscriber.join()
+
+        header_bytes = dag_cbor.encode({'hea': 'der'})
+        self.assertEqual([
+            header_bytes + dag_cbor.encode({'num': 3}),
+            header_bytes + dag_cbor.encode({'num': 4}),
+            header_bytes + dag_cbor.encode({'num': 5}),
+        ], FakeConnection.sent)
+
+    def test_subscription_client_disconnects(self):
+        FakeConnection.exc = ConnectionClosed()
+
+        def subscribe():
+            with self.app.test_request_context(query_string={'start': 3, 'end': 6}):
+                subscription(FakeConnection, server, 'io.example.subscribe')
+
+
+        subscriber = Thread(target=subscribe)
+        subscriber.start()
+        subscriber.join()
+        self.assertEqual([], FakeConnection.sent)
 
     # TODO
     @skip
@@ -87,7 +126,8 @@ class XrpcEndpointTest(TestCase):
     # TODO
     @skip
     def test_procedure_bad_input(self):
-        resp = self.client.post('/xrpc/io.example.procedure', json={'foo': 2, 'bar': 3})
+        resp = self.client.post('/xrpc/io.example.procedure',
+                                json={'foo': 2, 'bar': 3})
         self.assertEqual(400, resp.status_code)
         self.assertTrue(resp.json['message'].startswith(
             'Error validating io.example.procedure input:'))
