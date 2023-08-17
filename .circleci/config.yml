@@ -21,7 +21,7 @@ jobs:
           command: |
             pip install -U pip
             pip -V
-            pip install -U .[flask]
+            pip install -U .[flask] 'typing-extensions<4.6.0'
             pip install coverage coveralls
 
       - run:
