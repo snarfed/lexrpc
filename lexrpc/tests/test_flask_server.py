@@ -82,9 +82,11 @@ class XrpcEndpointTest(TestCase):
             resp.json['message'])
 
     def test_subscription(self):
+        handler = subscription(server, 'io.example.subscribe')
+
         def subscribe():
             with self.app.test_request_context(query_string={'start': 3, 'end': 6}):
-                subscription(FakeConnection, server, 'io.example.subscribe')
+                handler(FakeConnection)
 
         subscriber = Thread(target=subscribe)
         subscriber.start()
@@ -99,11 +101,11 @@ class XrpcEndpointTest(TestCase):
 
     def test_subscription_client_disconnects(self):
         FakeConnection.exc = ConnectionClosed()
+        handler = subscription(server, 'io.example.subscribe')
 
         def subscribe():
             with self.app.test_request_context(query_string={'start': 3, 'end': 6}):
-                subscription(FakeConnection, server, 'io.example.subscribe')
-
+                handler(FakeConnection)
 
         subscriber = Thread(target=subscribe)
         subscriber.start()

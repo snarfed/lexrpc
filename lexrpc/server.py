@@ -93,9 +93,9 @@ class Server(Base):
         logger.debug('Running method')
         args = [] if subscription else [input]
         output = fn(*args, **params)
-        logger.debug(f'Got: {loggable(output)}')
 
         if not subscription:
+            logger.debug(f'Got: {loggable(output)}')
             self._maybe_validate(nsid, 'output', output)
 
         return output
