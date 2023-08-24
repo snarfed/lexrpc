@@ -3,9 +3,11 @@
 TODO:
 * asyncio support for subscription websockets
 """
+from io import BytesIO
 import json
 import logging
 
+import dag_cbor
 import requests
 import simple_websocket
 
@@ -136,6 +138,9 @@ class Client(Base):
 
         try:
             while True:
-                yield json.loads(ws.receive())
+                buf = BytesIO(ws.receive())
+                header = dag_cbor.decode(buf, allow_concat=True)
+                payload = dag_cbor.decode(buf)
+                yield (header, payload)
         except simple_websocket.ConnectionClosed as cc:
             logger.debug(cc)

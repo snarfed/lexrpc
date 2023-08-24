@@ -4,6 +4,7 @@ from unittest import skip, TestCase
 from unittest.mock import patch
 import urllib.parse
 
+import dag_cbor
 from jsonschema import ValidationError
 import requests
 import simple_websocket
@@ -42,7 +43,8 @@ class FakeWebsocketClient:
         if not self.to_receive:
             raise simple_websocket.ConnectionClosed(message='foo')
 
-        return json.dumps(self.to_receive.pop(0))
+        return (dag_cbor.encode({'op': 1, 't': '#foo'}) +
+                dag_cbor.encode(self.to_receive.pop(0)))
 
 
 class ClientTest(TestCase):
@@ -196,8 +198,10 @@ class ClientTest(TestCase):
         ]
         FakeWebsocketClient.to_receive = list(msgs)
 
+        expected = [({'op': 1, 't': '#foo'}, msg) for msg in msgs]
+
         gen = self.client.io.example.subscribe(start=3, end=6)
-        self.assertEqual(msgs, list(gen))
+        self.assertEqual(expected, list(gen))
         self.assertEqual('http://ser.ver/xrpc/io.example.subscribe?start=3&end=6',
                          FakeWebsocketClient.url)
 

@@ -30,10 +30,11 @@ output = client.com.example.my_query({'foo': 'bar'}, param_a=5)
 
 Note that `-` characters in method NSIDs are converted to `_`s, eg the call above is for the method `com.example.my-query`.
 
-[Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) are generators that `yield` messages sent by the server. They take parameters as kwargs, but no positional `input`.
+[Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) are generators that `yield` (header, payload) tuples sent by the server. They take parameters as kwargs, but no positional `input`.
 
 ```
-for msg in client.com.example.count(start=1, end=10):
+for header, msg in client.com.example.count(start=1, end=10):
+    print(header['t'])
     print(msg['num'])
 ```
 
