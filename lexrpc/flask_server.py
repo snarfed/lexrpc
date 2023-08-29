@@ -114,7 +114,7 @@ def subscription(xrpc_server, nsid):
         try:
             for header, payload in xrpc_server.call(nsid, **params):
                 # TODO: validate header, payload?
-                logger.debug(f'Sending to {nsid} websocket client: {header} {str(payload)[:100]}...')
+                logger.debug(f'Sending to {nsid} websocket client: {header} {str(payload)[:500]}...')
                 ws.send(dag_cbor.encode(header) + dag_cbor.encode(payload))
         except ConnectionClosed as cc:
             logger.debug(f'Websocket client disconnected from {nsid}: {cc}')

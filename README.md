@@ -197,7 +197,7 @@ Here's how to package, test, and ship a new release.
 
 * Add array type support.
 * Add support for non-JSON input and output encodings.
-* Add `subscription` method type support.
+* Add `subscription` method type support over websockets.
 * Add `headers` kwarg to `Client` constructor.
 * Add new `Server.register` method for manually registering handlers.
 * Bug fix for server `@method` decorator.
