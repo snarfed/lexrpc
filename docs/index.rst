@@ -45,6 +45,17 @@ NSIDs to make calls, passing input as a dict and parameters as kwargs:
 Note that ``-`` characters in method NSIDs are converted to ``_``\ s, eg
 the call above is for the method ``com.example.my-query``.
 
+`Event stream methods with type
+``subscription <https://atproto.com/specs/event-stream>`__ are
+generators that ``yield`` (header, payload) tuples sent by the server.
+They take parameters as kwargs, but no positional ``input``.
+
+::
+
+   for header, msg in client.com.example.count(start=1, end=10):
+       print(header['t'])
+       print(msg['num'])
+
 Server
 ------
 
@@ -64,8 +75,8 @@ to call them, whether from your web framework or anywhere else.
    server = Server(lexicons)
 
    @server.method('com.example.my-query')
-   def my_query_hander(input, **params):
-       output = {'foo': input['foo'], 'b': params['param_a'] + 1}
+   def my_query(input, num=None):
+       output = {'foo': input['foo'], 'b': num + 1}
        return output
 
    # Extract nsid and decode query parameters from an HTTP request,
@@ -75,6 +86,28 @@ to call them, whether from your web framework or anywhere else.
    params = server.decode_params(nsid, request.query_params())
    output = server.call(nsid, input, **params)
    response.write_json(output)
+
+You can also register a method handler with
+`Server.register <https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.server.Server.register>`__:
+
+::
+
+   server.register('com.example.my-query', my_query_handler)
+
+`Event stream methods with type
+``subscription <https://atproto.com/specs/event-stream>`__ should be
+generators that ``yield`` frames to send to the client. `Each frame is a
+``(header dict, payload dict)``
+tuple <https://atproto.com/specs/event-stream#framing>`__ that will be
+DAG-CBOR encoded and sent to the websocket client. Subscription methods
+take parameters as kwargs, but no positional ``input``.
+
+::
+
+   @server.method('com.example.count')
+   def count(start=None, end=None):
+       for num in range(start, end):
+           yield {'num': num}
 
 Flask server
 ------------
@@ -126,8 +159,6 @@ TODO
 -  `extensions <https://atproto.com/guides/lexicon#extensibility>`__. is
    there anything to do? ah, `they’re currently TODO in the
    spec <https://atproto.com/specs/xrpc#todos>`__.
--  `“binary blob” support. <https://atproto.com/specs/xrpc>`__ currently
-   undefined ish? is it based on the ``encoding`` field?
 -  `authentication, currently TODO in the
    spec <https://atproto.com/specs/xrpc#todos>`__
 
@@ -251,6 +282,18 @@ Here’s how to package, test, and ship a new release.
 Changelog
 ---------
 
+0.3 - 2023-08-29
+~~~~~~~~~~~~~~~~
+
+-  Add array type support.
+-  Add support for non-JSON input and output encodings.
+-  Add ``subscription`` method type support over websockets.
+-  Add ``headers`` kwarg to ``Client`` constructor.
+-  Add new ``Server.register`` method for manually registering handlers.
+-  Bug fix for server ``@method`` decorator.
+
+.. _section-1:
+
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
 
@@ -266,7 +309,7 @@ put more effort into matching and fully implementing them. Stay tuned!
    format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
    Original format is no longer supported.
 
-.. _section-1:
+.. _section-2:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~
