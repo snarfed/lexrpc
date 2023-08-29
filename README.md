@@ -147,33 +147,33 @@ Here's how to package, test, and ship a new release.
     Test code to paste into the interpreter:
 
     ```py
-from lexrpc import Server
+    from lexrpc import Server
 
-server = Server([{
-    'lexicon': 1,
-    'id': 'io.example.ping',
-    'defs': {
-        'main': {
-            'type': 'query',
-            'description': 'Ping the server',
-            'parameters': {'message': { 'type': 'string' }},
-            'output': {
-                'encoding': 'application/json',
-                'schema': {
-                    'type': 'object',
-                    'required': ['message'],
-                    'properties': {'message': { 'type': 'string' }},
+    server = Server([{
+        'lexicon': 1,
+        'id': 'io.example.ping',
+        'defs': {
+            'main': {
+                'type': 'query',
+                'description': 'Ping the server',
+                'parameters': {'message': { 'type': 'string' }},
+                'output': {
+                    'encoding': 'application/json',
+                    'schema': {
+                        'type': 'object',
+                        'required': ['message'],
+                        'properties': {'message': { 'type': 'string' }},
+                    },
                 },
             },
         },
-    },
-}])
+    }])
 
-@server.method('io.example.ping')
-def ping(input, message=''):
-    return {'message': message}
+    @server.method('io.example.ping')
+    def ping(input, message=''):
+        return {'message': message}
 
-print(server.call('io.example.ping', {}, message='hello world'))
+    print(server.call('io.example.ping', {}, message='hello world'))
     ```
 1. Tag the release in git. In the tag message editor, delete the generated comments at bottom, leave the first line blank (to omit the release "title" in github), put `### Notable changes` on the second line, then copy and paste this version's changelog contents below it.
 
