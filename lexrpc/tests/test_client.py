@@ -51,7 +51,7 @@ class ClientTest(TestCase):
     maxDiff = None
 
     def setUp(self):
-        self.client = Client('http://ser.ver', LEXICONS)
+        self.client = Client('http://ser.ver', lexicons=LEXICONS)
 
         simple_websocket.Client = FakeWebsocketClient
         FakeWebsocketClient.sent = []
@@ -207,7 +207,7 @@ class ClientTest(TestCase):
 
     @patch('requests.post')
     def test_validate_false(self, mock_post):
-        client = Client('http://ser.ver', LEXICONS, validate=False)
+        client = Client('http://ser.ver', lexicons=LEXICONS, validate=False)
 
         input = {'funky': 'chicken'}
         output = {'O': 'K'}
@@ -227,7 +227,8 @@ class ClientTest(TestCase):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
 
-        client = Client('http://ser.ver', LEXICONS, headers={'Baz': 'biff'})
+        client = Client('http://ser.ver', lexicons=LEXICONS,
+                        headers={'Baz': 'biff'})
         got = client.call('io.example.query', {}, x='y')
         self.assertEqual(output, got)
 
@@ -239,3 +240,13 @@ class ClientTest(TestCase):
                 'Baz': 'biff',
             },
         )
+
+    @patch('requests.get')
+    def test_bundled_lexicons(self, mock_get):
+        self.client = Client('http://ser.ver')
+
+        output = {'did': 'did:plc:foo', 'handle': 'bar.com'}
+        mock_get.return_value = response(output)
+
+        got = self.client.call('com.atproto.server.getSession', {})
+        self.assertEqual(output, got)

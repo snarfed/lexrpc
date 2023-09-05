@@ -48,17 +48,20 @@ class Client(Base):
       _headers: dict, HTTP headers to include in every request
     """
 
-    def __init__(self, address, lexicons, headers=None, **kwargs):
+    def __init__(self, address, headers=None, **kwargs):
         """Constructor.
 
         Args:
-          lexicon: sequence of dict lexicons
+          address: str, base URL of XRPC server, eg `https://bsky.social/`
+          headers: optional dict of {str: str}, HTTP headers to include in every
+            request.
+          **kwargs: passed through to :class:`Base`
 
         Raises:
           :class:`jsonschema.SchemaError`
             if any schema is invalid
         """
-        super().__init__(lexicons, **kwargs)
+        super().__init__(**kwargs)
 
         logger.debug(f'Using server at {address}')
         assert address.startswith('http://') or address.startswith('https://'), \

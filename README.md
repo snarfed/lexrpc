@@ -18,17 +18,30 @@ License: This project is placed in the public domain.
 
 ## Client
 
-The lexrpc client let you [call methods dynamically by their NSIDs](https://atproto.com/guides/lexicon#rpc-methods). To make a call, first instantiate a [`Client`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.client.Client) object with the server address and method lexicons, then use method NSIDs to make calls, passing input as a dict and parameters as kwargs:
+The lexrpc client let you [call methods dynamically by their NSIDs](https://atproto.com/guides/lexicon#rpc-methods). To make a call, first instantiate a [`Client`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.client.Client) object with the server address, then use method NSIDs to make calls, passing input as a dict and parameters as kwargs:
 
 ```py
 from lexrpc import Client
 
-lexicons = [...]
-client = Client('https://xrpc.example.com', lexicons)
+client = Client('https://xrpc.example.com')
 output = client.com.example.my_query({'foo': 'bar'}, param_a=5)
 ```
 
 Note that `-` characters in method NSIDs are converted to `_`s, eg the call above is for the method `com.example.my-query`.
+
+By default, `Client` uses the [official `app.bsky` and `com.atproto` lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/). You can substitute your own custom lexicons by passing them to the `Client` constructor:
+
+```
+lexicons = [
+  {
+    "lexicon": 1,
+    "id": "com.example.myQuery",
+    "defs": ...
+  },
+  ...
+]
+client = Client(lexicons=lexicons)
+```
 
 [Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) are generators that `yield` (header, payload) tuples sent by the server. They take parameters as kwargs, but no positional `input`.
 
@@ -46,8 +59,7 @@ To implement an XRPC server, use the [`Server`](https://lexrpc.readthedocs.io/en
 ```py
 from lexrpc import Server
 
-lexicons = [...]
-server = Server(lexicons)
+server = Server()
 
 @server.method('com.example.my-query')
 def my_query(input, num=None):
@@ -67,6 +79,20 @@ You can also register a method handler with [`Server.register`](https://lexrpc.r
 
 ```
 server.register('com.example.my-query', my_query_handler)
+```
+
+As with `Client`, you can use custom lexicons by passing them to the `Server` constructor:
+
+```
+lexicons = [
+  {
+    "lexicon": 1,
+    "id": "com.example.myQuery",
+    "defs": ...
+  },
+  ...
+]
+server = Server(lexicons=lexicons)
 ```
 
 [Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) should be generators that `yield` frames to send to the client. [Each frame is a `(header dict, payload dict)` tuple](https://atproto.com/specs/event-stream#framing) that will be DAG-CBOR encoded and sent to the websocket client. Subscription methods take parameters as kwargs, but no positional `input`.
@@ -192,6 +218,10 @@ Here's how to package, test, and ship a new release.
 
 
 ## Changelog
+
+### 0.4 - unreleased
+
+* Bundle [the official `app.bsky` and `com.atproto` lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/), use them by default.
 
 ### 0.3 - 2023-08-29
 

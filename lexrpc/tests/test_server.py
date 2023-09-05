@@ -8,7 +8,7 @@ from ..server import Server
 
 
 # test server and methods
-server = Server(LEXICONS)
+server = Server(lexicons=LEXICONS)
 
 @server.method('io.example.query')
 def query(input, **params):
@@ -164,7 +164,7 @@ class ServerTest(TestCase):
                 pass
 
     def test_validate_false(self):
-        server = Server(LEXICONS, validate=False)
+        server = Server(lexicons=LEXICONS, validate=False)
 
         @server.method('io.example.procedure')
         def procedure(input, **params):
@@ -203,4 +203,15 @@ class ServerTest(TestCase):
         server.register('io.example.query', query)
         output = server.call('io.example.query', {}, x='y')
         self.assertEqual({'foo': 'y', 'bar': 5}, output)
+
+    def test_bundled_lexicons(self):
+        server = Server()
+
+        output = {'did': 'did:plc:foo', 'handle': 'bar.com'}
+
+        @server.method('com.atproto.server.getSession')
+        def get_session(input):
+            return output
+
+        self.assertEqual(output, server.call('com.atproto.server.getSession', {}))
 

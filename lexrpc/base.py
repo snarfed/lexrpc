@@ -1,5 +1,7 @@
 """Base code shared by both server and client."""
 import copy
+from importlib.resources import files
+import json
 import logging
 import re
 import urllib.parse
@@ -53,6 +55,15 @@ NSID_RE = re.compile(f'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
 #     ['$defs']['simpleTypes'].append('ref')
 
 
+def load_lexicons(traversable):
+    if traversable.is_file():
+        return [json.loads(traversable.read_text())]
+    elif traversable.is_dir():
+        return sum((load_lexicons(item) for item in traversable.iterdir()), start=[])
+
+_bundled_lexicons = load_lexicons(files('lexrpc').joinpath('lexicons'))
+
+
 def fail(msg, exc=NotImplementedError):
     """Logs an error and raises an exception with the given message."""
     logger.error(msg)
@@ -65,11 +76,12 @@ class Base():
     _defs = None  # dict mapping id to lexicon def
     _validate = True
 
-    def __init__(self, lexicons, validate=True):
+    def __init__(self, lexicons=None, validate=True):
         """Constructor.
 
         Args:
-          lexicons: sequence of dict lexicons
+          lexicons: sequence of dict lexicons, optional. If not provided,
+            defaults to the official `com.atproto` and `app.bsky` lexicons.
           validate: boolean, whether to validate schemas, parameters, and input
             and output bodies
 
@@ -79,6 +91,9 @@ class Base():
         """
         self._validate = validate
         self._defs = {}
+
+        if lexicons is None:
+            lexicons = _bundled_lexicons
 
         for i, lexicon in enumerate(copy.deepcopy(lexicons)):
             nsid = lexicon.get('id')

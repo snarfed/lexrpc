@@ -1,11 +1,18 @@
 # https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
 [build-system]
-requires = ['setuptools>=61.0']
+requires = ['setuptools>=68.0']
 build-backend = 'setuptools.build_meta'
 
-[tool.setuptools]
-packages = ['lexrpc']
+# Getting these next two sections and MANIFEST.in just right so that they
+# include the *.json files in lexrpc/lexicons/ but exclude other directories was
+# a huge amount of pain. setuptools's support for pyproject.toml is confusing
+# and immature. Be careful changing them!
+[tool.setuptools.package-data]
+'*' = ['*.json']
+
+[tool.setuptools.packages.find]
+where = ['.']
 
 [project]
 name = 'lexrpc'
