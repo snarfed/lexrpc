@@ -131,6 +131,11 @@ class Base():
 
                 self._defs[id] = defn
 
+        if not self._defs:
+            logger.error('No lexicons loaded!')
+        else:
+            logger.info(f'{len(self._defs)} lexicons loaded')
+
     def _get_def(self, id):
         """Returns the given lexicon def.
 
