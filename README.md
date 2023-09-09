@@ -222,6 +222,9 @@ Here's how to package, test, and ship a new release.
 ### 0.4 - unreleased
 
 * Bundle [the official `app.bsky` and `com.atproto` lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/), use them by default.
+* `Client`:
+  * Bug fix: handle trailing slash on server address, eg `http://ser.ver/` vs `http://ser.ver`.
+
 
 ### 0.3 - 2023-08-29
 
@@ -231,6 +234,7 @@ Here's how to package, test, and ship a new release.
 * Add `headers` kwarg to `Client` constructor.
 * Add new `Server.register` method for manually registering handlers.
 * Bug fix for server `@method` decorator.
+
 
 ### 0.2 - 2023-03-13
 

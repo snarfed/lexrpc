@@ -72,6 +72,18 @@ class ClientTest(TestCase):
         )
 
     @patch('requests.get')
+    def test_call_address_trailing_slash(self, mock_get):
+        client = Client('http://ser.ver/', lexicons=LEXICONS)
+        mock_get.return_value = response({})
+
+        got = client.call('io.example.query', {})
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query',
+            json=None,
+            headers={'Content-Type': 'application/json'},
+        )
+
+    @patch('requests.get')
     def test_query(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)

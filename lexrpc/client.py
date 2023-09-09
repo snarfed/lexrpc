@@ -6,6 +6,7 @@ TODO:
 from io import BytesIO
 import json
 import logging
+from urllib.parse import urljoin
 
 import dag_cbor
 import requests
@@ -113,7 +114,7 @@ class Client(Base):
         }
 
         # run method
-        url = f'{self._address}/xrpc/{nsid}'
+        url = urljoin(self._address, f'/xrpc/{nsid}')
         if params:
             url += f'?{params}'
 
