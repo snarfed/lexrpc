@@ -14,4 +14,4 @@ python:
         path: .
         extra_requirements:
           - flask
-      - requirements: requirements.txt
+      - requirements: docs/requirements.txt
