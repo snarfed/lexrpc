@@ -45,17 +45,19 @@ class Client(Base):
     """XRPC client.
 
     Attributes:
-      _address: str, server URL
-      _headers: dict, HTTP headers to include in every request
+      address: str, server URL
+      headers: dict, HTTP headers to include in every request
+      access_token: str, optional, sent in the Authorization HTTP header
     """
 
-    def __init__(self, address, headers=None, **kwargs):
+    def __init__(self, address, access_token=None, headers=None, **kwargs):
         """Constructor.
 
         Args:
           address: str, base URL of XRPC server, eg `https://bsky.social/`
-          headers: optional dict of {str: str}, HTTP headers to include in every
-            request.
+          access_token: str, optional, will be sent in `Authorization` header
+          headers: dict of {str: str}, optional, HTTP headers to include in
+            every request
           **kwargs: passed through to :class:`Base`
 
         Raises:
@@ -67,8 +69,9 @@ class Client(Base):
         logger.debug(f'Using server at {address}')
         assert address.startswith('http://') or address.startswith('https://'), \
             f"{address} doesn't start with http:// or https://"
-        self._address = address
-        self._headers = headers or {}
+        self.address = address
+        self.headers = headers or {}
+        self.access_token = access_token
 
     def __getattr__(self, attr):
         if NSID_SEGMENT_RE.match(attr):
@@ -109,12 +112,14 @@ class Client(Base):
             self._maybe_validate(nsid, 'input', input)
 
         headers = {
-            **self._headers,
+            **self.headers,
             'Content-Type': 'application/json',
         }
+        if self.access_token:
+            headers['Authorization'] = f'Bearer {self.access_token}'
 
         # run method
-        url = urljoin(self._address, f'/xrpc/{nsid}')
+        url = urljoin(self.address, f'/xrpc/{nsid}')
         if params:
             url += f'?{params}'
 

@@ -254,6 +254,26 @@ class ClientTest(TestCase):
         )
 
     @patch('requests.get')
+    def test_access_token(self, mock_get):
+        output = {'foo': 'asdf', 'bar': 3}
+        mock_get.return_value = response(output)
+
+        client = Client('http://ser.ver', lexicons=LEXICONS, access_token='towkin',
+                        headers={'Baz': 'biff'})
+        got = client.call('io.example.query', {}, x='y')
+        self.assertEqual(output, got)
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query?x=y',
+            json=None,
+            headers={
+                'Content-Type': 'application/json',
+                'Baz': 'biff',
+                'Authorization': 'Bearer towkin',
+            },
+        )
+
+    @patch('requests.get')
     def test_bundled_lexicons(self, mock_get):
         self.client = Client('http://ser.ver')
 
