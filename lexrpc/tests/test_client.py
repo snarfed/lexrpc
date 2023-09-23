@@ -10,8 +10,12 @@ import requests
 import simple_websocket
 
 from .lexicons import LEXICONS
-from .. import Client
+from .. import client, Client
 
+HEADERS = {
+    **client.DEFAULT_HEADERS,
+    'Content-Type': 'application/json',
+}
 
 def response(body=None, status=200, headers=None):
     resp = requests.Response()
@@ -67,9 +71,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None,
-            headers={'Content-Type': 'application/json'},
-        )
+            json=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_call_address_trailing_slash(self, mock_get):
@@ -79,9 +81,7 @@ class ClientTest(TestCase):
         got = client.call('io.example.query', {})
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            json=None,
-            headers={'Content-Type': 'application/json'},
-        )
+            json=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_query(self, mock_get):
@@ -93,9 +93,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None,
-            headers={'Content-Type': 'application/json'},
-        )
+            json=None, headers=HEADERS)
 
     @patch('requests.post')
     def test_procedure(self, mock_post):
@@ -108,9 +106,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure?x=y',
-            json=input,
-            headers={'Content-Type': 'application/json'},
-        )
+            json=input, headers=HEADERS)
 
     @patch('requests.get')
     def test_boolean_param(self, mock_get):
@@ -122,9 +118,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?z=true',
-            json=None,
-            headers={'Content-Type': 'application/json'},
-        )
+            json=None, headers=HEADERS)
 
     # TODO
     @skip
@@ -137,9 +131,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            json=None,
-            headers={'Content-Type': 'application/json'},
-        )
+            json=None, headers=HEADERS)
 
     @patch('requests.post')
     def test_no_params_input_output(self, mock_post):
@@ -148,9 +140,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.noParamsInputOutput',
-            json=None,
-            headers={'Content-Type': 'application/json'},
-        )
+            json=None, headers=HEADERS)
 
     @patch('requests.post')
     def test_dashed_name(self, mock_post):
@@ -159,9 +149,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.dashed-name',
-            json=None,
-            headers={'Content-Type': 'application/json'},
-        )
+            json=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_defs(self, mock_get):
@@ -171,9 +159,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.defs',
-            json={'in': 'bar'},
-            headers={'Content-Type': 'application/json'},
-        )
+            json={'in': 'bar'}, headers=HEADERS)
 
     # TODO
     @skip
@@ -198,9 +184,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.array?foo=a&foo=b',
-            json=None,
-            headers={'Content-Type': 'application/json'},
-        )
+            json=None, headers=HEADERS)
 
     def test_subscription(self):
         msgs = [
@@ -230,9 +214,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure',
-            json=input,
-            headers={'Content-Type': 'application/json'},
-        )
+            json=input, headers=HEADERS)
 
     @patch('requests.get')
     def test_headers(self, mock_get):
@@ -248,7 +230,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None,
             headers={
-                'Content-Type': 'application/json',
+                **HEADERS,
                 'Baz': 'biff',
             },
         )
@@ -267,7 +249,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None,
             headers={
-                'Content-Type': 'application/json',
+                **HEADERS,
                 'Baz': 'biff',
                 'Authorization': 'Bearer towkin',
             },

@@ -225,6 +225,7 @@ Here's how to package, test, and ship a new release.
 * `Client`:
   * Add minimal auth support with `access_token` constructor kwarg and attribute. To send authenticated requests, call `createSession` or `refreshSession` to get an access token, then set it on a `Client`.
   * Bug fix: handle trailing slash on server address, eg `http://ser.ver/` vs `http://ser.ver`.
+  * Add default `User-Agent: lexrpc (https://lexrpc.readthedocs.io/)` request header.
 
 
 ### 0.3 - 2023-08-29

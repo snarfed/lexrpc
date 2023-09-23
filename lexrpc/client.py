@@ -16,6 +16,10 @@ from .base import Base, NSID_SEGMENT_RE
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_HEADERS = {
+    'User-Agent': 'lexrpc (https://lexrpc.readthedocs.io/)',
+}
+
 
 class _NsidClient():
     """Internal helper class to implement dynamic attribute-based method calls.
@@ -112,6 +116,7 @@ class Client(Base):
             self._maybe_validate(nsid, 'input', input)
 
         headers = {
+            **DEFAULT_HEADERS,
             **self.headers,
             'Content-Type': 'application/json',
         }
