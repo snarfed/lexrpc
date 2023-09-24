@@ -19,7 +19,7 @@ jobs:
       - run:
           name: Python dependencies
           command: |
-            pip install -U pip
+            pip install -U pip flake8
             pip -V
             pip install -U .[flask] 'typing-extensions<4.6.0'
             pip install coverage coveralls
@@ -30,6 +30,11 @@ jobs:
             python -m coverage run --source=. --omit=lexrpc/tests/\* -m unittest discover -v
             python -m coverage html -d /tmp/coverage_html
             if [ "$COVERALLS_REPO_TOKEN" != "" ]; then python -m coveralls || true; fi
+
+            # check for unintentionally overridden test methods
+            # https://flake8.pycqa.org/en/latest/user/error-codes.html#error-codes
+            # https://flake8.pycqa.org/en/latest/user/options.html#cmdoption-flake8-select
+            flake8 --select=F811 lexrpc/tests/test_*.py
 
       - save_cache:
           key: venv-2-{{ .Branch }}
