@@ -1,6 +1,7 @@
 """XRPC client implementation.
 
 TODO:
+
 * asyncio support for subscription websockets
 """
 from io import BytesIO
@@ -24,7 +25,7 @@ DEFAULT_HEADERS = {
 class _NsidClient():
     """Internal helper class to implement dynamic attribute-based method calls.
 
-    eg client.com.example.my_method(...)
+    eg ``client.com.example.my_method(...)``
     """
     client = None
     nsid = None
@@ -49,24 +50,22 @@ class Client(Base):
     """XRPC client.
 
     Attributes:
-      address: str, server URL
-      headers: dict, HTTP headers to include in every request
-      access_token: str, optional, sent in the Authorization HTTP header
+      address (str): server URL
+      headers (dict): HTTP headers to include in every request
+      access_token (str): optional, sent in the ``Authorization`` HTTP header
     """
 
     def __init__(self, address, access_token=None, headers=None, **kwargs):
         """Constructor.
 
         Args:
-          address: str, base URL of XRPC server, eg `https://bsky.social/`
-          access_token: str, optional, will be sent in `Authorization` header
-          headers: dict of {str: str}, optional, HTTP headers to include in
-            every request
-          **kwargs: passed through to :class:`Base`
+          address (str): base URL of XRPC server, eg `https://bsky.social/`
+          access_token (str): optional, will be sent in `Authorization` header
+          headers (dict): optional, HTTP headers to include in every request
+          kwargs: passed through to :class:`Base`
 
         Raises:
-          :class:`jsonschema.SchemaError`
-            if any schema is invalid
+          jsonschema.SchemaError: if any schema is invalid
         """
         super().__init__(**kwargs)
 
@@ -87,23 +86,20 @@ class Client(Base):
         """Makes a remote XRPC method call.
 
         Args:
-          nsid: str, method NSID
-          input: dict, input body, optional for subscriptions
+          nsid (str): method NSID
+          input (dict): input body, optional for subscriptions
           params: optional method parameters
 
         Returns:
-          For queries and procedures: decoded JSON object, or None if the method
-            has no output
-          For subscriptions: generator iterator of messages from server
+          dict or generator iterator: for queries and procedures, decoded JSON object, or None if the method has no output. For subscriptions, generator of messages from server.
 
         Raises:
-          NotImplementedError
-            if the given NSID is not found in any of the loaded lexicons
-          :class:`jsonschema.ValidationError`
-            if the parameters, input, or returned output don't validate against
-            the method's schemas
-          :class:`requests.RequestException`
-            if the connection or HTTP request to the remote server failed
+          NotImplementedError: if the given NSID is not found in any of the
+            loaded lexicons
+          jsonschema.ValidationError: if the parameters, input, or returned
+            output don't validate against the method's schemas
+          requests.RequestException: if the connection or HTTP request to the
+            remote server failed
         """
         logger.debug(f'{nsid}: {params} {input}')
 

@@ -79,7 +79,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'lexrpc'
-copyright = '2022-2022, Ryan Barrett'
+copyright = '2022-2023, Ryan Barrett'
 author = 'Ryan Barrett'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -334,8 +334,11 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'jsonschema': ('https://python-jsonschema.readthedocs.io/en/latest', None),
+    'flask': ('https://flask.palletsprojects.com/en/latest', None),
+    'jsonschema': ('https://python-jsonschema.readthedocs.io/en/stable', None),
     'python': ('https://docs.python.org/3/', None),
     'requests': ('https://docs.python-requests.org/en/stable/', None),
-    'urllib3': ('https://urllib3.readthedocs.io/en/latest', None),
+    'simple_websocket': ('https://simple-websocket.readthedocs.io/en/stable', None),
+    'urllib3': ('https://urllib3.readthedocs.io/en/stable', None),
+    'websockets': ('https://websockets.readthedocs.io/en/stable', None),
 }

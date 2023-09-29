@@ -1,4 +1,4 @@
-"""Flask handler for /xrpc/... endpoint."""
+"""Flask handler for ``/xrpc/...`` endpoints."""
 import logging
 
 import dag_cbor
@@ -22,11 +22,11 @@ RESPONSE_HEADERS = {
 
 
 def init_flask(xrpc_server, app):
-    """Connects a :class:`lexrpc.Server` to serve on /xrpc/... on a Flask app.
+    """Connects a :class:`lexrpc.Server` to serve ``/xrpc/...`` on a Flask app.
 
     Args:
-      xrpc_server: :class:`lexrpc.Server`
-      app: :class:`flask.Flask`
+      xrpc_server (lexrpc.Server)
+      app (flask.Flask)
     """
     logger.info(f'Registering {xrpc_server} with {app}')
 
@@ -44,7 +44,7 @@ class XrpcEndpoint(View):
     """Handles inbound XRPC query and procedure (but not subscription) methods.
 
     Attributes:
-      server: :class:`lexrpc.Server`
+      server (lexrpc.Server)
     """
     server = None
 
@@ -104,13 +104,13 @@ def subscription(xrpc_server, nsid):
     """Generates websocket handlers for inbound XRPC subscription methods.
 
     Args:
-      xrpc_server: :class:`lexrpc.Server`
-      nsid: str, XRPC method NSID
+      xrpc_server (lexrpc.Server)
+      nsid (str): XRPC method NSID
     """
     def handler(ws):
         """
         Args:
-          ws: :class:`simple_websocket.ws.WSConnection`
+          ws (simple_websocket.ws.WSConnection)
         """
         logger.debug(f'New websocket client for {nsid}')
         params = xrpc_server.decode_params(nsid, request.args.items(multi=True))

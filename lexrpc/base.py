@@ -80,14 +80,14 @@ class Base():
         """Constructor.
 
         Args:
-          lexicons: sequence of dict lexicons, optional. If not provided,
-            defaults to the official `com.atproto` and `app.bsky` lexicons.
-          validate: boolean, whether to validate schemas, parameters, and input
+          lexicons (sequence of dict): lexicons, optional. If not provided,
+            defaults to the official, built in ``com.atproto`` and ``app.bsky``
+            lexicons.
+          validate (bool): whether to validate schemas, parameters, and input
             and output bodies
 
         Raises:
-          :class:`jsonschema.SchemaError`
-            if any schema is invalid
+          jsonschema.SchemaError: if any schema is invalid
         """
         self._validate = validate
         self._defs = {}
@@ -140,8 +140,7 @@ class Base():
         """Returns the given lexicon def.
 
         Raises:
-          NotImplementedError
-            if no def exists for the given id
+          NotImplementedError: if no def exists for the given id
         """
         lexicon = self._defs.get(id)
         if not lexicon:
@@ -155,18 +154,17 @@ class Base():
         Does nothing if this object was initialized with validate=False.
 
         Args:
-          nsid: str, method NSID
-          type: either 'input' or 'output'
-          obj: decoded JSON object
+          nsid (str): method NSID
+          type (str): either ``input`` or ``output``
+          obj (decoded): JSON object
 
-        Returns: None
+        Returns:
+          None
 
         Raises:
-          NotImplementedError
-            if no lexicon exists for the given NSID, or the lexicon does not
-            define a schema for the given type
-          :class:`jsonschema.ValidationError`
-            if the object is invalid
+          NotImplementedError: if no lexicon exists for the given NSID, or the
+            lexicon does not define a schema for the given type
+          jsonschema.ValidationError: if the object is invalid
         """
         if not self._validate:
             return
@@ -197,12 +195,13 @@ class Base():
     def encode_params(self, params):
         """Encodes decoded parameter values.
 
-        Based on https://atproto.com/specs/xrpc#path
+        Based on https://atproto.com/specs/xrpc#lexicon-http-endpoints
 
         Args:
-          params: dict mapping str names to boolean, number, str, or list values
+          params (dict): maps str names to boolean, number, str, or list values
 
-        Returns: bytes, URL-encoded query parameter string
+        Returns:
+          bytes: URL-encoded query parameter string
         """
         return urllib.parse.urlencode({
             name: ('true' if val is True
@@ -214,20 +213,18 @@ class Base():
     def decode_params(self, method_nsid, params):
         """Decodes encoded parameter values.
 
-        Based on https://atproto.com/specs/xrpc#path
+        Based on https://atproto.com/specs/xrpc#lexicon-http-endpoints
 
         Args:
-          method_nsid: str
-          params: sequence of (str name, str encoded value) tuples
+          method_nsid (str):
+          params (sequence of (str, str) tuple): name/value mappings
 
         Returns:
-          dict mapping str names to decoded boolean, number, str, and array values
+          dict: maps str names to decoded boolean, number, str, and array values
 
         Raises:
-          ValueError
-            if a parameter value can't be decoded
-          NotImplementedError
-            if no method lexicon is registered for the given NSID
+          ValueError: if a parameter value can't be decoded
+          NotImplementedError: if no method lexicon is registered for the given NSID
         """
         lexicon = self._get_def(method_nsid)
         params_schema = lexicon.get('parameters', {})\

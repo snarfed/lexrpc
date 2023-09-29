@@ -15,11 +15,10 @@ class Server(Base):
         """Constructor.
 
         Args:
-          passed through to :class:`Base`
+          kwargs: passed through to :class:`Base`
 
         Raises:
-          :class:`jsonschema.SchemaError`
-            if any schema is invalid
+          jsonschema.SchemaError: if any schema is invalid
         """
         super().__init__(**kwargs)
         self._methods = {}
@@ -28,7 +27,7 @@ class Server(Base):
         """XRPC method decorator. Use on each function that implements a method.
 
         Args:
-          nsid: str
+          nsid (str)
         """
         def decorated(fn):
             self.register(nsid, fn)
@@ -44,8 +43,8 @@ class Server(Base):
         """Registers an XRPC method decorator. Alternative to :meth:`method`.
 
         Args:
-          nsid: str
-          fn: callable
+          nsid (str)
+          fn (callable)
         """
         assert NSID_RE.match(nsid)
 
@@ -54,25 +53,25 @@ class Server(Base):
             fail(f'{nsid} already registered with {existing}',  AssertionError)
         self._methods[nsid] = fn
 
-
     def call(self, nsid, input=None, **params):
         """Calls an XRPC query or procedure method.
 
-        For subscriptions, returns a generator that yields (header dict, payload
-        dict) tuples to be DAG-CBOR encoded and sent to the websocket client.
+        For subscriptions, returns a generator that yields ``(header dict, payload
+        dict)`` tuples to be DAG-CBOR encoded and sent to the websocket client.
 
         Args:
-          nsid: str, method NSID
-          input: dict or bytes, input body, optional for subscriptions
+          nsid (str): method NSID
+          input (dict or bytes): input body, optional for subscriptions
           params: optional parameters
 
+        Returns:
+          dict: output
+
         Raises:
-          NotImplementedError
-            if the given NSID is not implemented or found in any of the loaded
-            lexicons
-          :class:`jsonschema.ValidationError`
-            if the parameters, input, or returned output don't validate against
-            the method's schemas
+          NotImplementedError: if the given NSID is not implemented or found in
+            any of the loaded lexicons
+          jsonschema.ValidationError: if the parameters, input, or returned
+            output don't validate against the method's schemas
         """
         def loggable(val):
             return f'{len(val)} bytes' if isinstance(val, bytes) else val
