@@ -135,7 +135,8 @@ class Client(Base):
             fn = requests.get if type == 'query' else requests.post
             logger.debug(f'Running {fn} {url} {input} {params} {headers}')
             resp = fn(url, json=input if input else None, headers=headers)
-            logger.debug(f'Got: {resp}')
+            if not resp.ok:
+                logger.debug(f'Got: {resp.text}')
             resp.raise_for_status()
 
             output = None
