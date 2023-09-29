@@ -29,7 +29,7 @@ output = client.com.example.my_query({'foo': 'bar'}, param_a=5)
 
 Note that `-` characters in method NSIDs are converted to `_`s, eg the call above is for the method `com.example.my-query`.
 
-By default, `Client` uses the [official `app.bsky` and `com.atproto` lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/). You can substitute your own custom lexicons by passing them to the `Client` constructor:
+By default, `Client` uses the [official lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/) for `app.bsky` and `com.atproto`. You can substitute your own custom lexicons by passing them to the `Client` constructor:
 
 ```
 lexicons = [
@@ -43,7 +43,7 @@ lexicons = [
 client = Client(lexicons=lexicons)
 ```
 
-[Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) are generators that `yield` (header, payload) tuples sent by the server. They take parameters as kwargs, but no positional `input`.
+[Event stream methods](https://atproto.com/specs/event-stream) with type `subscription` are generators that `yield` (header, payload) tuples sent by the server. They take parameters as kwargs, but no positional `input`.
 
 ```
 for header, msg in client.com.example.count(start=1, end=10):
@@ -95,7 +95,7 @@ lexicons = [
 server = Server(lexicons=lexicons)
 ```
 
-[Event stream methods with type `subscription`](https://atproto.com/specs/event-stream) should be generators that `yield` frames to send to the client. [Each frame is a `(header dict, payload dict)` tuple](https://atproto.com/specs/event-stream#framing) that will be DAG-CBOR encoded and sent to the websocket client. Subscription methods take parameters as kwargs, but no positional `input`.
+[Event stream methods](https://atproto.com/specs/event-stream) with type `subscription` should be generators that `yield` frames to send to the client. [Each frame](https://atproto.com/specs/event-stream#framing) is a `(header dict, payload dict)` tuple that will be DAG-CBOR encoded and sent to the websocket client. Subscription methods take parameters as kwargs, but no positional `input`.
 
 ```
 @server.method('com.example.count')
@@ -125,10 +125,10 @@ This configures the Flask app to serve the methods registered with the lexrpc se
 
 ## TODO
 
-* support record types, eg via type "ref" and ref field pointing to the nsid [example here](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13), ref points to [`app.bsky.actor.ref`](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/actor/ref.json). ref isn't documented yet though, and these lexicons also use a `defs` field, which isn't really documented either. [they plan to update the docs and specs soon.](https://github.com/bluesky-social/atproto/pull/409#issuecomment-1348766856)
+* support record types, eg via type `ref` and `ref` field pointing to the nsid. [example here](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13).
   * check out [atproto@63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab](https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab)!
 * [extensions](https://atproto.com/guides/lexicon#extensibility). is there anything to do? ah, [they're currently TODO in the spec](https://atproto.com/specs/xrpc#todos).
-* [authentication, currently TODO in the spec](https://atproto.com/specs/xrpc#todos)
+* [authentication](https://atproto.com/specs/xrpc#authentication)
 
 
 Release instructions

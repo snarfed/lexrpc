@@ -44,11 +44,10 @@ passing input as a dict and parameters as kwargs:
 Note that ``-`` characters in method NSIDs are converted to ``_``\ s, eg
 the call above is for the method ``com.example.my-query``.
 
-By default, ``Client`` uses the `official ``app.bsky`` and
-``com.atproto``
-lexicons <https://github.com/bluesky-social/atproto/tree/main/lexicons/>`__.
-You can substitute your own custom lexicons by passing them to the
-``Client`` constructor:
+By default, ``Client`` uses the `official
+lexicons <https://github.com/bluesky-social/atproto/tree/main/lexicons/>`__
+for ``app.bsky`` and ``com.atproto``. You can substitute your own custom
+lexicons by passing them to the ``Client`` constructor:
 
 ::
 
@@ -62,10 +61,10 @@ You can substitute your own custom lexicons by passing them to the
    ]
    client = Client(lexicons=lexicons)
 
-`Event stream methods with type
-``subscription <https://atproto.com/specs/event-stream>`__ are
-generators that ``yield`` (header, payload) tuples sent by the server.
-They take parameters as kwargs, but no positional ``input``.
+`Event stream methods <https://atproto.com/specs/event-stream>`__ with
+type ``subscription`` are generators that ``yield`` (header, payload)
+tuples sent by the server. They take parameters as kwargs, but no
+positional ``input``.
 
 ::
 
@@ -125,13 +124,13 @@ As with ``Client``, you can use custom lexicons by passing them to the
    ]
    server = Server(lexicons=lexicons)
 
-`Event stream methods with type
-``subscription <https://atproto.com/specs/event-stream>`__ should be
-generators that ``yield`` frames to send to the client. `Each frame is a
-``(header dict, payload dict)``
-tuple <https://atproto.com/specs/event-stream#framing>`__ that will be
-DAG-CBOR encoded and sent to the websocket client. Subscription methods
-take parameters as kwargs, but no positional ``input``.
+`Event stream methods <https://atproto.com/specs/event-stream>`__ with
+type ``subscription`` should be generators that ``yield`` frames to send
+to the client. `Each
+frame <https://atproto.com/specs/event-stream#framing>`__ is a
+``(header dict, payload dict)`` tuple that will be DAG-CBOR encoded and
+sent to the websocket client. Subscription methods take parameters as
+kwargs, but no positional ``input``.
 
 ::
 
@@ -174,15 +173,9 @@ set to ``application/json``.
 TODO
 ----
 
--  support record types, eg via type “ref” and ref field pointing to the
-   nsid `example
-   here <https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13>`__,
-   ref points to
-   `app.bsky.actor.ref <https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/actor/ref.json>`__.
-   ref isn’t documented yet though, and these lexicons also use a
-   ``defs`` field, which isn’t really documented either. `they plan to
-   update the docs and specs
-   soon. <https://github.com/bluesky-social/atproto/pull/409#issuecomment-1348766856>`__
+-  support record types, eg via type ``ref`` and ``ref`` field pointing
+   to the nsid. `example
+   here <https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13>`__.
 
    -  check out
       `atproto@63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__!
@@ -190,8 +183,7 @@ TODO
 -  `extensions <https://atproto.com/guides/lexicon#extensibility>`__. is
    there anything to do? ah, `they’re currently TODO in the
    spec <https://atproto.com/specs/xrpc#todos>`__.
--  `authentication, currently TODO in the
-   spec <https://atproto.com/specs/xrpc#todos>`__
+-  `authentication <https://atproto.com/specs/xrpc#authentication>`__
 
 Release instructions
 --------------------
