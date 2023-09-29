@@ -112,6 +112,11 @@ class XrpcEndpointTest(TestCase):
         subscriber.join()
         self.assertEqual([], FakeConnection.sent)
 
+    def test_subscription_http_not_websocket_405s(self):
+        resp = self.client.post('/xrpc/io.example.subscribe')
+        self.assertEqual(405, resp.status_code)
+        self.assertIn('Use websocket', resp.json['message'])
+
     # TODO
     @skip
     def test_procedure_missing_input(self):

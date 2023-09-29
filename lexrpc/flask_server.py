@@ -59,6 +59,9 @@ class XrpcEndpoint(View):
         except NotImplementedError as e:
             return {'message': str(e)}, 501, RESPONSE_HEADERS
 
+        if lexicon['type'] == 'subscription':
+            return {'message': f'Use websocket for {nsid}, not HTTP'}, 405
+
         if request.method == 'OPTIONS':
             return '', 200, RESPONSE_HEADERS
 
