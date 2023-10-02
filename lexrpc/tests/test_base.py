@@ -64,4 +64,4 @@ class BaseTest(TestCase):
                     'bar': { 'type': 'number' },
                 },
             },
-        }, self.base._defs['io.example.params']['parameters'])
+        }, self.base.defs['io.example.params']['parameters'])

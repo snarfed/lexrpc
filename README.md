@@ -222,6 +222,8 @@ Here's how to package, test, and ship a new release.
 ### 0.4 - unreleased
 
 * Bundle [the official `app.bsky` and `com.atproto` lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/), use them by default.
+* `Base`:
+  * Expose lexicons in `defs` attribute.
 * `Client`:
   * Add minimal auth support with `access_token` constructor kwarg and attribute. To send authenticated requests, call `createSession` or `refreshSession` to get an access token, then set it on a `Client`.
   * Bug fix: handle trailing slash on server address, eg `http://ser.ver/` vs `http://ser.ver`.

@@ -32,7 +32,7 @@ def init_flask(xrpc_server, app):
 
     sock = Sock(app)
     for nsid, _ in xrpc_server._methods.items():
-        if xrpc_server._defs[nsid]['type'] == 'subscription':
+        if xrpc_server.defs[nsid]['type'] == 'subscription':
             sock.route(f'/xrpc/{nsid}')(subscription(xrpc_server, nsid))
 
     app.add_url_rule('/xrpc/<nsid>',

@@ -71,9 +71,14 @@ def fail(msg, exc=NotImplementedError):
 
 
 class Base():
-    """Base class for both XRPC client and server."""
+    """Base class for both XRPC client and server.
 
-    _defs = None  # dict mapping id to lexicon def
+    Attributes:
+    * defs (dict): lexicons. Key is str NSID with optional fragment, value is
+      dict lexicon preprocessed to be JSON Schema compatible.
+    """
+
+    defs = None  # dict mapping id to lexicon def
     _validate = True
 
     def __init__(self, lexicons=None, validate=True):
@@ -90,7 +95,7 @@ class Base():
           jsonschema.SchemaError: if any schema is invalid
         """
         self._validate = validate
-        self._defs = {}
+        self.defs = {}
 
         if lexicons is None:
             lexicons = _bundled_lexicons
@@ -102,7 +107,7 @@ class Base():
 
             for name, defn in lexicon.get('defs', {}).items():
                 id = nsid if name == 'main' else f'{nsid}#{name}'
-                self._defs[id] = defn
+                self.defs[id] = defn
 
                 type = defn['type']
                 assert type in LEXICON_TYPES | PARAMETER_TYPES, \
@@ -129,12 +134,12 @@ class Base():
                                 # TODO: adapt jsonschema to support Lexicon, or drop
                                 # validators.validator_for(schema).check_schema(schema)
 
-                self._defs[id] = defn
+                self.defs[id] = defn
 
-        if not self._defs:
+        if not self.defs:
             logger.error('No lexicons loaded!')
         else:
-            logger.info(f'{len(self._defs)} lexicons loaded')
+            logger.info(f'{len(self.defs)} lexicons loaded')
 
     def _get_def(self, id):
         """Returns the given lexicon def.
@@ -142,7 +147,7 @@ class Base():
         Raises:
           NotImplementedError: if no def exists for the given id
         """
-        lexicon = self._defs.get(id)
+        lexicon = self.defs.get(id)
         if not lexicon:
             fail(f'{id} not found')
 

@@ -82,7 +82,7 @@ class Server(Base):
         if not fn:
             fail(f'{nsid} not implemented', NotImplementedError)
 
-        subscription = self._defs[nsid]['type'] == 'subscription'
+        subscription = self.defs[nsid]['type'] == 'subscription'
 
         # validate params and input, then encode params
         self._maybe_validate(nsid, 'parameters', params)
