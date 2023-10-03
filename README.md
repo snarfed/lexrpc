@@ -18,30 +18,40 @@ License: This project is placed in the public domain.
 
 ## Client
 
-The lexrpc client let you [call methods dynamically by their NSIDs](https://atproto.com/guides/lexicon#rpc-methods). To make a call, first instantiate a [`Client`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.client.Client) object with the server address, then use method NSIDs to make calls, passing input as a dict and parameters as kwargs:
+The lexrpc client let you [call methods dynamically by their NSIDs](https://atproto.com/guides/lexicon#rpc-methods). To make a call, first instantiate a [`Client`](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html#lexrpc.client.Client), then use NSIDs to make calls, passing input as a dict and parameters as kwargs. Here's an example of logging into the [official Bluesky PDS](https://bsky.app/) and fetching the user's timeline:
 
 ```py
 from lexrpc import Client
 
-client = Client('https://xrpc.example.com')
-output = client.com.example.my_query({'foo': 'bar'}, param_a=5)
+client = Client()
+session = client.com.atproto.server.createSession({
+    'identifier': 'snarfed.bsky.social',
+    'password': 'hunter2',
+})
+print('Logged in as', session['did'])
+
+client.access_token = session['accessJwt']
+timeline = client.app.bsky.feed.getTimeline(limit=10)
+print('First 10 posts:', json.dumps(timeline, indent=2))
 ```
 
-Note that `-` characters in method NSIDs are converted to `_`s, eg the call above is for the method `com.example.my-query`.
 
-By default, `Client` uses the [official lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/) for `app.bsky` and `com.atproto`. You can substitute your own custom lexicons by passing them to the `Client` constructor:
+By default, `Client` connects to the official `bsky.social` PDS and uses the [official `app.bsky` and `com.atproto` lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/). You can connect to a different PDS or use custom lexicons by passing them to the `Client` constructor:
 
-```
+```py
 lexicons = [
   {
     "lexicon": 1,
-    "id": "com.example.myQuery",
+    "id": "com.example.my-procedure",
     "defs": ...
   },
   ...
 ]
-client = Client(lexicons=lexicons)
+client = Client('my.server.com', lexicons=lexicons)
+output = client.com.example.my_procedure({'foo': 'bar'}, baz=5)
 ```
+
+Note that `-` characters in method NSIDs are converted to `_`s, eg the call above is for the method `com.example.my-procedure`.
 
 [Event stream methods](https://atproto.com/specs/event-stream) with type `subscription` are generators that `yield` (header, payload) tuples sent by the server. They take parameters as kwargs, but no positional `input`.
 
