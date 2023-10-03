@@ -255,12 +255,29 @@ class ClientTest(TestCase):
             },
         )
 
+    @patch('requests.post')
+    def test_createSession_sets_access_token(self, mock_post):
+        mock_post.return_value = response({'accessJwt': 'towkin'})
+
+        input = {
+            'identifier': 'snarfed.bsky.social',
+            'password': 'hunter2',
+        }
+
+        client = Client()
+        client.com.atproto.server.createSession(input)
+        self.assertEqual('towkin', client.access_token)
+
+        mock_post.assert_called_once_with(
+            'https://bsky.social/xrpc/com.atproto.server.createSession',
+            json=input, headers=HEADERS)
+
     @patch('requests.get')
     def test_bundled_lexicons(self, mock_get):
-        self.client = Client('http://ser.ver')
+        client = Client('http://ser.ver')
 
         output = {'did': 'did:plc:foo', 'handle': 'bar.com'}
         mock_get.return_value = response(output)
 
-        got = self.client.call('com.atproto.server.getSession', {})
+        got = client.call('com.atproto.server.getSession', {})
         self.assertEqual(output, got)

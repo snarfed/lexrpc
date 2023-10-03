@@ -55,7 +55,7 @@ Note that `-` characters in method NSIDs are converted to `_`s, eg the call abov
 
 [Event stream methods](https://atproto.com/specs/event-stream) with type `subscription` are generators that `yield` (header, payload) tuples sent by the server. They take parameters as kwargs, but no positional `input`.
 
-```
+```py
 for header, msg in client.com.example.count(start=1, end=10):
     print(header['t'])
     print(msg['num'])
@@ -231,12 +231,13 @@ Here's how to package, test, and ship a new release.
 
 ### 0.4 - unreleased
 
-* Bundle [the official `app.bsky` and `com.atproto` lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/), use them by default.
+* Bundle [the official lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/) for `app.bsky` and `com.atproto`, use them by default.
 * `Base`:
   * Expose lexicons in `defs` attribute.
 * `Client`:
   * Add minimal auth support with `access_token` constructor kwarg and attribute. To send authenticated requests, call `createSession` or `refreshSession` to get an access token, then set it on a `Client`.
   * Bug fix: handle trailing slash on server address, eg `http://ser.ver/` vs `http://ser.ver`.
+  * Default server address to official `https://bsky.social` PDS.
   * Add default `User-Agent: lexrpc (https://lexrpc.readthedocs.io/)` request header.
 * `flask_server`:
   * Return HTTP 405 error on HTTP requests to subscription (websocket) XRPCs.

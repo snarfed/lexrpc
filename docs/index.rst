@@ -319,9 +319,9 @@ Changelog
 0.4 - unreleased
 ~~~~~~~~~~~~~~~~
 
--  Bundle `the official ``app.bsky`` and ``com.atproto``
-   lexicons <https://github.com/bluesky-social/atproto/tree/main/lexicons/>`__,
-   use them by default.
+-  Bundle `the official
+   lexicons <https://github.com/bluesky-social/atproto/tree/main/lexicons/>`__
+   for ``app.bsky`` and ``com.atproto``, use them by default.
 -  ``Base``:
 
    -  Expose lexicons in ``defs`` attribute.

@@ -21,6 +21,7 @@ DEFAULT_PDS = 'https://bsky.social/'
 DEFAULT_HEADERS = {
     'User-Agent': 'lexrpc (https://lexrpc.readthedocs.io/)',
 }
+LOGIN_NSID = 'com.atproto.server.createSession'
 
 
 class _NsidClient():
@@ -141,6 +142,10 @@ class Client(Base):
             content_type = resp.headers.get('Content-Type', '').split(';')[0]
             if content_type == 'application/json' and resp.content:
                 output = resp.json()
+                if nsid == LOGIN_NSID:
+                    if token := output.get('accessJwt'):
+                        logger.info(f'Logged into {self.address} as {output.get("did")}, setting access_token')
+                        self.access_token = token
 
             self._maybe_validate(nsid, 'output', output)
             return output
