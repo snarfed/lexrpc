@@ -17,6 +17,7 @@ from .base import Base, NSID_SEGMENT_RE
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_PDS = 'https://bsky.social/'
 DEFAULT_HEADERS = {
     'User-Agent': 'lexrpc (https://lexrpc.readthedocs.io/)',
 }
@@ -50,17 +51,18 @@ class Client(Base):
     """XRPC client.
 
     Attributes:
-      address (str): server URL
+      address (str): base URL of XRPC server, eg ``https://bsky.social/``
+      access_token (str): sent in ``Authorization`` header
       headers (dict): HTTP headers to include in every request
-      access_token (str): optional, sent in the ``Authorization`` HTTP header
     """
 
-    def __init__(self, address, access_token=None, headers=None, **kwargs):
+    def __init__(self, address=DEFAULT_PDS, access_token=None, headers=None,
+                 **kwargs):
         """Constructor.
 
         Args:
-          address (str): base URL of XRPC server, eg `https://bsky.social/`
-          access_token (str): optional, will be sent in `Authorization` header
+          address (str): base URL of XRPC server, eg ``https://bsky.social/``
+          access_token (str): optional, will be sent in ``Authorization`` header
           headers (dict): optional, HTTP headers to include in every request
           kwargs: passed through to :class:`Base`
 
