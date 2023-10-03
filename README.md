@@ -36,7 +36,7 @@ print('First 10 posts:', json.dumps(timeline, indent=2))
 ```
 
 
-By default, `Client` connects to the official `bsky.social` PDS and uses the [official `app.bsky` and `com.atproto` lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/). You can connect to a different PDS or use custom lexicons by passing them to the `Client` constructor:
+By default, `Client` connects to the official `bsky.social` PDS and uses the [official lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/) for `app.bsky` and `com.atproto`. You can connect to a different PDS or use custom lexicons by passing them to the `Client` constructor:
 
 ```py
 lexicons = [
