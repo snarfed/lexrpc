@@ -30,7 +30,6 @@ session = client.com.atproto.server.createSession({
 })
 print('Logged in as', session['did'])
 
-client.access_token = session['accessJwt']
 timeline = client.app.bsky.feed.getTimeline(limit=10)
 print('First 10 posts:', json.dumps(timeline, indent=2))
 ```

@@ -46,7 +46,6 @@ PDS <https://bsky.app/>`__ and fetching the user’s timeline:
    })
    print('Logged in as', session['did'])
 
-   client.access_token = session['accessJwt']
    timeline = client.app.bsky.feed.getTimeline(limit=10)
    print('First 10 posts:', json.dumps(timeline, indent=2))
 
@@ -77,7 +76,7 @@ type ``subscription`` are generators that ``yield`` (header, payload)
 tuples sent by the server. They take parameters as kwargs, but no
 positional ``input``.
 
-::
+.. code:: py
 
    for header, msg in client.com.example.count(start=1, end=10):
        print(header['t'])
@@ -334,6 +333,7 @@ Changelog
       then set it on a ``Client``.
    -  Bug fix: handle trailing slash on server address, eg
       ``http://ser.ver/`` vs ``http://ser.ver``.
+   -  Default server address to official ``https://bsky.social`` PDS.
    -  Add default
       ``User-Agent: lexrpc (https://lexrpc.readthedocs.io/)`` request
       header.
