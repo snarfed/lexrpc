@@ -7,6 +7,22 @@ from .base import fail, METHOD_TYPES, NSID_RE, Base
 logger = logging.getLogger(__name__)
 
 
+class Redirect(Exception):
+    """Raised by XRPC handlers to direct the server to serve an HTTP redirect.
+
+    Uses the HTTP 302 status code.
+
+    Whether this is official supported by the XRPC spec is still TBD:
+    https://github.com/bluesky-social/atproto/discussions/1228
+
+    Attributes:
+      to (str): URL to redirect to
+    """
+    def __init__(self, to):
+        assert to
+        self.to = to
+
+
 class Server(Base):
     """XRPC server base class. Subclass to implement specific methods."""
     _methods = None  # dict, maps string NSID to Python callable

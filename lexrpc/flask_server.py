@@ -2,7 +2,7 @@
 import logging
 
 import dag_cbor
-from flask import request
+from flask import redirect, request
 from flask.json import jsonify
 from flask.views import View
 from flask_sock import Sock
@@ -10,6 +10,7 @@ from jsonschema import ValidationError
 from simple_websocket import ConnectionClosed
 
 from .base import NSID_RE
+from .server import Redirect
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +82,8 @@ class XrpcEndpoint(View):
             # TODO: for binary input/output, support streaming with eg
             # io.BufferedReader/Writer?
             output = self.server.call(nsid, input=input, **params)
+        except Redirect as r:
+            return redirect(r.to)
         except NotImplementedError as e:
             return {'message': str(e)}, 501, RESPONSE_HEADERS
         except ValidationError as e:

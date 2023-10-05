@@ -7,6 +7,7 @@ from flask import Flask
 from simple_websocket import ConnectionClosed
 
 from ..flask_server import init_flask, subscription
+from ..server import Redirect
 from .lexicons import LEXICONS
 from .test_server import server
 
@@ -186,3 +187,12 @@ class XrpcEndpointTest(TestCase):
         resp = self.client.post('/xrpc/io.example.encodings', data=val_bytes)
         self.assertEqual(200, resp.status_code)
         self.assertEqual(val + 1, int.from_bytes(resp.get_data(), 'big'))
+
+    def test_redirect(self):
+        @server.method('io.example.redirect')
+        def redirect(input):
+            raise Redirect('http://to/here')
+
+        resp = self.client.post('/xrpc/io.example.redirect')
+        self.assertEqual(302, resp.status_code)
+        self.assertEqual('http://to/here', resp.headers['Location'])
