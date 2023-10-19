@@ -4,6 +4,7 @@ TODO:
 
 * asyncio support for subscription websockets
 """
+import copy
 from io import BytesIO
 import json
 import logging
@@ -119,8 +120,10 @@ class Client(Base):
             **self.headers,
             'Content-Type': 'application/json',
         }
+        log_headers = copy.copy(headers)
         if self.access_token:
             headers['Authorization'] = f'Bearer {self.access_token}'
+            log_headers['Authorization'] = '...'
 
         # run method
         url = urljoin(self.address, f'/xrpc/{nsid}')
@@ -132,7 +135,7 @@ class Client(Base):
         else:
             # query or procedure
             fn = requests.get if type == 'query' else requests.post
-            logger.debug(f'Running {fn} {url} {input} {params} {headers}')
+            logger.debug(f'Running {fn} {url} {input} {params} {log_headers}')
             resp = fn(url, json=input if input else None, headers=headers)
             if not resp.ok:
                 logger.debug(f'Got: {resp.text}')
