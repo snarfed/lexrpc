@@ -262,6 +262,16 @@ LEXICONS = [
         },
     },
 
+    {
+        'lexicon': 1,
+        'id': 'io.example.valueError',
+        'defs': {
+            'main': {
+                'type': 'query',
+            },
+        },
+    },
+
     # TODO
 
     # {

@@ -243,6 +243,7 @@ Here's how to package, test, and ship a new release.
 * `flask_server`:
   * Return HTTP 405 error on HTTP requests to subscription (websocket) XRPCs.
   * Support the new `Redirect` exception.
+  * Add the `error` field to the JSON response bodies for most error responses.
 
 
 ### 0.3 - 2023-08-29

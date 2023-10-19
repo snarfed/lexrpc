@@ -54,11 +54,17 @@ class XrpcEndpoint(View):
 
     def dispatch_request(self, nsid):
         if not NSID_RE.match(nsid):
-            return {'message': f'{nsid} is not a valid NSID'}, 400, RESPONSE_HEADERS
+            return {
+                'error': 'InvalidRequest',
+                'message': f'{nsid} is not a valid NSID',
+            }, 400, RESPONSE_HEADERS
         try:
             lexicon = self.server._get_def(nsid)
         except NotImplementedError as e:
-            return {'message': str(e)}, 501, RESPONSE_HEADERS
+            return {
+                'error': 'MethodNotImplemented',
+                'message': str(e),
+            }, 501, RESPONSE_HEADERS
 
         if lexicon['type'] == 'subscription':
             return {'message': f'Use websocket for {nsid}, not HTTP'}, 405
@@ -85,12 +91,17 @@ class XrpcEndpoint(View):
         except Redirect as r:
             return redirect(r.to)
         except NotImplementedError as e:
-            return {'message': str(e)}, 501, RESPONSE_HEADERS
-        except ValidationError as e:
-            return {'message': str(e)}, 400, RESPONSE_HEADERS
-        except ValueError as e:
-            logging.info(f'Method raised', exc_info=True)
-            return {'message': str(e)}, 400, RESPONSE_HEADERS
+            return {
+                'error': 'MethodNotImplemented',
+                'message': str(e),
+            }, 501, RESPONSE_HEADERS
+        except (ValidationError, ValueError) as e:
+            if isinstance(e, ValueError):
+                logging.info(f'Method raised', exc_info=True)
+            return {
+                'error': 'InvalidRequest',
+                'message': str(e),
+            }, 400, RESPONSE_HEADERS
 
         # prepare output
         out_encoding = lexicon.get('output', {}).get('encoding')

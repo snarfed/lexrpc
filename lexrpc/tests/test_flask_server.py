@@ -70,7 +70,10 @@ class XrpcEndpointTest(TestCase):
         resp = self.client.post('/xrpc/not_an*nsid')
         self.assertEqual(400, resp.status_code)
         self.assertEqual('application/json', resp.headers['Content-Type'])
-        self.assertEqual({'message': 'not_an*nsid is not a valid NSID'}, resp.json)
+        self.assertEqual({
+            'error': 'InvalidRequest',
+            'message': 'not_an*nsid is not a valid NSID',
+        }, resp.json)
 
     def test_query_boolean_param(self):
         resp = self.client.get('/xrpc/io.example.query?x=&z=false')
@@ -78,9 +81,10 @@ class XrpcEndpointTest(TestCase):
 
         resp = self.client.get('/xrpc/io.example.query?z=foolz')
         self.assertEqual(400, resp.status_code)
-        self.assertEqual(
-            "Got 'foolz' for boolean parameter z, expected true or false",
-            resp.json['message'])
+        self.assertEqual({
+            'error': 'InvalidRequest',
+            'message': "Got 'foolz' for boolean parameter z, expected true or false",
+        }, resp.json)
 
     def test_subscription(self):
         handler = subscription(server, 'io.example.subscribe')
@@ -164,10 +168,17 @@ class XrpcEndpointTest(TestCase):
         self.assertTrue(resp.json['message'].startswith(
             'Error validating io.example.params parameters:'))
 
-    def test_invalid_params(self):
-        resp = self.client.post('/xrpc/io.example.params?bar=c')
+    def test_raises_valueerror(self):
+        @server.method('io.example.valueError')
+        def err(input):
+            raise ValueError('foo')
+
+        resp = self.client.post('/xrpc/io.example.valueError')
         self.assertEqual(400, resp.status_code)
-        self.assertIn("'c' for number parameter bar", resp.json['message'])
+        self.assertEqual({
+            'error': 'InvalidRequest',
+            'message': 'foo',
+        }, resp.json)
 
     def test_integer_param(self):
         resp = self.client.post('/xrpc/io.example.params?bar=5')
@@ -176,10 +187,18 @@ class XrpcEndpointTest(TestCase):
     def test_unknown_methods(self):
         resp = self.client.get('/xrpc/io.unknown')
         self.assertEqual(501, resp.status_code)
+        self.assertEqual({
+            'error': 'MethodNotImplemented',
+            'message': 'io.unknown not found',
+        }, resp.json)
 
     def test_undefined_method(self):
         resp = self.client.post('/xrpc/not.defined')
         self.assertEqual(501, resp.status_code)
+        self.assertEqual({
+            'error': 'MethodNotImplemented',
+            'message': 'not.defined not found',
+        }, resp.json)
 
     def test_encodings(self):
         val = 234892348203948
