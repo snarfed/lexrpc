@@ -1,7 +1,7 @@
 """Unit tests for client.py."""
 import json
 from unittest import skip, TestCase
-from unittest.mock import patch
+from unittest.mock import call, patch
 import urllib.parse
 
 import dag_cbor
@@ -19,7 +19,7 @@ HEADERS = {
 
 def response(body=None, status=200, headers=None):
     resp = requests.Response()
-    resp.status_code = 200
+    resp.status_code = status
 
     if headers:
         resp.headers.update(headers)
@@ -255,9 +255,50 @@ class ClientTest(TestCase):
             },
         )
 
+    @patch('requests.get')
     @patch('requests.post')
-    def test_createSession_sets_access_token(self, mock_post):
-        mock_post.return_value = response({'accessJwt': 'towkin'})
+    def test_refresh_token(self, mock_post, mock_get):
+        session = {
+            'accessJwt': 'new-towkin',
+            'refreshJwt': 'reephrush',
+            'handle': 'handull',
+            'did': 'dyd',
+        }
+        output = {'foo': 'asdf', 'bar': 3}
+        mock_get.side_effect = [
+            response(status=400, body={
+                'error': 'ExpiredToken',
+                'message': 'Token has expired'
+            }),
+            response(output),
+        ]
+        mock_post.return_value = response(session)
+
+        client = Client(access_token='towkin', refresh_token='reephrush')
+        got = client.com.atproto.server.describeServer(x='y')
+        self.assertEqual(output, got)
+        self.assertEqual(session, client.session)
+
+        mock_get.assert_any_call(
+            'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',
+            json=None,
+            headers={**HEADERS, 'Authorization': 'Bearer towkin'})
+        mock_post.assert_any_call(
+            'https://bsky.social/xrpc/com.atproto.server.refreshSession',
+            json=None,
+            headers={**HEADERS, 'Authorization': 'Bearer reephrush'})
+        mock_get.assert_any_call(
+            'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',
+            json=None,
+            headers={**HEADERS, 'Authorization': 'Bearer new-towkin'})
+
+    @patch('requests.post')
+    def test_createSession_sets_session(self, mock_post):
+        session = {
+            'accessJwt': 'towkin',
+            'foo': 'bar',
+        }
+        mock_post.return_value = response(session)
 
         input = {
             'identifier': 'snarfed.bsky.social',
@@ -266,7 +307,7 @@ class ClientTest(TestCase):
 
         client = Client()
         client.com.atproto.server.createSession(input)
-        self.assertEqual('towkin', client.access_token)
+        self.assertEqual(session, client.session)
 
         mock_post.assert_called_once_with(
             'https://bsky.social/xrpc/com.atproto.server.createSession',

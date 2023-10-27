@@ -23,6 +23,8 @@ DEFAULT_HEADERS = {
     'User-Agent': 'lexrpc (https://lexrpc.readthedocs.io/)',
 }
 LOGIN_NSID = 'com.atproto.server.createSession'
+REFRESH_NSID = 'com.atproto.server.refreshSession'
+EXPIRED_TOKEN = 'ExpiredToken'
 
 
 class _NsidClient():
@@ -52,19 +54,27 @@ class _NsidClient():
 class Client(Base):
     """XRPC client.
 
+    Calling ``com.atproto.server.createSession`` will store the returned session
+    and include its acccess token in subsequent requests. If a request fails
+    with ``ExpiredToken`` and we have a session stored, the access token will be
+    refreshed with ``com.atproto.server.refreshSession`` and then the original
+    request will be retried.
+
     Attributes:
       address (str): base URL of XRPC server, eg ``https://bsky.social/``
-      access_token (str): sent in ``Authorization`` header
+      session (dict): ``createSession`` response with ``accessJwt``,
+        `refreshJwt``, ``handle``, and ``did``
       headers (dict): HTTP headers to include in every request
     """
 
-    def __init__(self, address=DEFAULT_PDS, access_token=None, headers=None,
-                 **kwargs):
+    def __init__(self, address=DEFAULT_PDS, access_token=None,
+                 refresh_token=None, headers=None, **kwargs):
         """Constructor.
 
         Args:
           address (str): base URL of XRPC server, eg ``https://bsky.social/``
           access_token (str): optional, will be sent in ``Authorization`` header
+          refresh_token (str): optional; used to refresh access token
           headers (dict): optional, HTTP headers to include in every request
           kwargs: passed through to :class:`Base`
 
@@ -78,7 +88,11 @@ class Client(Base):
             f"{address} doesn't start with http:// or https://"
         self.address = address
         self.headers = headers or {}
-        self.access_token = access_token
+
+        self.session = {
+            'accessJwt': access_token,
+            'refreshJwt': refresh_token,
+        }
 
     def __getattr__(self, attr):
         if NSID_SEGMENT_RE.match(attr):
@@ -109,7 +123,7 @@ class Client(Base):
 
         # validate params and input, then encode params
         self._maybe_validate(nsid, 'parameters', params)
-        params = self.encode_params(params)
+        params_str = self.encode_params(params)
 
         type = self._get_def(nsid)['type']
         if type == 'subscription':
@@ -121,37 +135,48 @@ class Client(Base):
             'Content-Type': 'application/json',
         }
         log_headers = copy.copy(headers)
-        if self.access_token:
-            headers['Authorization'] = f'Bearer {self.access_token}'
+
+        # auth
+        token = (self.session.get('refreshJwt') if nsid == REFRESH_NSID
+                 else self.session.get('accessJwt'))
+        if token:
+            headers['Authorization'] = f'Bearer {token}'
             log_headers['Authorization'] = '...'
 
         # run method
         url = urljoin(self.address, f'/xrpc/{nsid}')
-        if params:
-            url += f'?{params}'
+        if params_str:
+            url += f'?{params_str}'
 
+        # event stream
         if type == 'subscription':
             return self._subscribe(url)
-        else:
-            # query or procedure
-            fn = requests.get if type == 'query' else requests.post
-            logger.debug(f'Running {fn} {url} {input} {params} {log_headers}')
-            resp = fn(url, json=input if input else None, headers=headers)
-            if not resp.ok:
-                logger.debug(f'Got: {resp.text}')
-            resp.raise_for_status()
 
-            output = None
-            content_type = resp.headers.get('Content-Type', '').split(';')[0]
-            if content_type == 'application/json' and resp.content:
-                output = resp.json()
-                if nsid == LOGIN_NSID:
-                    if token := output.get('accessJwt'):
-                        logger.info(f'Logged into {self.address} as {output.get("did")}, setting access_token')
-                        self.access_token = token
+        # query or procedure
+        fn = requests.get if type == 'query' else requests.post
+        logger.debug(f'Running requests.{fn} {url} {input} {params_str} {log_headers}')
+        resp = fn(url, json=input if input else None, headers=headers)
 
-            self._maybe_validate(nsid, 'output', output)
-            return output
+        output = None
+        content_type = resp.headers.get('Content-Type', '').split(';')[0]
+        if content_type == 'application/json' and resp.content:
+            output = resp.json()
+
+        if not resp.ok:
+            logger.debug(f'Got: {resp.text}')
+            # token expired? refresh it
+            if output and output.get('error') == EXPIRED_TOKEN:
+                self.call(REFRESH_NSID)
+                return self.call(nsid, input=input, **params)  # retry
+
+        resp.raise_for_status()
+
+        if output and nsid in (LOGIN_NSID, REFRESH_NSID):
+            logger.info(f'Logged in as {output.get("did")}, storing session')
+            self.session = output
+
+        self._maybe_validate(nsid, 'output', output)
+        return output
 
     def _subscribe(self, url):
         """Connects to a subscription websocket, yields the returned messages."""
