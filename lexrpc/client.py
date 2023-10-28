@@ -68,7 +68,8 @@ class Client(Base):
     """
 
     def __init__(self, address=DEFAULT_PDS, access_token=None,
-                 refresh_token=None, headers=None, **kwargs):
+                 refresh_token=None, headers=None, session_callback=None,
+                 **kwargs):
         """Constructor.
 
         Args:
@@ -76,6 +77,11 @@ class Client(Base):
           access_token (str): optional, will be sent in ``Authorization`` header
           refresh_token (str): optional; used to refresh access token
           headers (dict): optional, HTTP headers to include in every request
+          session_callback (callable, dict => None): called when a new session
+            is created with new access and refresh tokens. This callable is
+            passed one positional argument, the dict JSON output from
+            ``com.atproto.server.createSession`` or
+            ``com.atproto.server.refreshSession``.
           kwargs: passed through to :class:`Base`
 
         Raises:
@@ -93,6 +99,7 @@ class Client(Base):
             'accessJwt': access_token,
             'refreshJwt': refresh_token,
         }
+        self.session_callback = session_callback
 
     def __getattr__(self, attr):
         if NSID_SEGMENT_RE.match(attr):
@@ -109,7 +116,9 @@ class Client(Base):
           params: optional method parameters
 
         Returns:
-          dict or generator iterator: for queries and procedures, decoded JSON object, or None if the method has no output. For subscriptions, generator of messages from server.
+          dict or generator iterator: for queries and procedures, decoded JSON
+          object, or None if the method has no output. For subscriptions,
+          generator of messages from server.
 
         Raises:
           NotImplementedError: if the given NSID is not found in any of the
@@ -174,6 +183,8 @@ class Client(Base):
         if output and nsid in (LOGIN_NSID, REFRESH_NSID):
             logger.info(f'Logged in as {output.get("did")}, storing session')
             self.session = output
+            if self.session_callback:
+                self.session_callback(output)
 
         self._maybe_validate(nsid, 'output', output)
         return output

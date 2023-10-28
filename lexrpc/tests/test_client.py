@@ -274,10 +274,17 @@ class ClientTest(TestCase):
         ]
         mock_post.return_value = response(session)
 
-        client = Client(access_token='towkin', refresh_token='reephrush')
+        callback_got = []
+        def callback(session):
+            nonlocal callback_got
+            callback_got.append(session)
+
+        client = Client(access_token='towkin', refresh_token='reephrush',
+                        session_callback=callback)
         got = client.com.atproto.server.describeServer(x='y')
         self.assertEqual(output, got)
         self.assertEqual(session, client.session)
+        self.assertEqual([session], callback_got)
 
         mock_get.assert_any_call(
             'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',

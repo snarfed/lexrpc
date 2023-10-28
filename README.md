@@ -234,7 +234,7 @@ Here's how to package, test, and ship a new release.
 * `Base`:
   * Expose lexicons in `defs` attribute.
 * `Client`:
-  * Add minimal auth support with `access_token` constructor kwarg and attribute. To send authenticated requests, call `createSession` or `refreshSession` to get an access token, then set it on a `Client`.
+  * Add minimal auth support with `access_token` and `refresh_token` constructor kwargs and `session` attribute. If you use a `Client` to call `com.atproto.server.createSession` or `com.atproto.server.refreshSession`, the returned tokens will be automatically stored and used in future requests.
   * Bug fix: handle trailing slash on server address, eg `http://ser.ver/` vs `http://ser.ver`.
   * Default server address to official `https://bsky.social` PDS.
   * Add default `User-Agent: lexrpc (https://lexrpc.readthedocs.io/)` request header.
