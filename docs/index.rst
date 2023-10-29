@@ -254,7 +254,7 @@ Here’s how to package, test, and ship a new release.
 
        from lexrpc import Server
 
-       server = Server([{
+       server = Server(lexicons=[{
            'lexicon': 1,
            'id': 'io.example.ping',
            'defs': {
@@ -315,7 +315,7 @@ Here’s how to package, test, and ship a new release.
 Changelog
 ---------
 
-0.4 - unreleased
+0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
 
 -  Bundle `the official
@@ -327,10 +327,11 @@ Changelog
 
 -  ``Client``:
 
-   -  Add minimal auth support with ``access_token`` constructor kwarg
-      and attribute. To send authenticated requests, call
-      ``createSession`` or ``refreshSession`` to get an access token,
-      then set it on a ``Client``.
+   -  Add minimal auth support with ``access_token`` and
+      ``refresh_token`` constructor kwargs and ``session`` attribute. If
+      you use a ``Client`` to call ``com.atproto.server.createSession``
+      or ``com.atproto.server.refreshSession``, the returned tokens will
+      be automatically stored and used in future requests.
    -  Bug fix: handle trailing slash on server address, eg
       ``http://ser.ver/`` vs ``http://ser.ver``.
    -  Default server address to official ``https://bsky.social`` PDS.
@@ -338,10 +339,22 @@ Changelog
       ``User-Agent: lexrpc (https://lexrpc.readthedocs.io/)`` request
       header.
 
+-  ``server``:
+
+   -  Add new ``Redirect`` class. Handlers can raise this to indicate
+      that the web server should serve an HTTP redirect. `Whether this
+      is official supported by the XRPC spec is still
+      TBD. <https://github.com/bluesky-social/atproto/discussions/1228>`__
+
 -  ``flask_server``:
 
    -  Return HTTP 405 error on HTTP requests to subscription (websocket)
       XRPCs.
+   -  Support the new ``Redirect`` exception.
+   -  Add the ``error`` field to the JSON response bodies for most error
+      responses.
+
+.. _section-1:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
@@ -353,7 +366,7 @@ Changelog
 -  Add new ``Server.register`` method for manually registering handlers.
 -  Bug fix for server ``@method`` decorator.
 
-.. _section-1:
+.. _section-2:
 
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
@@ -370,7 +383,7 @@ put more effort into matching and fully implementing them. Stay tuned!
    format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
    Original format is no longer supported.
 
-.. _section-2:
+.. _section-3:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~

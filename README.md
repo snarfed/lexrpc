@@ -184,7 +184,7 @@ Here's how to package, test, and ship a new release.
     ```py
     from lexrpc import Server
 
-    server = Server([{
+    server = Server(lexicons=[{
         'lexicon': 1,
         'id': 'io.example.ping',
         'defs': {
@@ -228,7 +228,7 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 0.4 - unreleased
+### 0.4 - 2023-10-28
 
 * Bundle [the official lexicons](https://github.com/bluesky-social/atproto/tree/main/lexicons/) for `app.bsky` and `com.atproto`, use them by default.
 * `Base`:
