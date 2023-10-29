@@ -238,7 +238,7 @@ Here's how to package, test, and ship a new release.
   * Bug fix: handle trailing slash on server address, eg `http://ser.ver/` vs `http://ser.ver`.
   * Default server address to official `https://bsky.social` PDS.
   * Add default `User-Agent: lexrpc (https://lexrpc.readthedocs.io/)` request header.
-* `server`:
+* `Server`:
   * Add new `Redirect` class. Handlers can raise this to indicate that the web server should serve an HTTP redirect. [Whether this is official supported by the XRPC spec is still TBD.](https://github.com/bluesky-social/atproto/discussions/1228)
 * `flask_server`:
   * Return HTTP 405 error on HTTP requests to subscription (websocket) XRPCs.

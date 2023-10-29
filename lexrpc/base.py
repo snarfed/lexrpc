@@ -188,7 +188,7 @@ class Base():
                 return
             fail(f'{nsid} has no schema for {type}')
 
-        logger.debug(f'Validating {nsid} {type}')
+        # logger.debug(f'Validating {nsid} {type}')
         try:
             # TODO: adapt jsonschema to support Lexicon, or drop
             # jsonschema.validate(obj, schema)
