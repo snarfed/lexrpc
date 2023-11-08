@@ -24,7 +24,7 @@ DEFAULT_HEADERS = {
 }
 LOGIN_NSID = 'com.atproto.server.createSession'
 REFRESH_NSID = 'com.atproto.server.refreshSession'
-EXPIRED_TOKEN = 'ExpiredToken'
+TOKEN_ERRORS = ('AccountNotFound', 'ExpiredToken', 'InvalidToken', 'TokenRequired')
 
 
 class _NsidClient():
@@ -173,18 +173,24 @@ class Client(Base):
 
         if not resp.ok:
             logger.debug(f'Got: {resp.text}')
-            # token expired? refresh it
-            if output and output.get('error') == EXPIRED_TOKEN:
+
+        if nsid in (LOGIN_NSID, REFRESH_NSID):  # auth
+            if resp.ok:
+                logger.info(f'Logged in as {output.get("did")}, storing session')
+            else:
+                logger.info(f'Login failed, nulling out session')
+                output = {}
+
+            self.session = output
+            if self.session_callback:
+                self.session_callback(output)
+
+        elif not resp.ok:  # token expired, try to refresh it
+            if output and output.get('error') in TOKEN_ERRORS:
                 self.call(REFRESH_NSID)
                 return self.call(nsid, input=input, **params)  # retry
 
         resp.raise_for_status()
-
-        if output and nsid in (LOGIN_NSID, REFRESH_NSID):
-            logger.info(f'Logged in as {output.get("did")}, storing session')
-            self.session = output
-            if self.session_callback:
-                self.session_callback(output)
 
         self._maybe_validate(nsid, 'output', output)
         return output

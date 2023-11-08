@@ -161,6 +161,20 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.defs',
             json={'in': 'bar'}, headers=HEADERS)
 
+    @patch('requests.get')
+    def test_error(self, mock_get):
+        mock_get.return_value = response(status=400, body={
+            'error': 'Something',
+            'message': 'too bad'
+        })
+
+        with self.assertRaises(requests.HTTPError):
+            self.client.call('io.example.query', {}, x='y')
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query?x=y',
+            json=None, headers=HEADERS)
+
     # TODO
     @skip
     def test_missing_params(self):
@@ -298,6 +312,40 @@ class ClientTest(TestCase):
             'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',
             json=None,
             headers={**HEADERS, 'Authorization': 'Bearer new-towkin'})
+
+    @patch('requests.get')
+    @patch('requests.post')
+    def test_refresh_token_fails(self, mock_post, mock_get):
+        mock_get.return_value = response(status=400, body={
+            'error': 'ExpiredToken',
+            'message': 'Token has expired'
+        })
+        mock_post.return_value = response(status=400, body={
+            'error': 'ExpiredToken',
+            'message': 'Token has been revoked'
+        })
+
+        callback_got = []
+        def callback(session):
+            nonlocal callback_got
+            callback_got.append(session)
+
+        client = Client(access_token='towkin', refresh_token='reephrush',
+                        session_callback=callback)
+        with self.assertRaises(requests.HTTPError):
+            client.com.atproto.server.describeServer(x='y')
+
+        self.assertEqual({}, client.session)
+        self.assertEqual([{}], callback_got)
+
+        mock_get.assert_called_with(
+            'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',
+            json=None,
+            headers={**HEADERS, 'Authorization': 'Bearer towkin'})
+        mock_post.assert_called_with(
+            'https://bsky.social/xrpc/com.atproto.server.refreshSession',
+            json=None,
+            headers={**HEADERS, 'Authorization': 'Bearer reephrush'})
 
     @patch('requests.post')
     def test_createSession_sets_session(self, mock_post):
