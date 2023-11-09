@@ -5,7 +5,7 @@ Python implementation of [AT Protocol](https://atproto.com/)'s [XRPC](https://at
 
 Install from [PyPI](https://pypi.org/project/lexrpc/) with `pip install lexrpc` or `pip install lexrpc[flask]`.
 
-License: This project is placed in the public domain.
+License: This project is placed in the public domain. You may also use it under the [CC0 License](https://creativecommons.org/publicdomain/zero/1.0/).
 
 * [Client](#client)
 * [Server](#server)
