@@ -24,7 +24,13 @@ DEFAULT_HEADERS = {
 }
 LOGIN_NSID = 'com.atproto.server.createSession'
 REFRESH_NSID = 'com.atproto.server.refreshSession'
-TOKEN_ERRORS = ('AccountNotFound', 'ExpiredToken', 'InvalidToken', 'TokenRequired')
+TOKEN_ERRORS = (
+    'AccountNotFound',
+    'AuthenticationRequired',
+    'ExpiredToken',
+    'InvalidToken',
+    'TokenRequired',
+)
 
 
 class _NsidClient():
@@ -95,10 +101,12 @@ class Client(Base):
         self.address = address
         self.headers = headers or {}
 
-        self.session = {
-            'accessJwt': access_token,
-            'refreshJwt': refresh_token,
-        }
+        self.session = {}
+        if access_token or refresh_token:
+            self.session.update({
+                'accessJwt': access_token,
+                'refreshJwt': refresh_token,
+            })
         self.session_callback = session_callback
 
     def __getattr__(self, attr):
