@@ -391,10 +391,12 @@ class ClientTest(TestCase):
         mock_get.assert_called_with(
             'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',
             json=None,
+            data=None,
             headers={**HEADERS, 'Authorization': 'Bearer towkin'})
         mock_post.assert_called_with(
             'https://bsky.social/xrpc/com.atproto.server.refreshSession',
             json=None,
+            data=None,
             headers={**HEADERS, 'Authorization': 'Bearer reephrush'})
 
     @patch('requests.post')
