@@ -115,12 +115,12 @@ class Client(Base):
 
         return getattr(super(), attr)
 
-    def call(self, nsid, input=None, **params):
+    def call(self, nsid, input=None, headers={}, **params):
         """Makes a remote XRPC method call.
 
         Args:
           nsid (str): method NSID
-          input (dict): input body, optional for subscriptions
+          input (dict or bytes): input body, optional for subscriptions
           params: optional method parameters
 
         Returns:
@@ -136,7 +136,9 @@ class Client(Base):
           requests.RequestException: if the connection or HTTP request to the
             remote server failed
         """
-        logger.debug(f'{nsid}: {params} {input}')
+        def loggable(val):
+            return f'{len(val)} bytes' if isinstance(val, bytes) else val
+        logger.debug(f'{nsid}: {params} {loggable(input)}')
 
         # validate params and input, then encode params
         self._maybe_validate(nsid, 'parameters', params)
@@ -146,18 +148,20 @@ class Client(Base):
         if type == 'subscription':
             self._maybe_validate(nsid, 'input', input)
 
-        headers = {
+        req_headers = {
             **DEFAULT_HEADERS,
-            **self.headers,
             'Content-Type': 'application/json',
+            **self.headers,
+            **headers,
         }
-        log_headers = copy.copy(headers)
+
+        log_headers = copy.copy(req_headers)
 
         # auth
         token = (self.session.get('refreshJwt') if nsid == REFRESH_NSID
                  else self.session.get('accessJwt'))
         if token:
-            headers['Authorization'] = f'Bearer {token}'
+            req_headers['Authorization'] = f'Bearer {token}'
             log_headers['Authorization'] = '...'
 
         # run method
@@ -169,10 +173,22 @@ class Client(Base):
         if type == 'subscription':
             return self._subscribe(url)
 
+        def is_json(x):
+          try:
+            json.dumps(x)
+            return True
+          except (TypeError, OverflowError):
+            return False
+
         # query or procedure
         fn = requests.get if type == 'query' else requests.post
-        logger.debug(f'Running requests.{fn} {url} {input} {params_str} {log_headers}')
-        resp = fn(url, json=input if input else None, headers=headers)
+        logger.debug(f'Running requests.{fn} {url} {loggable(input)} {params_str} {log_headers}')
+        resp = fn(
+          url,
+          json=input if input and is_json(input) else None,
+          data=input if input and not is_json(input) else None,
+          headers=req_headers
+        )
 
         output = None
         content_type = resp.headers.get('Content-Type', '').split(';')[0]
@@ -196,7 +212,7 @@ class Client(Base):
         elif not resp.ok:  # token expired, try to refresh it
             if output and output.get('error') in TOKEN_ERRORS:
                 self.call(REFRESH_NSID)
-                return self.call(nsid, input=input, **params)  # retry
+                return self.call(nsid, input=input, headers=req_headers, **params)  # retry
 
         resp.raise_for_status()
 

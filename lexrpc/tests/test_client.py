@@ -71,7 +71,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, headers=HEADERS)
+            json=None, data=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_call_address_trailing_slash(self, mock_get):
@@ -81,7 +81,7 @@ class ClientTest(TestCase):
         got = client.call('io.example.query', {})
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            json=None, headers=HEADERS)
+            json=None, data=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_query(self, mock_get):
@@ -93,7 +93,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, headers=HEADERS)
+            json=None, data=None, headers=HEADERS)
 
     @patch('requests.post')
     def test_procedure(self, mock_post):
@@ -106,7 +106,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure?x=y',
-            json=input, headers=HEADERS)
+            json=input, data=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_boolean_param(self, mock_get):
@@ -118,7 +118,31 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?z=true',
-            json=None, headers=HEADERS)
+            json=None, data=None, headers=HEADERS)
+
+    @patch('requests.get')
+    def test_call_headers(self, mock_get):
+        output = {'foo': 'asdf', 'bar': 3}
+        mock_get.return_value = response(output)
+
+        got = self.client.call('io.example.query', {}, x='y', headers={'foo': 'bar'})
+        self.assertEqual(output, got)
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query?x=y',
+            json=None, data=None, headers={**HEADERS, 'foo': 'bar'})
+
+    @patch('requests.get')
+    def test_call_headers_override_content_type(self, mock_get):
+        output = {'foo': 'asdf', 'bar': 3}
+        mock_get.return_value = response(output)
+
+        got = self.client.call('io.example.query', {}, x='y', headers={'Content-Type': 'application/xml'})
+        self.assertEqual(output, got)
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query?x=y',
+            json=None, data=None, headers={**HEADERS, 'Content-Type': 'application/xml'})
 
     # TODO
     @skip
@@ -131,7 +155,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            json=None, headers=HEADERS)
+            json=None, data=None, headers=HEADERS)
 
     @patch('requests.post')
     def test_no_params_input_output(self, mock_post):
@@ -140,7 +164,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.noParamsInputOutput',
-            json=None, headers=HEADERS)
+            json=None, data=None, headers=HEADERS)
 
     @patch('requests.post')
     def test_dashed_name(self, mock_post):
@@ -149,7 +173,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.dashed-name',
-            json=None, headers=HEADERS)
+            json=None, data=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_defs(self, mock_get):
@@ -159,7 +183,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.defs',
-            json={'in': 'bar'}, headers=HEADERS)
+            json={'in': 'bar'}, data=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_error(self, mock_get):
@@ -198,7 +222,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.array?foo=a&foo=b',
-            json=None, headers=HEADERS)
+            json=None, data=None, headers=HEADERS)
 
     def test_subscription(self):
         msgs = [
@@ -228,10 +252,10 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure',
-            json=input, headers=HEADERS)
+            json=input, data=None, headers=HEADERS)
 
     @patch('requests.get')
-    def test_headers(self, mock_get):
+    def test_client_headers(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
 
@@ -243,9 +267,31 @@ class ClientTest(TestCase):
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None,
+            data=None,
             headers={
                 **HEADERS,
                 'Baz': 'biff',
+            },
+        )
+
+    @patch('requests.get')
+    def test_client_headers_override_content_type(self, mock_get):
+        output = {'foo': 'asdf', 'bar': 3}
+        mock_get.return_value = response(output)
+
+        client = Client('http://ser.ver', lexicons=LEXICONS,
+                        headers={'Baz': 'biff', 'Content-Type': 'application/xml'})
+        got = client.call('io.example.query', {}, x='y')
+        self.assertEqual(output, got)
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query?x=y',
+            json=None,
+            data=None,
+            headers={
+                **HEADERS,
+                'Baz': 'biff',
+                'Content-Type': 'application/xml',
             },
         )
 
@@ -262,6 +308,7 @@ class ClientTest(TestCase):
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None,
+            data=None,
             headers={
                 **HEADERS,
                 'Baz': 'biff',
@@ -303,14 +350,17 @@ class ClientTest(TestCase):
         mock_get.assert_any_call(
             'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',
             json=None,
+            data=None,
             headers={**HEADERS, 'Authorization': 'Bearer towkin'})
         mock_post.assert_any_call(
             'https://bsky.social/xrpc/com.atproto.server.refreshSession',
             json=None,
+            data=None,
             headers={**HEADERS, 'Authorization': 'Bearer reephrush'})
         mock_get.assert_any_call(
             'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',
             json=None,
+            data=None,
             headers={**HEADERS, 'Authorization': 'Bearer new-towkin'})
 
     @patch('requests.get')
@@ -366,7 +416,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'https://bsky.social/xrpc/com.atproto.server.createSession',
-            json=input, headers=HEADERS)
+            json=input, data=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_bundled_lexicons(self, mock_get):
