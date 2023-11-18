@@ -197,7 +197,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, headers=HEADERS)
+            json=None, data=None, headers=HEADERS)
 
     # TODO
     @skip
