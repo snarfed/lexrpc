@@ -173,20 +173,13 @@ class Client(Base):
         if type == 'subscription':
             return self._subscribe(url)
 
-        def is_json(x):
-          try:
-            json.dumps(x)
-            return True
-          except (TypeError, OverflowError):
-            return False
-
         # query or procedure
         fn = requests.get if type == 'query' else requests.post
         logger.debug(f'Running requests.{fn} {url} {loggable(input)} {params_str} {log_headers}')
         resp = fn(
           url,
-          json=input if input and is_json(input) else None,
-          data=input if input and not is_json(input) else None,
+          json=input if input and isinstance(input, dict) else None,
+          data=input if input and not isinstance(input, dict) else None,
           headers=req_headers
         )
 
