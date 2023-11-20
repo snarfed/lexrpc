@@ -429,3 +429,13 @@ class ClientTest(TestCase):
 
         got = client.call('com.atproto.server.getSession', {})
         self.assertEqual(output, got)
+
+    @patch('requests.post')
+    def test_binary_data(self, mock_post):
+        mock_post.return_value = response({'ok': 'ok'})
+
+        self.assertEqual({'ok': 'ok'}, self.client.io.example.encodings(0xFFFFFFFF))
+
+        mock_post.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.encodings',
+            json=None, data=0xFFFFFFFF, headers=HEADERS)
