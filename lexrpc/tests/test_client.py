@@ -434,7 +434,7 @@ class ClientTest(TestCase):
     def test_binary_data(self, mock_post):
         mock_post.return_value = response({'ok': 'ok'})
 
-        self.assertEqual({'ok': 'ok'}, self.client.io.example.encodings(0xFFFFFFFF))
+        self.assertEqual({'ok': 'ok'}, self.client.io.example.encodings(b'foo bar'))
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.encodings',
