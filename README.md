@@ -52,6 +52,8 @@ output = client.com.example.my_procedure({'foo': 'bar'}, baz=5)
 
 Note that `-` characters in method NSIDs are converted to `_`s, eg the call above is for the method `com.example.my-procedure`.
 
+To call a method with non-JSON (eg binary) input, pass `bytes` to the call instead of a `dict`, and pass the content type with `headers={'Content-Type': '...'}`.
+
 [Event stream methods](https://atproto.com/specs/event-stream) with type `subscription` are generators that `yield` (header, payload) tuples sent by the server. They take parameters as kwargs, but no positional `input`.
 
 ```py
@@ -227,6 +229,14 @@ Here's how to package, test, and ship a new release.
 
 
 ## Changelog
+
+### 0.5 - 2023-12-10
+
+* `Client`:
+  * Support binary request data automatically based on input type, eg `dict` vs `bytes`.
+  * Add new `headers` kwarg to `call` and auto-generated lexicon method calls, useful for providing an explicit `Content-Type` when sending binary data.
+  * Bug fix: don't infinite loop if `refreshSession` fails.
+  * Other minor authentication bug fixes.
 
 ### 0.4 - 2023-10-28
 

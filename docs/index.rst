@@ -13,7 +13,9 @@ schemas.
 Install from `PyPI <https://pypi.org/project/lexrpc/>`__ with
 ``pip install lexrpc`` or ``pip install lexrpc[flask]``.
 
-License: This project is placed in the public domain.
+License: This project is placed in the public domain. You may also use
+it under the `CC0
+License <https://creativecommons.org/publicdomain/zero/1.0/>`__.
 
 -  `Client <#client>`__
 -  `Server <#server>`__
@@ -70,6 +72,10 @@ or use custom lexicons by passing them to the ``Client`` constructor:
 
 Note that ``-`` characters in method NSIDs are converted to ``_``\ s, eg
 the call above is for the method ``com.example.my-procedure``.
+
+To call a method with non-JSON (eg binary) input, pass ``bytes`` to the
+call instead of a ``dict``, and pass the content type with
+``headers={'Content-Type': '...'}``.
 
 `Event stream methods <https://atproto.com/specs/event-stream>`__ with
 type ``subscription`` are generators that ``yield`` (header, payload)
@@ -315,6 +321,21 @@ Here’s how to package, test, and ship a new release.
 Changelog
 ---------
 
+0.5 - 2023-12-10
+~~~~~~~~~~~~~~~~
+
+-  ``Client``:
+
+   -  Support binary request data automatically based on input type, eg
+      ``dict`` vs ``bytes``.
+   -  Add new ``headers`` kwarg to ``call`` and auto-generated lexicon
+      method calls, useful for providing an explicit ``Content-Type``
+      when sending binary data.
+   -  Bug fix: don’t infinite loop if ``refreshSession`` fails.
+   -  Other minor authentication bug fixes.
+
+.. _section-1:
+
 0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
 
@@ -339,7 +360,7 @@ Changelog
       ``User-Agent: lexrpc (https://lexrpc.readthedocs.io/)`` request
       header.
 
--  ``server``:
+-  ``Server``:
 
    -  Add new ``Redirect`` class. Handlers can raise this to indicate
       that the web server should serve an HTTP redirect. `Whether this
@@ -354,7 +375,7 @@ Changelog
    -  Add the ``error`` field to the JSON response bodies for most error
       responses.
 
-.. _section-1:
+.. _section-2:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
@@ -366,7 +387,7 @@ Changelog
 -  Add new ``Server.register`` method for manually registering handlers.
 -  Bug fix for server ``@method`` decorator.
 
-.. _section-2:
+.. _section-3:
 
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
@@ -383,7 +404,7 @@ put more effort into matching and fully implementing them. Stay tuned!
    format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
    Original format is no longer supported.
 
-.. _section-3:
+.. _section-4:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~

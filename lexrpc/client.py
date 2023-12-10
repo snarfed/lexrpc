@@ -121,6 +121,8 @@ class Client(Base):
         Args:
           nsid (str): method NSID
           input (dict or bytes): input body, optional for subscriptions
+          headers (dict): HTTP headers to include in this request. Overrides any
+            headers passed to the constructor.
           params: optional method parameters
 
         Returns:
@@ -135,6 +137,7 @@ class Client(Base):
             output don't validate against the method's schemas
           requests.RequestException: if the connection or HTTP request to the
             remote server failed
+
         """
         def loggable(val):
             return f'{len(val)} bytes' if isinstance(val, bytes) else val
