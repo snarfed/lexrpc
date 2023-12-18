@@ -29,11 +29,6 @@ dependencies = [
     'jsonschema>=4.0',
     'requests>=2.0',
     'simple-websocket',
-    # we don't directly depend on typing-extensions; this is only here because
-    # 4.6.0 introduced an incompatibility with the typing-validation package
-    # that's still not fixed yet.
-    # https://github.com/hashberg-io/typing-validation/issues/1
-    'typing-extensions<4.6.0',
 ]
 classifiers = [
     'Programming Language :: Python :: 3',
