@@ -1,22 +1,22 @@
 {
   "lexicon": 1,
-  "id": "com.atproto.admin.getModerationAction",
+  "id": "com.atproto.admin.getAccountInfo",
   "defs": {
     "main": {
       "type": "query",
-      "description": "View details about a moderation action.",
+      "description": "Get details about an account.",
       "parameters": {
         "type": "params",
-        "required": ["id"],
+        "required": ["did"],
         "properties": {
-          "id": { "type": "integer" }
+          "did": { "type": "string", "format": "did" }
         }
       },
       "output": {
         "encoding": "application/json",
         "schema": {
           "type": "ref",
-          "ref": "com.atproto.admin.defs#actionViewDetail"
+          "ref": "com.atproto.admin.defs#accountView"
         }
       }
     }

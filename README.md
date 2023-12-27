@@ -230,6 +230,10 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
+### 0.6 - unreleased
+
+* Update bundled `app.bsky` and `com.atproto` lexicons, as of [bluesky-social/atproto@50f209e](https://github.com/snarfed/atproto/commit/50f209e6507d8bfff20fb78eae1d3ec963e926de).
+
 ### 0.5 - 2023-12-10
 
 * `Client`:
