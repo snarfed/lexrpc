@@ -57,11 +57,15 @@ NSID_RE = re.compile(f'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
 
 def load_lexicons(traversable):
     if traversable.is_file():
-        return [json.loads(traversable.read_text())]
+        lexicons = [json.loads(traversable.read_text())]
     elif traversable.is_dir():
-        return sum((load_lexicons(item) for item in traversable.iterdir()), start=[])
+        lexicons = sum((load_lexicons(item) for item in traversable.iterdir()),
+                       start=[])
+
+    return lexicons
 
 _bundled_lexicons = load_lexicons(files('lexrpc').joinpath('lexicons'))
+logger.info(f'{len(_bundled_lexicons)} lexicons loaded')
 
 
 def fail(msg, exc=NotImplementedError):
@@ -138,8 +142,6 @@ class Base():
 
         if not self.defs:
             logger.error('No lexicons loaded!')
-        else:
-            logger.info(f'{len(self.defs)} lexicons loaded')
 
     def _get_def(self, id):
         """Returns the given lexicon def.

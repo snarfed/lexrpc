@@ -138,8 +138,6 @@ This configures the Flask app to serve the methods registered with the lexrpc se
 
 * support record types, eg via type `ref` and `ref` field pointing to the nsid. [example here](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13).
   * check out [atproto@63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab](https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab)!
-* [extensions](https://atproto.com/guides/lexicon#extensibility). is there anything to do? ah, [they're currently TODO in the spec](https://atproto.com/specs/xrpc#todos).
-* [authentication](https://atproto.com/specs/xrpc#authentication)
 
 
 Release instructions
