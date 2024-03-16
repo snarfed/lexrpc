@@ -1,13 +1,18 @@
 {
   "lexicon": 1,
-  "id": "app.bsky.unspecced.getTimelineSkeleton",
+  "id": "tools.ozone.moderation.searchRepos",
   "defs": {
     "main": {
       "type": "query",
-      "description": "DEPRECATED: a skeleton of a timeline. Unspecced and will be unavailable soon.",
+      "description": "Find repositories based on a search term.",
       "parameters": {
         "type": "params",
         "properties": {
+          "term": {
+            "type": "string",
+            "description": "DEPRECATED: use 'q' instead"
+          },
+          "q": { "type": "string" },
           "limit": {
             "type": "integer",
             "minimum": 1,
@@ -21,20 +26,19 @@
         "encoding": "application/json",
         "schema": {
           "type": "object",
-          "required": ["feed"],
+          "required": ["repos"],
           "properties": {
             "cursor": { "type": "string" },
-            "feed": {
+            "repos": {
               "type": "array",
               "items": {
                 "type": "ref",
-                "ref": "app.bsky.feed.defs#skeletonFeedPost"
+                "ref": "tools.ozone.moderation.defs#repoView"
               }
             }
           }
         }
-      },
-      "errors": [{ "name": "UnknownFeed" }]
+      }
     }
   }
 }
