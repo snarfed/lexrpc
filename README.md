@@ -136,8 +136,7 @@ This configures the Flask app to serve the methods registered with the lexrpc se
 
 ## TODO
 
-* support record types, eg via type `ref` and `ref` field pointing to the nsid. [example here](https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13).
-  * check out [atproto@63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab](https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab)!
+* schema validation for records
 
 
 Release instructions
@@ -228,7 +227,7 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 0.6 - unreleased
+### 0.6 - 2024-03-16
 
 * Drop `typing-extensions` version pin now that [typing-validation has been updated to be compatible with it](https://github.com/hashberg-io/typing-validation/issues/1).
 * Update bundled `app.bsky` and `com.atproto` lexicons, as of [bluesky-social/atproto@f45eef3](https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282).

@@ -189,17 +189,7 @@ set to ``application/json``.
 TODO
 ----
 
--  support record types, eg via type ``ref`` and ``ref`` field pointing
-   to the nsid. `example
-   here <https://github.com/bluesky-social/atproto/blob/main/lexicons/app/bsky/graph/follow.json#L13>`__.
-
-   -  check out
-      `atproto@63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__!
-
--  `extensions <https://atproto.com/guides/lexicon#extensibility>`__. is
-   there anything to do? ah, `they’re currently TODO in the
-   spec <https://atproto.com/specs/xrpc#todos>`__.
--  `authentication <https://atproto.com/specs/xrpc#authentication>`__
+-  schema validation for records
 
 Release instructions
 --------------------
@@ -321,6 +311,17 @@ Here’s how to package, test, and ship a new release.
 Changelog
 ---------
 
+0.6 - 2024-03-16
+~~~~~~~~~~~~~~~~
+
+-  Drop ``typing-extensions`` version pin now that `typing-validation
+   has been updated to be compatible with
+   it <https://github.com/hashberg-io/typing-validation/issues/1>`__.
+-  Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
+   `bluesky-social/atproto@f45eef3 <https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282>`__.
+
+.. _section-1:
+
 0.5 - 2023-12-10
 ~~~~~~~~~~~~~~~~
 
@@ -334,7 +335,7 @@ Changelog
    -  Bug fix: don’t infinite loop if ``refreshSession`` fails.
    -  Other minor authentication bug fixes.
 
-.. _section-1:
+.. _section-2:
 
 0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
@@ -375,7 +376,7 @@ Changelog
    -  Add the ``error`` field to the JSON response bodies for most error
       responses.
 
-.. _section-2:
+.. _section-3:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
@@ -387,7 +388,7 @@ Changelog
 -  Add new ``Server.register`` method for manually registering handlers.
 -  Bug fix for server ``@method`` decorator.
 
-.. _section-3:
+.. _section-4:
 
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
@@ -404,7 +405,7 @@ put more effort into matching and fully implementing them. Stay tuned!
    format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
    Original format is no longer supported.
 
-.. _section-4:
+.. _section-5:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~
