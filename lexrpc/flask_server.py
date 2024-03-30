@@ -1,4 +1,5 @@
 """Flask handler for ``/xrpc/...`` endpoints."""
+from datetime import timedelta
 import logging
 
 import dag_cbor
@@ -6,6 +7,7 @@ from flask import redirect, request
 from flask.json import jsonify
 from flask.views import View
 from flask_sock import Sock
+from iterators import TimeoutIterator
 from jsonschema import ValidationError
 from simple_websocket import ConnectionClosed
 
@@ -13,6 +15,8 @@ from .base import NSID_RE
 from .server import Redirect
 
 logger = logging.getLogger(__name__)
+
+SUBSCRIPTION_ITERATOR_TIMEOUT = timedelta(seconds=10)
 
 RESPONSE_HEADERS = {
     # wide open CORS to allow client-side apps like https://bsky.app/
@@ -128,12 +132,26 @@ def subscription(xrpc_server, nsid):
         """
         logger.debug(f'New websocket client for {nsid}')
         params = xrpc_server.decode_params(nsid, request.args.items(multi=True))
-        try:
-            for header, payload in xrpc_server.call(nsid, **params):
-                # TODO: validate header, payload?
-                logger.debug(f'Sending to {nsid} websocket client: {header} {str(payload)[:500]}...')
+
+        # use TimeoutIterator here so that we can periodically detect if the
+        # client has disconnected. if we don't, we'll tie up this thread forever
+        # while we block waiting for results from the XRPC server method, and
+        # we'll eventually exhaust the WSGI worker thread pool. background:
+        # https://github.com/miguelgrinberg/flask-sock/issues/78
+        for header, payload in TimeoutIterator(
+                xrpc_server.call(nsid, **params),
+                timeout=SUBSCRIPTION_ITERATOR_TIMEOUT.total_seconds()):
+            if not ws.connected:
+                logger.debug(f'Websocket client disconnected from {nsid}')
+                return
+
+            # TODO: validate header, payload?
+            logger.debug(f'Sending to {nsid} websocket client: {header} {str(payload)[:500]}...')
+
+            try:
                 ws.send(dag_cbor.encode(header) + dag_cbor.encode(payload))
-        except ConnectionClosed as cc:
-            logger.debug(f'Websocket client disconnected from {nsid}: {cc}')
+            except ConnectionClosed as cc:
+                logger.debug(f'Websocket client disconnected from {nsid}: {cc}')
+                return
 
     return handler

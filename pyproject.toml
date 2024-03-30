@@ -26,6 +26,7 @@ requires-python = '>=3.7'
 keywords = ['XRPC', 'Lexicon', 'AT Protocol', 'ATP']
 dependencies = [
     'dag-cbor',
+    'iterators',
     'jsonschema>=4.0',
     'requests>=2.0',
     'simple-websocket',

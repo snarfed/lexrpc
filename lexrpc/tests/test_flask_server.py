@@ -16,6 +16,7 @@ class FakeConnection:
     """Fake of :class:`simple_websocket.ws.WSConnection`."""
     exc = None
     sent = []
+    connected = True
 
     @classmethod
     def send(cls, msg):
@@ -36,6 +37,7 @@ class XrpcEndpointTest(TestCase):
         self.client = self.app.test_client()
         FakeConnection.exc = None
         FakeConnection.sent = []
+        FakeConnection.connected = True
 
     def test_procedure(self):
         input = {
@@ -105,6 +107,19 @@ class XrpcEndpointTest(TestCase):
         ], FakeConnection.sent)
 
     def test_subscription_client_disconnects(self):
+        handler = subscription(server, 'io.example.subscribe')
+        FakeConnection.connected = False
+
+        def subscribe():
+            with self.app.test_request_context(query_string={'start': 3, 'end': 6}):
+                handler(FakeConnection)
+
+        subscriber = Thread(target=subscribe)
+        subscriber.start()
+        subscriber.join()
+        self.assertEqual([], FakeConnection.sent)
+
+    def test_subscription_connection_closed_exception(self):
         FakeConnection.exc = ConnectionClosed()
         handler = subscription(server, 'io.example.subscribe')
 
