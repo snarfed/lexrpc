@@ -254,6 +254,26 @@ LEXICONS = [
 
     {
         'lexicon': 1,
+        'id': 'io.example.delayedSubscribe',
+        'defs': {
+            'main': {
+                'type': 'subscription',
+                'parameters': {
+                    'type': 'params',
+                    'properties': {},
+                },
+                'message': {
+                    'schema': {
+                        'type': 'object',
+                        'properties': {},
+                    },
+                },
+            },
+        },
+    },
+
+    {
+        'lexicon': 1,
         'id': 'io.example.redirect',
         'defs': {
             'main': {

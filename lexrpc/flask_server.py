@@ -121,6 +121,10 @@ class XrpcEndpoint(View):
 def subscription(xrpc_server, nsid):
     """Generates websocket handlers for inbound XRPC subscription methods.
 
+    Note that this calls the XRPC method on a _different thread_, so that it can
+    block on it there while still periodically checking in the request thread
+    that the websocket client is still connected.
+
     Args:
       xrpc_server (lexrpc.Server)
       nsid (str): XRPC method NSID
@@ -138,13 +142,16 @@ def subscription(xrpc_server, nsid):
         # while we block waiting for results from the XRPC server method, and
         # we'll eventually exhaust the WSGI worker thread pool. background:
         # https://github.com/miguelgrinberg/flask-sock/issues/78
-        for header, payload in TimeoutIterator(
-                xrpc_server.call(nsid, **params),
-                timeout=SUBSCRIPTION_ITERATOR_TIMEOUT.total_seconds()):
+        iter = TimeoutIterator(xrpc_server.call(nsid, **params),
+                               timeout=SUBSCRIPTION_ITERATOR_TIMEOUT.total_seconds())
+        for result in iter:
             if not ws.connected:
                 logger.debug(f'Websocket client disconnected from {nsid}')
                 return
+            elif result == iter.get_sentinel():
+                continue
 
+            header, payload = result
             # TODO: validate header, payload?
             logger.debug(f'Sending to {nsid} websocket client: {header} {str(payload)[:500]}...')
 

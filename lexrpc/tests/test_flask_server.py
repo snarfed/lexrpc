@@ -1,6 +1,9 @@
 """Unit tests for flask_server.py."""
+from datetime import timedelta
 from threading import Thread
+import time
 from unittest import skip, TestCase
+from unittest.mock import patch
 
 import dag_cbor
 from flask import Flask
@@ -131,6 +134,31 @@ class XrpcEndpointTest(TestCase):
         subscriber.start()
         subscriber.join()
         self.assertEqual([], FakeConnection.sent)
+
+    @patch('lexrpc.flask_server.SUBSCRIPTION_ITERATOR_TIMEOUT',
+           timedelta(milliseconds=100))
+    def test_subscription_iterator_timeout(self):
+        @server.method('io.example.delayedSubscribe')
+        def delayed_subscribe():
+            time.sleep(.15)
+            yield {'foo': 'bar'}, {}
+            time.sleep(.15)
+            yield {'foo 2': 'bar'}, {}
+
+        handler = subscription(server, 'io.example.delayedSubscribe')
+
+        def subscribe():
+            with self.app.test_request_context():
+                handler(FakeConnection)
+
+        subscriber = Thread(target=subscribe)
+        subscriber.start()
+        subscriber.join()
+
+        self.assertEqual([
+            dag_cbor.encode({'foo': 'bar'}) + dag_cbor.encode({}),
+            dag_cbor.encode({'foo 2': 'bar'}) + dag_cbor.encode({}),
+        ], FakeConnection.sent)
 
     def test_subscription_http_not_websocket_405s(self):
         resp = self.client.post('/xrpc/io.example.subscribe')

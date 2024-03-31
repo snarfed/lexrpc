@@ -227,6 +227,10 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
+### 0.7 - unreleased
+
+* Fix websocket subscription server hang with blocking server XRPC methods due to exhausting worker thread pool ([#8](https://github.com/snarfed/lexrpc/issues/8)).
+
 ### 0.6 - 2024-03-16
 
 * Drop `typing-extensions` version pin now that [typing-validation has been updated to be compatible with it](https://github.com/hashberg-io/typing-validation/issues/1).
