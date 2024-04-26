@@ -183,12 +183,14 @@ class Base():
 
         schema = base
         if type != 'record':
-            # TODO: handle # fragment ids
             schema = base.get('schema')
 
         if not schema:
+            # TODO: handle # fragment ids
+            if '#' in nsid:
+                return obj
             if not obj:
-                return
+                return obj
             fail(f'{nsid} has no schema for {type}')
 
         if self._truncate:
@@ -196,7 +198,7 @@ class Base():
                 # TODO: recurse into reference, union, etc properties
                 if max_graphemes := config.get('maxGraphemes'):
                     val = obj.get(name)
-                    if len(val) > max_graphemes:
+                    if val and len(val) > max_graphemes:
                         obj = {
                             **obj,
                             name: val[:max_graphemes - 1] + '…',
