@@ -75,17 +75,13 @@ def fail(msg, exc=NotImplementedError):
 
 
 class Base():
-    """Base class for both XRPC client and server.
-
-    Attributes:
-    * defs (dict): lexicons. Key is str NSID with optional fragment, value is
-      dict lexicon preprocessed to be JSON Schema compatible.
-    """
+    """Base class for both XRPC client and server."""
 
     defs = None  # dict mapping id to lexicon def
-    _validate = True
+    _validate = None
+    _truncate = None
 
-    def __init__(self, lexicons=None, validate=True):
+    def __init__(self, lexicons=None, validate=True, truncate=False):
         """Constructor.
 
         Args:
@@ -94,11 +90,14 @@ class Base():
             lexicons.
           validate (bool): whether to validate schemas, parameters, and input
             and output bodies
+          truncate (bool): whether to truncate string values that are longer
+            than their ``maxGraphemes`` or ``maxLength`` in their lexicon
 
         Raises:
           jsonschema.SchemaError: if any schema is invalid
         """
         self._validate = validate
+        self._truncate = truncate
         self.defs = {}
 
         if lexicons is None:
@@ -162,33 +161,49 @@ class Base():
 
         Args:
           nsid (str): method NSID
-          type (str): either ``input`` or ``output``
-          obj (decoded): JSON object
+          type (str): ``input``, ``output``, ``parameters``, or ``record``
+          obj (dict): JSON object
 
         Returns:
-          None
+          dict: obj, either unchanged, or possible a modified copy if
+            ``truncate`` is enabled and a string value was too long
 
         Raises:
           NotImplementedError: if no lexicon exists for the given NSID, or the
             lexicon does not define a schema for the given type
           jsonschema.ValidationError: if the object is invalid
         """
-        if not self._validate:
-            return
-
         assert type in ('input', 'output', 'parameters', 'record'), type
 
         base = self._get_def(nsid).get(type, {})
         encoding = base.get('encoding')
         if encoding and encoding != 'application/json':
             # binary or other non-JSON data, pass through
-            return
+            return obj
 
-        schema = base.get('schema')
+        schema = base
+        if type != 'record':
+            # TODO: handle # fragment ids
+            schema = base.get('schema')
+
         if not schema:
             if not obj:
                 return
             fail(f'{nsid} has no schema for {type}')
+
+        if self._truncate:
+            for name, config in schema.get('properties', []).items():
+                # TODO: recurse into reference, union, etc properties
+                if max_graphemes := config.get('maxGraphemes'):
+                    val = obj.get(name)
+                    if len(val) > max_graphemes:
+                        obj = {
+                            **obj,
+                            name: val[:max_graphemes - 1] + '…',
+                        }
+
+        if not self._validate:
+            return obj
 
         # logger.debug(f'Validating {nsid} {type}')
         try:
@@ -198,6 +213,8 @@ class Base():
         except jsonschema.ValidationError as e:
             e.message = f'Error validating {nsid} {type}: {e.message}'
             raise
+
+        return obj
 
     def encode_params(self, params):
         """Encodes decoded parameter values.

@@ -292,6 +292,27 @@ LEXICONS = [
         },
     },
 
+
+    {
+        'lexicon': 1,
+        'id': 'com.example.stringLength',
+        'defs': {
+            'main': {
+                'type': 'record',
+                'record': {
+                    'type': 'object',
+                    'properties': {
+                        'string': {
+                            'type': 'string',
+                            'maxLength': 20,
+                            'maxGraphemes': 10,
+                        },
+                    },
+                },
+            },
+        },
+    },
+
     # TODO
 
     # {
@@ -580,26 +601,6 @@ LEXICONS = [
     #                     'integer': {
     #                         'type': 'integer',
     #                         'const': 0,
-    #                     },
-    #                 },
-    #             },
-    #         },
-    #     },
-    # },
-
-    # {
-    #     'lexicon': 1,
-    #     'id': 'com.example.stringLength',
-    #     'defs': {
-    #         'main': {
-    #             'type': 'record',
-    #             'record': {
-    #                 'type': 'object',
-    #                 'properties': {
-    #                     'string': {
-    #                         'type': 'string',
-    #                         'minLength': 2,
-    #                         'maxLength': 4,
     #                     },
     #                 },
     #             },

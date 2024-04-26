@@ -101,9 +101,9 @@ class Server(Base):
         subscription = self.defs[nsid]['type'] == 'subscription'
 
         # validate params and input, then encode params
-        self._maybe_validate(nsid, 'parameters', params)
+        params = self._maybe_validate(nsid, 'parameters', params)
         if not subscription:
-            self._maybe_validate(nsid, 'input', input)
+            input = self._maybe_validate(nsid, 'input', input)
 
         logger.debug('Running method')
         args = [] if subscription else [input]
@@ -111,6 +111,6 @@ class Server(Base):
 
         if not subscription:
             logger.debug(f'Got: {loggable(output)}')
-            self._maybe_validate(nsid, 'output', output)
+            output = self._maybe_validate(nsid, 'output', output)
 
         return output

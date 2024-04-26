@@ -144,12 +144,12 @@ class Client(Base):
         logger.debug(f'{nsid}: {params} {loggable(input)}')
 
         # validate params and input, then encode params
-        self._maybe_validate(nsid, 'parameters', params)
+        params = self._maybe_validate(nsid, 'parameters', params)
         params_str = self.encode_params(params)
 
         type = self._get_def(nsid)['type']
         if type == 'subscription':
-            self._maybe_validate(nsid, 'input', input)
+            input = self._maybe_validate(nsid, 'input', input)
 
         req_headers = {
             **DEFAULT_HEADERS,
@@ -212,7 +212,7 @@ class Client(Base):
 
         resp.raise_for_status()
 
-        self._maybe_validate(nsid, 'output', output)
+        output = self._maybe_validate(nsid, 'output', output)
         return output
 
     def _subscribe(self, url):
