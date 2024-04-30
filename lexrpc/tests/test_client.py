@@ -1,7 +1,8 @@
 """Unit tests for client.py."""
+from io import BytesIO
 import json
 from unittest import skip, TestCase
-from unittest.mock import call, patch
+from unittest.mock import ANY, call, patch
 import urllib.parse
 
 import dag_cbor
@@ -10,7 +11,7 @@ import requests
 import simple_websocket
 
 from .lexicons import LEXICONS
-from .. import client, Client
+from .. import base, client, Client
 
 HEADERS = {
     **client.DEFAULT_HEADERS,
@@ -445,3 +446,59 @@ class ClientTest(TestCase):
                 **client.DEFAULT_HEADERS,
                 'Content-Type': 'foo/bar',
             })
+
+    @patch('requests.post')
+    def test_binary_input_stream_with_refresh_token(self, mock_post):
+        session = {
+            'accessJwt': 'new-towkin',
+            'refreshJwt': 'reephrush',
+            'handle': 'handull',
+            'did': 'dyd',
+        }
+        post_resps = [
+            response(status=400, body={  # io.example.encodings, fails auth
+                'error': 'ExpiredToken',
+                'message': 'Token has expired'
+            }),
+            response(session),  # refreshSession
+            response({'ok': 'ok'}),  # io.example.encodings retry, succeeds
+        ]
+
+        cur = -1
+        def check_posts(url, data=None, **kwargs):
+            if url.endswith('/io.example.encodings'):
+                # consume data stream to test that we reset it for the retry
+                self.assertEqual(b'foo bar', data.read())
+            nonlocal cur
+            cur += 1
+            return post_resps[cur]
+
+        mock_post.side_effect = check_posts
+
+        cli = Client('http://ser.ver', lexicons=LEXICONS + base._bundled_lexicons,
+                     access_token='towkin', refresh_token='reephrush')
+        input = BytesIO(b'foo bar')
+        resp = cli.io.example.encodings(input, headers={'Content-Type': 'foo/bar'})
+        self.assertEqual({'ok': 'ok'}, resp)
+        self.assertEqual(session, cli.session)
+
+        mock_post.assert_has_calls([
+            call('http://ser.ver/xrpc/io.example.encodings',
+                 json=None, data=ANY, headers={
+                     **client.DEFAULT_HEADERS,
+                     'Content-Type': 'foo/bar',
+                     'Authorization': 'Bearer towkin'
+                 }),
+            call('http://ser.ver/xrpc/com.atproto.server.refreshSession',
+                 json=None, data=None, headers={
+                     **client.DEFAULT_HEADERS,
+                     'Content-Type': 'application/json',
+                     'Authorization': 'Bearer reephrush',
+                 }),
+            call('http://ser.ver/xrpc/io.example.encodings',
+                 json=None, data=ANY, headers={
+                     **client.DEFAULT_HEADERS,
+                     'Content-Type': 'foo/bar',
+                     'Authorization': 'Bearer new-towkin'
+                 }),
+        ], any_order=True)
