@@ -5,7 +5,7 @@ TODO:
 * asyncio support for subscription websockets
 """
 import copy
-from io import BufferedRandom, BytesIO
+from io import BytesIO
 import json
 import logging
 from urllib.parse import urljoin
@@ -179,10 +179,6 @@ class Client(Base):
         # query or procedure
         fn = requests.get if type == 'query' else requests.post
         logger.debug(f'Running requests.{fn} {url} {loggable(input)} {params_str} {log_headers}')
-
-        if input and not isinstance(input, (dict, str, bytes)):
-            input = BufferedRandom(input)
-
         resp = fn(
           url,
           json=input if input and isinstance(input, dict) else None,
@@ -212,8 +208,6 @@ class Client(Base):
         elif not resp.ok:  # token expired, try to refresh it
             if output and output.get('error') in TOKEN_ERRORS:
                 self.call(REFRESH_NSID)
-                if isinstance(input, BufferedRandom):
-                    input.seek(0)
                 return self.call(nsid, input=input, headers=req_headers, **params)  # retry
 
         resp.raise_for_status()
