@@ -5,7 +5,7 @@ TODO:
 * asyncio support for subscription websockets
 """
 import copy
-from io import BytesIO
+from io import BytesIO, IOBase
 import json
 import logging
 from urllib.parse import urljoin
@@ -178,6 +178,13 @@ class Client(Base):
 
         # query or procedure
         fn = requests.get if type == 'query' else requests.post
+
+        # buffer binary inputs in memory. ideally we'd stream instead, but if we
+        # have to refresh our token below, we need to seek the stream back to the
+        # beginning, and not all streams are seekable, eg requests.Request.raw
+        if isinstance(input, IOBase) or hasattr(input, 'read'):
+            input = input.read()
+
         logger.debug(f'Running requests.{fn} {url} {loggable(input)} {params_str} {log_headers}')
         resp = fn(
           url,

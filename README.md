@@ -231,6 +231,8 @@ Here's how to package, test, and ship a new release.
 
 * Fix websocket subscription server hang with blocking server XRPC methods due to exhausting worker thread pool ([#8](https://github.com/snarfed/lexrpc/issues/8)).
 * Add `truncate` kwarg to `Client` and `Server` constructors to automatically truncate (ellipsize) string values that are longer than their ``maxGraphemes`` or ``maxLength`` in their lexicon. Defaults to `False`.
+* `Client`:
+  * Bug fix for calls with binary inputs that refresh the access token. Calls with binary input now buffer the entire input in memory. ([snarfed/bridgy#1670](https://github.com/snarfed/bridgy/issues/1670))
 
 ### 0.6 - 2024-03-16
 

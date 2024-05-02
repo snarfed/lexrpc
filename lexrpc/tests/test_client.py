@@ -1,4 +1,5 @@
 """Unit tests for client.py."""
+from io import BytesIO
 import json
 from unittest import skip, TestCase
 from unittest.mock import call, patch
@@ -435,6 +436,23 @@ class ClientTest(TestCase):
         mock_post.return_value = response({'ok': 'ok'})
 
         resp = self.client.io.example.encodings(b'foo bar', headers={
+            'Content-Type': 'foo/bar',
+        })
+        self.assertEqual({'ok': 'ok'}, resp)
+
+        mock_post.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.encodings',
+            json=None, data=b'foo bar', headers={
+                **client.DEFAULT_HEADERS,
+                'Content-Type': 'foo/bar',
+            })
+
+    @patch('requests.post')
+    def test_binary_stream(self, mock_post):
+        mock_post.return_value = response({'ok': 'ok'})
+
+        stream = BytesIO(b'foo bar')
+        resp = self.client.io.example.encodings(stream, headers={
             'Content-Type': 'foo/bar',
         })
         self.assertEqual({'ok': 'ok'}, resp)
