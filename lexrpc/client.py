@@ -143,7 +143,8 @@ class Client(Base):
             return f'{len(val)} bytes' if isinstance(val, bytes) else val
         logger.debug(f'{nsid}: {params} {loggable(input)}')
 
-        # validate params and input, then encode params
+        # strip null params, validate params and input, then encode params
+        params = {k: v for k, v in params.items() if v is not None}
         params = self._maybe_validate(nsid, 'parameters', params)
         params_str = self.encode_params(params)
 

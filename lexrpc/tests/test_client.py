@@ -122,6 +122,18 @@ class ClientTest(TestCase):
             json=None, data=None, headers=HEADERS)
 
     @patch('requests.get')
+    def test_omit_None_param(self, mock_get):
+        output = {'foo': 'asdf', 'bar': 3}
+        mock_get.return_value = response(output)
+
+        got = self.client.io.example.query({}, z=None)
+        self.assertEqual(output, got)
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query',
+            json=None, data=None, headers=HEADERS)
+
+    @patch('requests.get')
     def test_call_headers(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
