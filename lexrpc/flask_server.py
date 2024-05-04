@@ -157,8 +157,8 @@ def subscription(xrpc_server, nsid):
 
             try:
                 ws.send(dag_cbor.encode(header) + dag_cbor.encode(payload))
-            except ConnectionClosed as cc:
-                logger.debug(f'Websocket client disconnected from {nsid}: {cc}')
+            except (ConnectionError, ConnectionClosed) as err:
+                logger.debug(f'Websocket client disconnected from {nsid}: {err}')
                 return
 
     return handler
