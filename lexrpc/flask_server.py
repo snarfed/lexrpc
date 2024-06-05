@@ -147,6 +147,7 @@ def subscription(xrpc_server, nsid):
         for result in iter:
             if not ws.connected:
                 logger.debug(f'Websocket client disconnected from {nsid}')
+                iter.interrupt()
                 return
             elif result == iter.get_sentinel():
                 continue
@@ -159,6 +160,7 @@ def subscription(xrpc_server, nsid):
                 ws.send(dag_cbor.encode(header) + dag_cbor.encode(payload))
             except (ConnectionError, ConnectionClosed) as err:
                 logger.debug(f'Websocket client disconnected from {nsid}: {err}')
+                iter.interrupt()
                 return
 
     return handler
