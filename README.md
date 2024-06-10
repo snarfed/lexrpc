@@ -231,6 +231,9 @@ Here's how to package, test, and ship a new release.
 
 * Fix websocket subscription server hang with blocking server XRPC methods due to exhausting worker thread pool ([#8](https://github.com/snarfed/lexrpc/issues/8)).
 * Add `truncate` kwarg to `Client` and `Server` constructors to automatically truncate (ellipsize) string values that are longer than their ``maxGraphemes`` or ``maxLength`` in their lexicon. Defaults to `False`.
+* Add new `base.XrpcError` exception type for named errors in method definitions.
+* `flask_server`:
+  * Handle `base.XrpcError`, convert to [JSON error response](https://atproto.com/specs/xrpc#error-responses) with `error` and `message` fields.
 * `Client`:
   * Bug fix for calls with binary inputs that refresh the access token. Calls with binary input now buffer the entire input in memory. ([snarfed/bridgy#1670](https://github.com/snarfed/bridgy/issues/1670))
   * Bug fix: omit null (`None`) parameters instead of passing them with string value `None`.

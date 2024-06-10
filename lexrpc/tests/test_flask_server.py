@@ -9,6 +9,7 @@ import dag_cbor
 from flask import Flask
 from simple_websocket import ConnectionClosed
 
+from ..base import XrpcError
 from ..flask_server import init_flask, subscription
 from ..server import Redirect
 from .lexicons import LEXICONS
@@ -221,6 +222,18 @@ class XrpcEndpointTest(TestCase):
         self.assertEqual({
             'error': 'InvalidRequest',
             'message': 'foo',
+        }, resp.json)
+
+    def test_raises_xrpc_error(self):
+        @server.method('io.example.xrpcError')
+        def err(input):
+            raise XrpcError('the message', name='TheName')
+
+        resp = self.client.post('/xrpc/io.example.xrpcError')
+        self.assertEqual(400, resp.status_code)
+        self.assertEqual({
+            'error': 'TheName',
+            'message': 'the message',
         }, resp.json)
 
     def test_integer_param(self):

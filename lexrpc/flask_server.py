@@ -103,8 +103,8 @@ class XrpcEndpoint(View):
             if isinstance(e, ValueError):
                 logging.info(f'Method raised', exc_info=True)
             return {
-                'error': 'InvalidRequest',
-                'message': str(e),
+                'error': getattr(e, 'name', 'InvalidRequest'),
+                'message': getattr(e, 'message', str(e)),
             }, 400, RESPONSE_HEADERS
 
         # prepare output

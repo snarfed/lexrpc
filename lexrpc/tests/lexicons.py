@@ -292,6 +292,16 @@ LEXICONS = [
         },
     },
 
+    {
+        'lexicon': 1,
+        'id': 'io.example.xrpcError',
+        'defs': {
+            'main': {
+                'type': 'query',
+            },
+        },
+    },
+
 
     {
         'lexicon': 1,

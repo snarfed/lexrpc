@@ -36,6 +36,18 @@ NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
 NSID_RE = re.compile(f'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
 
 
+class XrpcError(ValueError):
+    """A named error in an XRPC call.
+
+    ``name`` is the error, eg ``RepoNotFound`` in ``com.atproto.sync.getRepo``.
+    ``message`` is the human-readable string error message.
+    """
+    def __init__(self, message, name=None, **kwargs):
+        super().__init__(message, **kwargs)
+        self.name = name
+        self.message = message
+
+
 # TODO: drop jsonschema, implement from scratch? maybe skip until some methods
 # are implemented? probably not?
 

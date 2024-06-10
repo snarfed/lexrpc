@@ -49,11 +49,6 @@ def defs(input, **params):
     return {'out': 'bar'}
 
 
-@server.method('io.example.error')
-def error(input, **params):
-    pass
-
-
 @server.method('io.example.encodings')
 def encodings(input, **params):
     assert isinstance(input, bytes)
