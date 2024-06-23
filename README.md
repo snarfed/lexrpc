@@ -237,6 +237,7 @@ Here's how to package, test, and ship a new release.
 * `Client`:
   * Bug fix for calls with binary inputs that refresh the access token. Calls with binary input now buffer the entire input in memory. ([snarfed/bridgy#1670](https://github.com/snarfed/bridgy/issues/1670))
   * Bug fix: omit null (`None`) parameters instead of passing them with string value `None`.
+* Update bundled `app.bsky` and `com.atproto` lexicons, as of [bluesky-social/atproto@15cc6ff37c326d5c186385037c4bfe8b60ea41b1](https://github.com/bluesky-social/atproto/commit/15cc6ff37c326d5c186385037c4bfe8b60ea41b1).
 
 ### 0.6 - 2024-03-16
 
