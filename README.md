@@ -147,7 +147,7 @@ Here's how to package, test, and ship a new release.
 
     ```sh
     source local/bin/activate.csh
-    python3 -m unittest discover
+    python -m unittest discover
     ```
 1. Bump the version number in `pyproject.toml` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
 1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`. Check that the generated HTML looks fine by opening `docs/_build/html/index.html` and looking around.
@@ -155,7 +155,7 @@ Here's how to package, test, and ship a new release.
 1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
 
     ```sh
-    python3 -m build
+    python -m build
     setenv ver X.Y
     twine upload -r pypitest dist/lexrpc-$ver*
     ```
@@ -163,18 +163,18 @@ Here's how to package, test, and ship a new release.
 
     ```sh
     cd /tmp
-    python3 -m venv local
+    python -m venv local
     source local/bin/activate.csh
-    pip3 uninstall lexrpc # make sure we force pip to use the uploaded version
-    pip3 install --upgrade pip
-    pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver
+    pip uninstall lexrpc # make sure we force pip to use the uploaded version
+    pip install --upgrade pip
+    pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver
     deactivate
     ```
 1. Smoke test that the code trivially loads and runs.
 
     ```sh
     source local/bin/activate.csh
-    python3
+    python
     # run test code below
     deactivate
     ```
@@ -227,7 +227,7 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 0.7 - unreleased
+### 0.7 - 2024-06-24
 
 * Fix websocket subscription server hang with blocking server XRPC methods due to exhausting worker thread pool ([#8](https://github.com/snarfed/lexrpc/issues/8)).
 * Add `truncate` kwarg to `Client` and `Server` constructors to automatically truncate (ellipsize) string values that are longer than their ``maxGraphemes`` or ``maxLength`` in their lexicon. Defaults to `False`.

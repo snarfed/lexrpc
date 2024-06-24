@@ -201,7 +201,7 @@ Here’s how to package, test, and ship a new release.
     .. code:: sh
 
        source local/bin/activate.csh
-       python3 -m unittest discover
+       python -m unittest discover
 
 2.  Bump the version number in ``pyproject.toml`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
@@ -219,7 +219,7 @@ Here’s how to package, test, and ship a new release.
 
     .. code:: sh
 
-       python3 -m build
+       python -m build
        setenv ver X.Y
        twine upload -r pypitest dist/lexrpc-$ver*
 
@@ -228,11 +228,11 @@ Here’s how to package, test, and ship a new release.
     .. code:: sh
 
        cd /tmp
-       python3 -m venv local
+       python -m venv local
        source local/bin/activate.csh
-       pip3 uninstall lexrpc # make sure we force pip to use the uploaded version
-       pip3 install --upgrade pip
-       pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver
+       pip uninstall lexrpc # make sure we force pip to use the uploaded version
+       pip install --upgrade pip
+       pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver
        deactivate
 
 7.  Smoke test that the code trivially loads and runs.
@@ -240,7 +240,7 @@ Here’s how to package, test, and ship a new release.
     .. code:: sh
 
        source local/bin/activate.csh
-       python3
+       python
        # run test code below
        deactivate
 
@@ -311,6 +311,38 @@ Here’s how to package, test, and ship a new release.
 Changelog
 ---------
 
+0.7 - 2024-06-24
+~~~~~~~~~~~~~~~~
+
+-  Fix websocket subscription server hang with blocking server XRPC
+   methods due to exhausting worker thread pool
+   (`#8 <https://github.com/snarfed/lexrpc/issues/8>`__).
+-  Add ``truncate`` kwarg to ``Client`` and ``Server`` constructors to
+   automatically truncate (ellipsize) string values that are longer than
+   their ``maxGraphemes`` or ``maxLength`` in their lexicon. Defaults to
+   ``False``.
+-  Add new ``base.XrpcError`` exception type for named errors in method
+   definitions.
+-  ``flask_server``:
+
+   -  Handle ``base.XrpcError``, convert to `JSON error
+      response <https://atproto.com/specs/xrpc#error-responses>`__ with
+      ``error`` and ``message`` fields.
+
+-  ``Client``:
+
+   -  Bug fix for calls with binary inputs that refresh the access
+      token. Calls with binary input now buffer the entire input in
+      memory.
+      (`snarfed/bridgy#1670 <https://github.com/snarfed/bridgy/issues/1670>`__)
+   -  Bug fix: omit null (``None``) parameters instead of passing them
+      with string value ``None``.
+
+-  Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
+   `bluesky-social/atproto@15cc6ff37c326d5c186385037c4bfe8b60ea41b1 <https://github.com/bluesky-social/atproto/commit/15cc6ff37c326d5c186385037c4bfe8b60ea41b1>`__.
+
+.. _section-1:
+
 0.6 - 2024-03-16
 ~~~~~~~~~~~~~~~~
 
@@ -320,7 +352,7 @@ Changelog
 -  Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
    `bluesky-social/atproto@f45eef3 <https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282>`__.
 
-.. _section-1:
+.. _section-2:
 
 0.5 - 2023-12-10
 ~~~~~~~~~~~~~~~~
@@ -335,7 +367,7 @@ Changelog
    -  Bug fix: don’t infinite loop if ``refreshSession`` fails.
    -  Other minor authentication bug fixes.
 
-.. _section-2:
+.. _section-3:
 
 0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
@@ -376,7 +408,7 @@ Changelog
    -  Add the ``error`` field to the JSON response bodies for most error
       responses.
 
-.. _section-3:
+.. _section-4:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
@@ -388,7 +420,7 @@ Changelog
 -  Add new ``Server.register`` method for manually registering handlers.
 -  Bug fix for server ``@method`` decorator.
 
-.. _section-4:
+.. _section-5:
 
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
@@ -405,7 +437,7 @@ put more effort into matching and fully implementing them. Stay tuned!
    format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
    Original format is no longer supported.
 
-.. _section-5:
+.. _section-6:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~
