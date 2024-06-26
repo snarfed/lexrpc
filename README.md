@@ -227,6 +227,10 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
+### 0.8 - unreleased
+* `server`:
+  * Add `status` param to `Redirect`.
+
 ### 0.7 - 2024-06-24
 
 * Fix websocket subscription server hang with blocking server XRPC methods due to exhausting worker thread pool ([#8](https://github.com/snarfed/lexrpc/issues/8)).

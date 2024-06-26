@@ -93,7 +93,7 @@ class XrpcEndpoint(View):
             # io.BufferedReader/Writer?
             output = self.server.call(nsid, input=input, **params)
         except Redirect as r:
-            return redirect(r.to)
+            return redirect(r.to, code=r.status)
         except NotImplementedError as e:
             return {
                 'error': 'MethodNotImplemented',
