@@ -228,6 +228,7 @@ Here's how to package, test, and ship a new release.
 ## Changelog
 
 ### 0.8 - unreleased
+* `flask_server`: add new top-level `subscribers` attr that tracks clients connected (subscribed) to each event stream.
 * `server`:
   * Add `status` param to `Redirect`.
 

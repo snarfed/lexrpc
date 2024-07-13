@@ -260,7 +260,9 @@ LEXICONS = [
                 'type': 'subscription',
                 'parameters': {
                     'type': 'params',
-                    'properties': {},
+                    'properties': {
+                        'foo': {'type': 'string'},
+                    },
                 },
                 'message': {
                     'schema': {

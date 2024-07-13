@@ -1,9 +1,10 @@
 """Flask handler for ``/xrpc/...`` endpoints."""
-from datetime import timedelta
+from collections import defaultdict, namedtuple
+from datetime import datetime, timedelta
 import logging
 
 import dag_cbor
-from flask import redirect, request
+from flask import after_this_request, redirect, request
 from flask.json import jsonify
 from flask.views import View
 from flask_sock import Sock
@@ -11,6 +12,7 @@ from iterators import TimeoutIterator
 from jsonschema import ValidationError
 from simple_websocket import ConnectionClosed
 
+from . import base
 from .base import NSID_RE
 from .server import Redirect
 
@@ -24,6 +26,10 @@ RESPONSE_HEADERS = {
     'Access-Control-Allow-Methods': '*',
     'Access-Control-Allow-Origin': '*',
 }
+
+# maps string NSID to Subscriber
+subscribers = defaultdict(list)
+Subscriber = namedtuple('Subscriber', ('ip', 'user_agent', 'args', 'start'))
 
 
 def init_flask(xrpc_server, app):
@@ -129,12 +135,11 @@ def subscription(xrpc_server, nsid):
       xrpc_server (lexrpc.Server)
       nsid (str): XRPC method NSID
     """
-    def handler(ws):
+    def handle(ws):
         """
         Args:
-          ws (simple_websocket.ws.WSConnection)
+          ws (wsproto.WSConnection)
         """
-        logger.debug(f'New websocket client for {nsid}')
         params = xrpc_server.decode_params(nsid, request.args.items(multi=True))
 
         # use TimeoutIterator here so that we can periodically detect if the
@@ -163,4 +168,20 @@ def subscription(xrpc_server, nsid):
                 iter.interrupt()
                 return
 
-    return handler
+    def track_subscriber(ws):
+        logger.debug(f'New websocket client for {nsid}: {request.remote_addr} {request.user_agent}')
+        subscriber = Subscriber(ip=request.remote_addr,
+                                user_agent=str(request.user_agent),
+                                args=request.args.to_dict(),
+                                start=base.now())
+        subscribers[nsid].append(subscriber)
+
+        try:
+            handle(ws)
+        finally:
+            # ideally I'd use Flask's after_this_request instead, but it doesn't
+            # guarantee that it'll run if the request raises an uncaught
+            # exception. teardown_request does, but it runs on *every* request.
+            subscribers[nsid].remove(subscriber)
+
+    return track_subscriber

@@ -342,6 +342,7 @@ intersphinx_mapping = {
     'simple_websocket': ('https://simple-websocket.readthedocs.io/en/stable', None),
     'urllib3': ('https://urllib3.readthedocs.io/en/stable', None),
     'websockets': ('https://websockets.readthedocs.io/en/stable', None),
+    'wsproto': ('https://python-hyper.org/projects/wsproto/', None)
 }
 
 # -- Post process ------------------------------------------------------------

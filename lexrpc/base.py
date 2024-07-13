@@ -1,5 +1,6 @@
 """Base code shared by both server and client."""
 import copy
+from datetime import timezone
 from importlib.resources import files
 import json
 import logging
@@ -34,6 +35,10 @@ PARAMETER_TYPES = frozenset((
 NSID_SEGMENT = '[a-zA-Z0-9-]+'
 NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
 NSID_RE = re.compile(f'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
+
+
+# wrapper for datetime.now, lets us mock it out in tests
+now = lambda tz=timezone.utc, **kwargs: datetime.now(tz=tz, **kwargs)
 
 
 class XrpcError(ValueError):

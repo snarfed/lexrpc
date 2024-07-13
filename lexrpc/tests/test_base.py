@@ -1,10 +1,14 @@
 """Unit tests for base.py."""
+from datetime import datetime
 from unittest import skip, TestCase
 
 from jsonschema import SchemaError, ValidationError
 
 from .lexicons import LEXICONS
 from ..base import Base
+
+# set as the base.now return value in mocks in tests
+NOW = datetime(2022, 2, 3)
 
 
 class BaseTest(TestCase):
