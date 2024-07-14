@@ -173,7 +173,7 @@ def subscription(xrpc_server, nsid):
         subscriber = Subscriber(ip=request.remote_addr,
                                 user_agent=str(request.user_agent),
                                 args=request.args.to_dict(),
-                                start=base.now())
+                                start=base.now().replace(microsecond=0))
         subscribers[nsid].append(subscriber)
 
         try:
