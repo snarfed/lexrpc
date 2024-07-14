@@ -177,7 +177,7 @@ def subscription(xrpc_server, nsid):
         else:
             ip = request.remote_addr
 
-        logger.debug(f'New websocket client for {nsid}: {ip} {request.user_agent} {request.headers}')
+        logger.debug(f'New websocket client for {nsid}: {ip} {request.user_agent}')
         subscriber = Subscriber(ip=ip,
                                 user_agent=str(request.user_agent),
                                 args=request.args.to_dict(),
