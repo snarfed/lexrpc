@@ -174,13 +174,12 @@ class XrpcEndpointTest(TestCase):
 
     def test_subscribers(self):
         start = Barrier(2)
-        cont = Condition()
+        cont = Barrier(3)
 
         @server.method('io.example.delayedSubscribe')
         def delayed_subscribe(foo=None):
             start.wait()
-            with cont:
-                cont.wait()
+            cont.wait()
             yield {}, {}
 
         handler = subscription(server, 'io.example.delayedSubscribe')
@@ -203,7 +202,7 @@ class XrpcEndpointTest(TestCase):
             Subscriber('1.2.3.4', 'first', {'foo': 'bar'}, NOW),
         ], subscribers['io.example.delayedSubscribe'])
 
-        start = Barrier(2)
+        start.reset()
         second = Thread(target=subscribe, kwargs={
             'query_string': {'foo': 'baz'},
             'headers': {'User-Agent': 'second'},
@@ -217,8 +216,7 @@ class XrpcEndpointTest(TestCase):
             Subscriber('5.6.7.8', 'second', {'foo': 'baz'}, NOW),
         ], subscribers['io.example.delayedSubscribe'])
 
-        with cont:
-            cont.notify_all()
+        cont.wait()
         first.join()
         second.join()
         self.assertEqual(0, len(subscribers['io.example.delayedSubscribe']))
