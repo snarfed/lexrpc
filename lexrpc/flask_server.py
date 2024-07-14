@@ -169,8 +169,16 @@ def subscription(xrpc_server, nsid):
                 return
 
     def track_subscriber(ws):
-        logger.debug(f'New websocket client for {nsid}: {request.remote_addr} {request.user_agent} {request.headers}')
-        subscriber = Subscriber(ip=request.remote_addr,
+        # support X-Forwarded-For header:
+        # https://cloud.google.com/appengine/docs/flexible/reference/request-headers#app_engine-specific_headers
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+        if x_forwarded_for := request.headers.get('X-Forwarded-For'):
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.remote_addr
+
+        logger.debug(f'New websocket client for {nsid}: {ip} {request.user_agent} {request.headers}')
+        subscriber = Subscriber(ip=ip,
                                 user_agent=str(request.user_agent),
                                 args=request.args.to_dict(),
                                 start=base.now().replace(microsecond=0))

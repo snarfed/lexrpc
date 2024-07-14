@@ -205,8 +205,11 @@ class XrpcEndpointTest(TestCase):
         start.reset()
         second = Thread(target=subscribe, kwargs={
             'query_string': {'foo': 'baz'},
-            'headers': {'User-Agent': 'second'},
-            'environ_overrides': {'REMOTE_ADDR': '5.6.7.8'},
+            'headers': {
+                'User-Agent': 'second',
+                'X-Forwarded-For': '5.6.7.8, 9.9.9.9'
+            },
+            'environ_overrides': {'REMOTE_ADDR': '0.0.0.0'},
         })
         second.start()
         start.wait()
