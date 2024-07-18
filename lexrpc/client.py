@@ -200,13 +200,13 @@ class Client(Base):
             output = resp.json()
 
         if not resp.ok:
-            logger.debug(f'Got: {resp.text}')
+            logger.debug(f'Got {resp.status_code}: {resp.text}')
 
         if nsid in (LOGIN_NSID, REFRESH_NSID):  # auth
             if resp.ok:
-                logger.info(f'Logged in as {output.get("did")}, storing session')
+                logger.debug(f'Logged in as {output.get("did")}, storing session')
             else:
-                logger.info(f'Login failed, nulling out session')
+                logger.debug(f'Login failed, nulling out session')
                 output = {}
 
             self.session = output

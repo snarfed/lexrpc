@@ -107,7 +107,7 @@ class XrpcEndpoint(View):
             }, 501, RESPONSE_HEADERS
         except (ValidationError, ValueError) as e:
             if isinstance(e, ValueError):
-                logging.info(f'Method raised', exc_info=True)
+                logging.debug(f'Method raised', exc_info=True)
             return {
                 'error': getattr(e, 'name', 'InvalidRequest'),
                 'message': getattr(e, 'message', str(e)),
