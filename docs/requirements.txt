@@ -1,2 +1,2 @@
-sphinx~=7.4
+sphinx~=8.0
 sphinx-rtd-theme>=1.0.0
