@@ -211,7 +211,7 @@ class Base():
             fail(f'{nsid} has no schema for {type}')
 
         if self._truncate:
-            for name, config in schema.get('properties', []).items():
+            for name, config in schema.get('properties', {}).items():
                 # TODO: recurse into reference, union, etc properties
                 if max_graphemes := config.get('maxGraphemes'):
                     val = obj.get(name)
