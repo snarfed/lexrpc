@@ -10,7 +10,7 @@ import json
 import logging
 from urllib.parse import urljoin
 
-import dag_cbor
+import libipld
 import requests
 import simple_websocket
 
@@ -229,9 +229,7 @@ class Client(Base):
 
         try:
             while True:
-                buf = BytesIO(ws.receive())
-                header = dag_cbor.decode(buf, allow_concat=True)
-                payload = dag_cbor.decode(buf)
+                header, payload = libipld.decode_dag_cbor_multi(ws.receive())
                 yield (header, payload)
         except simple_websocket.ConnectionClosed as cc:
             logger.debug(cc)

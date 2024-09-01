@@ -28,6 +28,7 @@ dependencies = [
     'dag-cbor',
     'iterators',
     'jsonschema>=4.0',
+    'libipld',
     'requests>=2.0',
     'simple-websocket',
 ]
