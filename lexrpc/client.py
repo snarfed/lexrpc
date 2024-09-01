@@ -229,7 +229,6 @@ class Client(Base):
 
         try:
             while True:
-                header, payload = libipld.decode_dag_cbor_multi(ws.receive())
-                yield (header, payload)
+                yield ws.receive()
         except simple_websocket.ConnectionClosed as cc:
             logger.debug(cc)
