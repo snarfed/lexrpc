@@ -10,7 +10,6 @@ import json
 import logging
 from urllib.parse import urljoin
 
-import libipld
 import requests
 import simple_websocket
 
