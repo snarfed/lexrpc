@@ -26,7 +26,7 @@ LEXICONS = [
                         'required': ['foo'],
                         'properties': {
                             'foo': {'type': 'string'},
-                            'bar': {'type': 'number'},
+                            'bar': {'type': 'integer'},
                         },
                     },
                 },
@@ -37,7 +37,7 @@ LEXICONS = [
                         'required': ['foo'],
                         'properties': {
                             'foo': {'type': 'string'},
-                            'bar': {'type': 'number'},
+                            'bar': {'type': 'integer'},
                         },
                     },
                 },
@@ -65,7 +65,7 @@ LEXICONS = [
                         'required': ['foo'],
                         'properties': {
                             'foo': {'type': 'string'},
-                            'bar': {'type': 'number'},
+                            'bar': {'type': 'integer'},
                         },
                     },
                 },
@@ -104,7 +104,7 @@ LEXICONS = [
                     'required': ['bar'],
                     'properties': {
                         'foo': {'type': 'string'},
-                        'bar': {'type': 'number'},
+                        'bar': {'type': 'integer'},
                     },
                 },
             },
@@ -148,11 +148,13 @@ LEXICONS = [
                 'type': 'record',
                 'record': {
                     'required': ['baz'],
-                    'baz': {'type': 'integer', },
-                    'biff': {
-                        'type': 'object',
-                        'properties': {
-                            'baj': {'type': 'string'},
+                    'properties': {
+                        'baz': {'type': 'integer', },
+                        'biff': {
+                            'type': 'object',
+                            'properties': {
+                                'baj': {'type': 'string'},
+                            },
                         },
                     },
                 },
@@ -325,91 +327,61 @@ LEXICONS = [
         },
     },
 
+    {
+        'lexicon': 1,
+        'id': 'io.example.kitchenSink',
+        'defs': {
+            'main': {
+                'type': 'record',
+                'description': 'A record',
+                'key': 'tid',
+                'record': {
+                    'type': 'object',
+                    'required': ['object', 'array', 'boolean', 'integer', 'string', 'datetime'],
+                    'properties': {
+                        'object': {
+                            'type': 'ref',
+                            'ref': '#object'
+                        },
+                        'array': {
+                            'type': 'array',
+                            'items': {'type': 'string'},
+                        },
+                        'boolean': {'type': 'boolean'},
+                        'integer': {'type': 'integer'},
+                        'string': {'type': 'string'},
+                        'datetime': {'type': 'datetime'},
+                    },
+                },
+            },
+            'object': {
+                'type': 'object',
+                'required': ['object', 'array', 'boolean', 'integer', 'string'],
+                'properties': {
+                    'object': {
+                        'type': 'ref',
+                        'ref': '#subobject',
+                    },
+                    'array': {
+                        'type': 'array',
+                        'items': {'type': 'string'},
+                    },
+                    'boolean': {'type': 'boolean'},
+                    'integer': {'type': 'integer'},
+                    'string': {'type': 'string'},
+                },
+            },
+            'subobject': {
+                'type': 'object',
+                'required': ['boolean'],
+                'properties': {
+                    'boolean': {'type': 'boolean'},
+                },
+            },
+        },
+    },
+
     # TODO
-
-    # {
-    #     'lexicon': 1,
-    #     'id': 'com.example.kitchenSink',
-    #     'defs': {
-    #         'main': {
-    #             'type': 'record',
-    #             'description': 'A record',
-    #             'key': 'tid',
-    #             'record': {
-    #                 'type': 'object',
-    #                 'required': ['object', 'array', 'boolean', 'number', 'integer', 'string', 'datetime'],
-    #                 'properties': {
-    #                     'object': {
-    #                         'type': 'ref',
-    #                         'ref': '#object'
-    #                     },
-    #                     'array': {
-    #                         'type': 'array',
-    #                         'items': {'type': 'string'},
-    #                     },
-    #                     'boolean': {'type': 'boolean'},
-    #                     'number': {'type': 'number'},
-    #                     'integer': {'type': 'integer'},
-    #                     'string': {'type': 'string'},
-    #                     'datetime': {'type': 'datetime'},
-    #                 },
-    #             },
-    #         },
-    #         'object': {
-    #             'type': 'object',
-    #             'required': ['object', 'array', 'boolean', 'number', 'integer', 'string'],
-    #             'properties': {
-    #                 'object': {
-    #                     'type': 'ref',
-    #                     'ref': '#subobject',
-    #                 },
-    #                 'array': {
-    #                     'type': 'array',
-    #                     'items': {'type': 'string'},
-    #                 },
-    #                 'boolean': {'type': 'boolean'},
-    #                 'number': {'type': 'number'},
-    #                 'integer': {'type': 'integer'},
-    #                 'string': {'type': 'string'},
-    #             },
-    #         },
-    #         'subobject': {
-    #             'type': 'object',
-    #             'required': ['boolean'],
-    #             'properties': {
-    #                 'boolean': {'type': 'boolean'},
-    #             },
-    #         },
-    #     },
-    # },
-
-    # {
-    #     'lexicon': 1,
-    #     'id': 'com.example.query',
-    #     'defs': {
-    #         'main': {
-    #             'type': 'query',
-    #             'description': 'A query',
-    #             'parameters': {
-    #                 'type': 'params',
-    #                 'required': ['boolean', 'number', 'integer'],
-    #                 'properties': {
-    #                     'boolean': {'type': 'boolean'},
-    #                     'number': {'type': 'number'},
-    #                     'integer': {'type': 'integer'},
-    #                     'string': {'type': 'string'},
-    #                 },
-    #             },
-    #             'output': {
-    #                 'encoding': 'application/json',
-    #                 'schema': {
-    #                     'type': 'ref',
-    #                     'ref': 'com.example.kitchenSink#object',
-    #                 },
-    #             },
-    #         },
-    #     },
-    # },
 
     # {
     #     'lexicon': 1,
@@ -477,7 +449,7 @@ LEXICONS = [
     #                         'type': 'array',
     #                         'minLength': 2,
     #                         'maxLength': 4,
-    #                         'items': {'type': 'number'},
+    #                         'items': {'type': 'integer'},
     #                     },
     #                 },
     #             },
@@ -506,15 +478,15 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.numberRange',
+    #     'id': 'com.example.integerRange',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
     #             'record': {
     #                 'type': 'object',
     #                 'properties': {
-    #                     'number': {
-    #                         'type': 'number',
+    #                     'integer': {
+    #                         'type': 'integer',
     #                         'minimum': 2,
     #                         'maximum': 4,
     #                     },
@@ -526,15 +498,15 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.numberEnum',
+    #     'id': 'com.example.integerEnum',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
     #             'record': {
     #                 'type': 'object',
     #                 'properties': {
-    #                     'number': {
-    #                         'type': 'number',
+    #                     'integer': {
+    #                         'type': 'integer',
     #                         'enum': [1, 1.5, 2],
     #                     },
     #                 },
@@ -545,15 +517,15 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.numberConst',
+    #     'id': 'com.example.integerConst',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
     #             'record': {
     #                 'type': 'object',
     #                 'properties': {
-    #                     'number': {
-    #                         'type': 'number',
+    #                     'integer': {
+    #                         'type': 'integer',
     #                         'const': 0,
     #                     },
     #                 },

@@ -1,8 +1,7 @@
 """Unit tests for server.py."""
 from unittest import skip, TestCase
 
-from jsonschema import ValidationError
-
+from ..base import ValidationError
 from .lexicons import LEXICONS
 from ..server import Server
 

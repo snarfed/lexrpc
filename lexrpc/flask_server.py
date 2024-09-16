@@ -9,11 +9,10 @@ from flask.json import jsonify
 from flask.views import View
 from flask_sock import Sock
 from iterators import TimeoutIterator
-from jsonschema import ValidationError
 from simple_websocket import ConnectionClosed
 
 from . import base
-from .base import NSID_RE
+from .base import NSID_RE, ValidationError
 from .server import Redirect
 
 logger = logging.getLogger(__name__)

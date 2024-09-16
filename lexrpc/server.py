@@ -35,7 +35,7 @@ class Server(Base):
           kwargs: passed through to :class:`Base`
 
         Raises:
-          jsonschema.SchemaError: if any schema is invalid
+          ValidationError: if any schema is invalid
         """
         super().__init__(**kwargs)
         self._methods = {}
@@ -87,8 +87,8 @@ class Server(Base):
         Raises:
           NotImplementedError: if the given NSID is not implemented or found in
             any of the loaded lexicons
-          jsonschema.ValidationError: if the parameters, input, or returned
-            output don't validate against the method's schemas
+          ValidationError: if the parameters, input, or returned output don't
+            validate against the method's schemas
         """
         def loggable(val):
             return f'{len(val)} bytes' if isinstance(val, bytes) else val

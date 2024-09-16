@@ -91,7 +91,7 @@ class Client(Base):
           kwargs: passed through to :class:`Base`
 
         Raises:
-          jsonschema.SchemaError: if any schema is invalid
+          ValidationError: if any schema is invalid
         """
         super().__init__(**kwargs)
 
@@ -136,8 +136,8 @@ class Client(Base):
         Raises:
           NotImplementedError: if the given NSID is not found in any of the
             loaded lexicons
-          jsonschema.ValidationError: if the parameters, input, or returned
-            output don't validate against the method's schemas
+          ValidationError: if the parameters, input, or returned output don't
+            validate against the method's schemas
           requests.RequestException: if the connection or HTTP request to the
             remote server failed
         """

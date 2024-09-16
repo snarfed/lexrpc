@@ -6,12 +6,12 @@ from unittest.mock import call, patch
 import urllib.parse
 
 import dag_cbor
-from jsonschema import ValidationError
 import requests
 import simple_websocket
 
 from .lexicons import LEXICONS
 from .. import client, Client
+from ..base import ValidationError
 
 HEADERS = {
     **client.DEFAULT_HEADERS,
@@ -74,11 +74,9 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None, data=None, headers=HEADERS)
 
-    @patch('requests.get')
+    @patch('requests.get', return_value=response({'foo': 'asdf'}))
     def test_call_address_trailing_slash(self, mock_get):
         client = Client('http://ser.ver/', lexicons=LEXICONS)
-        mock_get.return_value = response({})
-
         got = client.call('io.example.query', {})
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
@@ -159,10 +157,8 @@ class ClientTest(TestCase):
 
     # TODO
     @skip
-    @patch('requests.get')
+    @patch('requests.get', return_value=response())
     def test_no_output_error(self, mock_get):
-        mock_get.return_value = response()
-
         with self.assertRaises(ValidationError):
             got = self.client.io.example.query({})
 
@@ -170,27 +166,24 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query',
             json=None, data=None, headers=HEADERS)
 
-    @patch('requests.post')
+    @patch('requests.post', return_value=response())
     def test_no_params_input_output(self, mock_post):
-        mock_post.return_value = response()
         self.assertIsNone(self.client.io.example.noParamsInputOutput({}))
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.noParamsInputOutput',
             json=None, data=None, headers=HEADERS)
 
-    @patch('requests.post')
+    @patch('requests.post', return_value=response())
     def test_dashed_name(self, mock_post):
-        mock_post.return_value = response()
         self.assertIsNone(self.client.io.example.dashed_name({}))
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.dashed-name',
             json=None, data=None, headers=HEADERS)
 
-    @patch('requests.get')
+    @patch('requests.get', return_value=response({'out': 'foo'}))
     def test_defs(self, mock_get):
-        mock_get.return_value = response({'out': 'foo'})
         self.assertEqual({'out': 'foo'},
                          self.client.io.example.defs({'in': 'bar'}))
 
@@ -198,13 +191,11 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.defs',
             json={'in': 'bar'}, data=None, headers=HEADERS)
 
-    @patch('requests.get')
+    @patch('requests.get', return_value=response(status=400, body={
+        'error': 'Something',
+        'message': 'too bad'
+    }))
     def test_error(self, mock_get):
-        mock_get.return_value = response(status=400, body={
-            'error': 'Something',
-            'message': 'too bad'
-        })
-
         with self.assertRaises(requests.HTTPError):
             self.client.call('io.example.query', {}, x='y')
 
@@ -227,10 +218,8 @@ class ClientTest(TestCase):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({}, bar='c')
 
-    @patch('requests.post')
+    @patch('requests.post', return_value=response(['z']))
     def test_array(self, mock_post):
-        mock_post.return_value = response(['z'])
-
         self.assertEqual(['z'], self.client.io.example.array({}, foo=['a', 'b']))
 
         mock_post.assert_called_once_with(
@@ -351,11 +340,14 @@ class ClientTest(TestCase):
             'handle': 'handull',
             'did': 'dyd',
         }
-        output = {'foo': 'asdf', 'bar': 3}
+        output = {
+            'did': 'unused',
+            'availableUserDomains': ['moo.com'],
+        }
         mock_get.side_effect = [
             response(status=400, body={
                 'error': 'ExpiredToken',
-                'message': 'Token has expired'
+                'message': 'Token has expired',
             }),
             response(output),
         ]
@@ -368,13 +360,13 @@ class ClientTest(TestCase):
 
         client = Client(access_token='towkin', refresh_token='reephrush',
                         session_callback=callback)
-        got = client.com.atproto.server.describeServer(x='y')
+        got = client.com.atproto.server.describeServer()
         self.assertEqual(output, got)
         self.assertEqual(session, client.session)
         self.assertEqual([session], callback_got)
 
         mock_get.assert_any_call(
-            'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',
+            'https://bsky.social/xrpc/com.atproto.server.describeServer',
             json=None,
             data=None,
             headers={**HEADERS, 'Authorization': 'Bearer towkin'})
@@ -384,23 +376,20 @@ class ClientTest(TestCase):
             data=None,
             headers={**HEADERS, 'Authorization': 'Bearer reephrush'})
         mock_get.assert_any_call(
-            'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',
+            'https://bsky.social/xrpc/com.atproto.server.describeServer',
             json=None,
             data=None,
             headers={**HEADERS, 'Authorization': 'Bearer new-towkin'})
 
-    @patch('requests.get')
-    @patch('requests.post')
+    @patch('requests.get', return_value=response(status=400, body={
+        'error': 'ExpiredToken',
+        'message': 'Token has expired'
+    }))
+    @patch('requests.post', return_value=response(status=400, body={
+        'error': 'ExpiredToken',
+        'message': 'Token has been revoked'
+    }))
     def test_refresh_token_fails(self, mock_post, mock_get):
-        mock_get.return_value = response(status=400, body={
-            'error': 'ExpiredToken',
-            'message': 'Token has expired'
-        })
-        mock_post.return_value = response(status=400, body={
-            'error': 'ExpiredToken',
-            'message': 'Token has been revoked'
-        })
-
         callback_got = []
         def callback(session):
             nonlocal callback_got
@@ -429,7 +418,9 @@ class ClientTest(TestCase):
     def test_createSession_sets_session(self, mock_post):
         session = {
             'accessJwt': 'towkin',
-            'foo': 'bar',
+            'refreshJwt': 'unused',
+            'handle': 'unused',
+            'did': 'unused',
         }
         mock_post.return_value = response(session)
 
@@ -456,10 +447,8 @@ class ClientTest(TestCase):
         got = client.call('com.atproto.server.getSession', {})
         self.assertEqual(output, got)
 
-    @patch('requests.post')
+    @patch('requests.post', return_value=response({'ok': 'ok'}))
     def test_binary_data(self, mock_post):
-        mock_post.return_value = response({'ok': 'ok'})
-
         resp = self.client.io.example.encodings(b'foo bar', headers={
             'Content-Type': 'foo/bar',
         })
