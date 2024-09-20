@@ -94,7 +94,7 @@ class Client(Base):
         """
         super().__init__(**kwargs)
 
-        logger.debug(f'Using server at {address}')
+        # logger.debug(f'Using server at {address}')
         assert address.startswith('http://') or address.startswith('https://'), \
             f"{address} doesn't start with http:// or https://"
         self.address = address
