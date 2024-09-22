@@ -107,7 +107,7 @@ class BaseTest(TestCase):
                 },
             })
 
-    def test_validate_record_kitchen_sinkpass(self):
+    def test_validate_record_kitchen_sink_pass(self):
         self.base._maybe_validate('io.example.kitchenSink', 'record', {
             # TODO
             # 'object': {

@@ -21,10 +21,10 @@
     { "name": "invalid bytes field",
       "rkey": "demo",
       "data": { "$type": "example.lexicon.record", "integer": 1, "bytes": "green" } },
-    { "name": "invalid bytes: empty object",
+    { "name": "invalid bytes empty object",
       "rkey": "demo",
       "data": { "$type": "example.lexicon.record", "integer": 1, "bytes": {}}},
-    { "name": "invalid bytes: wrong type",
+    { "name": "invalid bytes wrong type",
       "rkey": "demo",
       "data": { "$type": "example.lexicon.record", "integer": 1, "bytes": {
         "bytes": "asdfasdfasdfasdf"
@@ -35,7 +35,7 @@
     { "name": "invalid blob field",
       "rkey": "demo",
       "data": { "$type": "example.lexicon.record", "integer": 1, "blob": "green" } },
-    { "name": "invalid blob: wrong type",
+    { "name": "invalid blob wrong type",
       "rkey": "demo",
       "data": { "$type": "example.lexicon.record", "integer": 1, "bytes": {
             "type": "blob",

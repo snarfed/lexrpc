@@ -186,7 +186,6 @@ class Base():
             schema = base.get('schema')
 
         if not schema:
-
             return
             # ...or should we fail if obj is non-null? maybe not, since then
             # we'd fail if a query with no params gets requested with any query
