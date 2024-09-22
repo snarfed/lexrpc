@@ -31,12 +31,34 @@ PARAMETER_TYPES = frozenset((
 # https://atproto.com/specs/lexicon#overview-of-types
 FIELD_TYPES = {
     'null': NoneType,
+    'blob': dict,
     'boolean': bool,
     'integer': int,
     'string': str,
     'bytes': bytes,
     'array': list,
     'object': dict,
+}
+
+# https://atproto.com/specs/data-model#blob-type
+BLOB_DEF = {
+    'type': 'record',
+    'record': {
+        'required': ['ref', 'mimeType', 'size'],
+        'properties': {
+            'ref': {
+                'type': 'ref',
+            },
+            'mimeType': {
+                'type': 'string',
+                'minLength': 1,
+            },
+            'size': {
+                'type': 'integer',
+                'minimum': 1,
+            },
+        },
+    },
 }
 
 # https://atproto.com/specs/nsid
@@ -137,6 +159,8 @@ class Base():
 
                 self.defs[id] = defn
 
+        self.defs['blob'] = BLOB_DEF
+
         if not self.defs:
             logger.error('No lexicons loaded!')
 
@@ -216,10 +240,15 @@ class Base():
 
             val = obj[name]
             if val is None:
-                if name not in schema.get('nullable', []):
+                if prop['type'] != 'null' and name not in schema.get('nullable', []):
                     raise ValidationError(
                         f'{nsid} {type} property {name} is not nullable')
                 continue
+
+            if prop['type'] == 'unknown':
+                continue
+
+            # if prop['type'] == 'blob':
 
             # TODO: datetime
             # TODO: token

@@ -5,6 +5,8 @@ from pathlib import Path
 import os
 from unittest import TestCase
 
+import dag_json
+
 from ..base import Base, ValidationError
 
 
@@ -21,13 +23,17 @@ def test_name(input):
   return 'test_' + input['name'].replace(' ', '_')
 
 
-for input in json.load(Path('record-data-valid.json').open()):
-    def test(self):
+for input in dag_json.decode(Path('record-data-valid.json').read_bytes(),
+                             dialect='atproto'):
+    def test_fn():
+        data = input['data']
         # shouldn't raise
-        base._maybe_validate(input['data']['$type'], 'record', input['data'])
-    tests[test_name(input)] = test
+        return lambda self: base._maybe_validate(data['$type'], 'record', data)
 
-for input in json.load(Path('record-data-invalid.json').open()):
+    tests[test_name(input)] = test_fn()
+
+for input in dag_json.decode(Path('record-data-invalid.json').read_bytes(),
+                                  dialect='atproto'):
     def test(self):
         with self.assertRaises(ValidationError):
             base._maybe_validate(input['data']['$type'], 'record', input['data'])
