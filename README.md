@@ -229,6 +229,8 @@ Here's how to package, test, and ship a new release.
 
 ### 0.8 - unreleased
 * Dependencies: start to switch from `dag-cbor` to `libipld`, for performance.
+* `client`:
+  * Add new `decode` kwarg to subscription methods to control whether DAG-CBOR messages should be decoded into native dicts for header and payload.
 * `flask_server`: add new top-level `subscribers` attr that tracks clients connected (subscribed) to each event stream.
 * `server`:
   * Add `status` param to `Redirect`.

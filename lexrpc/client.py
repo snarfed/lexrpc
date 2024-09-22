@@ -10,6 +10,7 @@ import json
 import logging
 from urllib.parse import urljoin
 
+import libipld
 import requests
 import simple_websocket
 
@@ -114,7 +115,7 @@ class Client(Base):
 
         return getattr(super(), attr)
 
-    def call(self, nsid, input=None, headers={}, **params):
+    def call(self, nsid, input=None, headers={}, decode=True, **params):
         """Makes a remote XRPC method call.
 
         Args:
@@ -122,12 +123,15 @@ class Client(Base):
           input (dict or bytes): input body, optional for subscriptions
           headers (dict): HTTP headers to include in this request. Overrides any
             headers passed to the constructor.
+          decode (bool): if this is a subscription, decode header and payload
+            before returning, otherwise return raw bytes
           params: optional method parameters
 
         Returns:
           dict or generator iterator: for queries and procedures, decoded JSON
           object, or None if the method has no output. For subscriptions,
-          generator of messages from server.
+          generator of messages from server, as (dict header, dict payload) tuple
+          if ``decode`` is True, bytes otherwise.
 
         Raises:
           NotImplementedError: if the given NSID is not found in any of the
@@ -136,7 +140,6 @@ class Client(Base):
             output don't validate against the method's schemas
           requests.RequestException: if the connection or HTTP request to the
             remote server failed
-
         """
         def loggable(val):
             return f'{len(val)} bytes' if isinstance(val, bytes) else val
@@ -174,7 +177,7 @@ class Client(Base):
 
         # event stream
         if type == 'subscription':
-            return self._subscribe(url)
+            return self._subscribe(url, decode=decode)
 
         # query or procedure
         fn = requests.get if type == 'query' else requests.post
@@ -222,12 +225,25 @@ class Client(Base):
         output = self._maybe_validate(nsid, 'output', output)
         return output
 
-    def _subscribe(self, url):
-        """Connects to a subscription websocket, yields the returned messages."""
+    def _subscribe(self, url, decode=True):
+        """Connects to a subscription websocket, yields the returned messages.
+
+        Args:
+          decode (bool): if True, decodes messages before returning
+
+        Returns:
+          (dict header, dict payload) or bytes: tuple of dicts if ``decode`` is
+            True, otherwise raw bytes
+        """
         ws = simple_websocket.Client(url)
 
         try:
             while True:
-                yield ws.receive()
+                msg = ws.receive()
+                if decode:
+                    header, payload = libipld.decode_dag_cbor_multi(msg)
+                    yield (header, payload)
+                else:
+                    yield msg
         except simple_websocket.ConnectionClosed as cc:
             logger.debug(cc)

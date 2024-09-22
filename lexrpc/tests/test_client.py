@@ -243,8 +243,21 @@ class ClientTest(TestCase):
             {'num': 4},
             {'num': 5},
         ]
-        FakeWebsocketClient.to_receive = list(msgs)
+        FakeWebsocketClient.to_receive = msgs
+        expected = [({'op': 1, 't': '#foo'}, msg) for msg in msgs]
 
+        gen = self.client.io.example.subscribe(start=3, end=6)
+        self.assertEqual(expected, list(gen))
+        self.assertEqual('http://ser.ver/xrpc/io.example.subscribe?start=3&end=6',
+                         FakeWebsocketClient.url)
+
+    def test_subscription_decode_false(self):
+        msgs = [
+            {'num': 3},
+            {'num': 4},
+            {'num': 5},
+        ]
+        FakeWebsocketClient.to_receive = msgs
         expected = [({'op': 1, 't': '#foo'}, msg) for msg in msgs]
 
         gen = self.client.io.example.subscribe(start=3, end=6)
