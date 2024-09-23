@@ -29,6 +29,7 @@ dependencies = [
     'dag-json>=0.3',
     'iterators',
     'libipld',
+    'multiformats>=0.3.1.post4',
     'requests>=2.0',
     'simple-websocket',
 ]

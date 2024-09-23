@@ -47,14 +47,14 @@ class BaseTest(TestCase):
                 }])
 
     def test_validate_record_pass(self):
-        self.base._maybe_validate('io.example.record', 'record', {
+        self.base.maybe_validate('io.example.record', 'record', {
             'baz': 3,
             'biff': {
                 'baj': 'foo',
             },
         })
 
-    def test_maybe_validate_truncate(self):
+    def testmaybe_validate_truncate(self):
         base = Base(LEXICONS, truncate=True)
 
         for input, expected in (
@@ -64,18 +64,18 @@ class BaseTest(TestCase):
         ):
             self.assertEqual(
                 {'string': expected},
-                base._maybe_validate('com.example.stringLength', 'record',
+                base.maybe_validate('com.example.stringLength', 'record',
                                      {'string': input}))
 
     def test_validate_record_pass_nested_optional_field_missing(self):
-        self.base._maybe_validate('io.example.record', 'record', {
+        self.base.maybe_validate('io.example.record', 'record', {
             'baz': 3,
             'biff': {
             },
         })
 
     def test_validate_record_pass_optional_field_missing(self):
-        self.base._maybe_validate('io.example.record', 'record', {
+        self.base.maybe_validate('io.example.record', 'record', {
             'baz': 3,
         })
 
@@ -83,7 +83,7 @@ class BaseTest(TestCase):
     def test_validate_record_fail_integer_field_bad_type(self):
         self.base._validate = True
         with self.assertRaises(ValidationError):
-            self.base._maybe_validate('io.example.record', 'record', {
+            self.base.maybe_validate('io.example.record', 'record', {
                 'baz': 'x',
                 'biff': {
                     'baj': 'foo',
@@ -93,7 +93,7 @@ class BaseTest(TestCase):
     def test_validate_record_fail_object_field_bad_type(self):
         self.base._validate = True
         with self.assertRaises(ValidationError):
-            self.base._maybe_validate('io.example.record', 'record', {
+            self.base.maybe_validate('io.example.record', 'record', {
                 'baz': 3,
                 'biff': 4,
             })
@@ -101,14 +101,14 @@ class BaseTest(TestCase):
     def test_validate_record_fail_missing_required_field(self):
         self.base._validate = True
         with self.assertRaises(ValidationError):
-            self.base._maybe_validate('io.example.record', 'record', {
+            self.base.maybe_validate('io.example.record', 'record', {
                 'biff': {
                     'baj': 'foo',
                 },
             })
 
     def test_validate_record_kitchen_sink_pass(self):
-        self.base._maybe_validate('io.example.kitchenSink', 'record', {
+        self.base.maybe_validate('io.example.kitchenSink', 'record', {
             # TODO
             # 'object': {
             #     'type': 'ref',

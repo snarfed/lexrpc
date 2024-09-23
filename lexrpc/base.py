@@ -8,6 +8,8 @@ import re
 from types import NoneType
 import urllib.parse
 
+from multiformats import CID
+
 logger = logging.getLogger(__name__)
 
 METHOD_TYPES = frozenset((
@@ -33,6 +35,7 @@ FIELD_TYPES = {
     'null': NoneType,
     'blob': dict,
     'boolean': bool,
+    'cid-link': CID,
     'integer': int,
     'string': str,
     'bytes': bytes,
@@ -64,7 +67,7 @@ BLOB_DEF = {
 # https://atproto.com/specs/nsid
 NSID_SEGMENT = '[a-zA-Z0-9-]+'
 NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
-NSID_RE = re.compile(f'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
+NSID_RE = re.compile(rf'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
 
 
 # wrapper for datetime.now, lets us mock it out in tests
@@ -157,12 +160,16 @@ class Base():
                         # TODO
                         pass
 
+                # TODO: fully qualify #... references? or are we already doing that?
+
                 self.defs[id] = defn
 
         self.defs['blob'] = BLOB_DEF
 
         if not self.defs:
             logger.error('No lexicons loaded!')
+
+        # print(json.dumps(self.defs, indent=2))
 
     def _get_def(self, id):
         """Returns the given lexicon def.
@@ -176,8 +183,8 @@ class Base():
 
         return lexicon
 
-    def _maybe_validate(self, nsid, type, obj):
-        """If configured to do so, validates a JSON object against a given schema.
+    def maybe_validate(self, nsid, type, obj):
+        """If configured to do so, validates a ATProto value against its lexicon.
 
         Returns ``None`` if the object validates, otherwise raises an exception.
 
@@ -226,46 +233,86 @@ class Base():
                             name: val[:max_graphemes - 1] + '…',
                         }
 
-        if not self._validate:
+        if self._validate:
+            self._validate_value(obj, schema)
+
+    def _validate_value(self, obj, lexicon):
+        """Validates an ATProto object against a lexicon.
+
+        Returns ``None`` if the object validates, otherwise raises an exception.
+
+        https://atproto.com/specs/lexicon
+
+        Args:
+          obj (dict)
+          lexicon (dict): should have at least ``properties`` key
+
+        Raises:
+          ValidationError: if the object is invalid
+        """
+        # print(lexicon, obj)
+
+        assert lexicon
+        if lexicon.get('type') == 'token':
+            if not isinstance(obj, str):
+                raise ValidationError(f'got value {obj} for type token')
+            # TODO: anything else to do here?
             return
 
-        # logger.debug(f'Validating {nsid} {type}')
+        assert isinstance(obj, dict), obj
 
-        for name, prop in schema.get('properties', {}).items():
+        for name, schema in lexicon.get('properties', {}).items():
+            # print('@', name)
             if name not in obj:
-                if name in schema.get('required', []):
-                    raise ValidationError(
-                        f'{nsid} {type} missing required property {name}')
+                if name in lexicon.get('required', []):
+                    raise ValidationError(f'missing required property {name}')
                 continue
 
+            type = schema['type']
             val = obj[name]
             if val is None:
-                if prop['type'] != 'null' and name not in schema.get('nullable', []):
-                    raise ValidationError(
-                        f'{nsid} {type} property {name} is not nullable')
+                if type != 'null' and name not in lexicon.get('nullable', []):
+                    raise ValidationError(f'property {name} is not nullable')
                 continue
 
-            if prop['type'] == 'unknown':
+            if type == 'unknown':
                 continue
 
-            # if prop['type'] == 'blob':
+            elif type == 'token':
+                # TODO: anything to do here?
+                continue
+
+            elif type in ('blob', 'object', 'ref', 'union'):
+                if type == 'blob':
+                    schema = BLOB_DEF
+                if type == 'ref':
+                    # print('@@', schema['ref'])
+                    schema = self._get_def(schema['ref'])
+                    # print('@@', schema)
+                elif type == 'union':
+                    inner_type = (val if isinstance(val, str)  # token
+                                  else val.get('$type'))
+                    if not inner_type:
+                        raise ValidationError(f'union property {name} missing $type')
+                    schema = self._get_def(inner_type)
+
+                self._validate_value(val, schema)
+                continue
+
+            elif type == 'ref':
+                continue
 
             # TODO: datetime
             # TODO: token
-            # TODO: ref
-            # TODO: union
-            # TODO: unknown
-            # TODO: cid-link
-            if not isinstance(val, FIELD_TYPES[prop['type']]):
+            if not isinstance(val, FIELD_TYPES[type]):
                 raise ValidationError(
-                    f'{nsid} {type}: unexpected value for {prop["type"]} property '
-                    f'{name}: {val!r}')
+                    f'unexpected value for {schema["type"]} property {name}: {val!r}')
 
             if type == 'array':
                 for item in val:
-                    if not isinstance(item, FIELD_TYPES[prop['items']['type']]):
+                    if not isinstance(item, FIELD_TYPES[schema['items']['type']]):
                         raise ValidationError(
-                            f'{nsid} {type}: unexpected item for {prop["type"]} '
+                            f'unexpected item for {schema["type"]} '
                             f'array property {name}: {item!r}')
 
         return obj
