@@ -40,7 +40,7 @@ def params(input, **params):
 @server.method('io.example.array')
 def array(input, foo=None):
     assert isinstance(foo, list)
-    return foo + ['z']
+    return {'items': foo + ['z']}
 
 
 @server.method('io.example.defs')
@@ -132,7 +132,7 @@ class ServerTest(TestCase):
             server.call('io.example.params', {}, bar='c')
 
     def test_array(self):
-        self.assertEqual(['a', 'b', 'z'],
+        self.assertEqual({'items': ['a', 'b', 'z']},
                          server.call('io.example.array', {}, foo=['a', 'b']))
 
     def test_subscription(self):

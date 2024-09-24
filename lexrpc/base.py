@@ -7,7 +7,7 @@ import logging
 import re
 import string
 from types import NoneType
-import urllib.parse
+from urllib.parse import urlencode, urljoin, urlparse
 
 import grapheme
 from multiformats import CID
@@ -240,7 +240,7 @@ class Base():
             schema = base.get('schema')
 
         if not schema:
-            return
+            return obj
             # ...or should we fail if obj is non-null? maybe not, since then
             # we'd fail if a query with no params gets requested with any query
             # params at all, eg utm_* tracking params
@@ -257,11 +257,11 @@ class Base():
                         }
 
         if self._validate:
-            self._validate_value(obj, schema)
+            self._validate_value(obj, nsid, schema)
 
         return obj
 
-    def _validate_value(self, obj, lexicon):
+    def _validate_value(self, obj, type_, lexicon):
         """Validates an ATProto object against a lexicon.
 
         Returns ``None`` if the object validates, otherwise raises an exception.
@@ -270,6 +270,7 @@ class Base():
 
         Args:
           obj (dict)
+          type_ (str): name of type, eg ``app.bsky.feed.post#replyRef``
           lexicon (dict): should have at least ``properties`` key
 
         Raises:
@@ -294,50 +295,60 @@ class Base():
                 val_str = repr(val)
                 return val_str if len(val_str) <= 50 else val_str[:50] + '…'
 
-            def fail(msg):
-                raise ValidationError(f'{type_} property {name} value {trunc(val)} {msg}')
+            prop_type = schema['type']
 
-            type_ = schema['type']
+            def fail(msg):
+                raise ValidationError(f'{prop_type} property {name} value {trunc(val)} {msg}')
+
             val = obj[name]
             if val is None:
-                if type_ != 'null' and name not in lexicon.get('nullable', []):
+                if prop_type != 'null' and name not in lexicon.get('nullable', []):
                     fail('is not nullable')
                 continue
 
-            if type_ == 'unknown':
+            if prop_type == 'unknown':
                 continue
 
-            if type_ == 'token':
+            if prop_type == 'token':
                 if val not in self.defs:
                     fail(f'not found')
 
-            if type_ in ('blob', 'object', 'ref', 'union'):
-                if type_ == 'blob':
+            if prop_type in ('blob', 'object', 'ref', 'union'):
+                if prop_type == 'object':
+                    inner_type = type_
+
+                elif prop_type == 'blob':
+                    inner_type = 'blob'
                     max_size = schema.get('maxSize')
                     accept = schema.get('accept')
-                    schema = BLOB_DEF
-                if type_ == 'ref':
-                    ref = schema['ref']
-                    schema = self._get_def(ref)
-                    if schema.get('type') == 'token' and val != ref:
-                        fail('is not token value')
-                elif type_ == 'union':
-                    refs = schema['refs']
-                    if (not isinstance(val, (str, dict))
-                            or isinstance(val, str) and val not in refs):
-                        fail("is invalid")
+
+                elif prop_type == 'ref':
+                    inner_type = schema['ref']
+
+                elif prop_type == 'union':
                     inner_type = (val if isinstance(val, str)  # token
                                   else val.get('$type'))
                     if not inner_type:
                         fail('missing $type')
+                    refs = schema['refs']
+                    if (not isinstance(val, (str, dict))
+                            or isinstance(val, str) and val not in refs):
+                        fail("is invalid")
+
+                if prop_type != 'object':
+                    # if it's a fragment, fully qualify it
+                    inner_type = urljoin(type_, inner_type)
                     schema = self._get_def(inner_type)
 
-                if not isinstance(val, dict) and schema.get('type') != 'token':
+                if schema.get('type') == 'token':
+                    if val != inner_type:
+                        fail('is not token value')
+                elif not isinstance(val, dict):
                     fail('is invalid')
 
-                self._validate_value(val, schema)
+                self._validate_value(val, inner_type, schema)
 
-                if type_ == 'blob':
+                if prop_type == 'blob':
                     if max_size and val['size'] > max_size:
                         fail(f'has size {val["size"]} over maxSize {max_size}')
 
@@ -348,9 +359,7 @@ class Base():
 
                 continue
 
-            # TODO: datetime
-            # TODO: token
-            if type(val) is not FIELD_TYPES[type_]:
+            if type(val) is not FIELD_TYPES[prop_type]:
                 fail(f'has unexpected type {type(val)}')
 
             if minimum := schema.get('minimum'):
@@ -360,16 +369,16 @@ class Base():
                 if val > maximum:
                     fail(f'is longer than maximum {maximum}')
 
-            if type_ in ('array', 'bytes', 'string'):
+            if prop_type in ('array', 'bytes', 'string'):
                 min_length = schema.get('minLength')
                 max_length = schema.get('maxLength')
-                length = len(val.encode('utf-8')) if type_ == 'string' else len(val)
+                length = len(val.encode('utf-8') if prop_type == 'string' else val)
                 if max_length and length > max_length:
                     fail(f'is longer ({length}) than maxLength {max_length}')
                 elif min_length and length < min_length:
                     fail(f'is shorter ({length}) than minLength {min_length}')
 
-            if type_ == 'string':
+            if prop_type == 'string':
                 if format := schema.get('format'):
                     try:
                         self._validate_string_format(val, format)
@@ -385,7 +394,7 @@ class Base():
                     if max_graphemes and length > max_graphemes:
                         fail(f'is longer than maxGraphemes {max_graphemes}')
 
-            if type_ == 'array':
+            if prop_type == 'array':
                 for item in val:
                     if type(item) is not FIELD_TYPES[schema['items']['type']]:
                         fail(f'has element {trunc(item)} with invalid type {type(item)}')
@@ -447,7 +456,7 @@ class Base():
             check(val not in ('.', '..') and RKEY_RE.match(val))
 
         elif format == 'uri':
-            parsed = urllib.parse.urlparse(val)
+            parsed = urlparse(val)
             check(parsed.scheme and parsed.netloc)
 
         elif format == 'language':
@@ -467,7 +476,7 @@ class Base():
         Returns:
           bytes: URL-encoded query parameter string
         """
-        return urllib.parse.urlencode({
+        return urlencode({
             name: ('true' if val is True
                    else 'false' if val is False
                    else val)

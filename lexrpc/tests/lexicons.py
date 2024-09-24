@@ -350,15 +350,18 @@ LEXICONS = [
                         'boolean': {'type': 'boolean'},
                         'integer': {'type': 'integer'},
                         'string': {'type': 'string'},
-                        'datetime': {'type': 'datetime'},
+                        'datetime': {
+                            'type': 'string',
+                            'format': 'datetime',
+                        },
                     },
                 },
             },
             'object': {
                 'type': 'object',
-                'required': ['object', 'array', 'boolean', 'integer', 'string'],
+                'required': ['subobject', 'array', 'boolean', 'integer', 'string'],
                 'properties': {
-                    'object': {
+                    'subobject': {
                         'type': 'ref',
                         'ref': '#subobject',
                     },

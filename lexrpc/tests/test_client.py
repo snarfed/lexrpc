@@ -218,9 +218,10 @@ class ClientTest(TestCase):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({}, bar='c')
 
-    @patch('requests.post', return_value=response(['z']))
+    @patch('requests.post', return_value=response({'items': ['z']}))
     def test_array(self, mock_post):
-        self.assertEqual(['z'], self.client.io.example.array({}, foo=['a', 'b']))
+        self.assertEqual({'items': ['z']},
+                         self.client.io.example.array({}, foo=['a', 'b']))
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.array?foo=a&foo=b',
@@ -337,11 +338,11 @@ class ClientTest(TestCase):
         session = {
             'accessJwt': 'new-towkin',
             'refreshJwt': 'reephrush',
-            'handle': 'handull',
-            'did': 'dyd',
+            'handle': 'han.dull',
+            'did': 'did:dyd',
         }
         output = {
-            'did': 'unused',
+            'did': 'did:unused',
             'availableUserDomains': ['moo.com'],
         }
         mock_get.side_effect = [
@@ -419,8 +420,8 @@ class ClientTest(TestCase):
         session = {
             'accessJwt': 'towkin',
             'refreshJwt': 'unused',
-            'handle': 'unused',
-            'did': 'unused',
+            'handle': 'unu.sed',
+            'did': 'did:unused',
         }
         mock_post.return_value = response(session)
 

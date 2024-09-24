@@ -110,15 +110,18 @@ class BaseTest(TestCase):
 
     def test_validate_record_kitchen_sink_pass(self):
         self.base.maybe_validate('io.example.kitchenSink', 'record', {
-            # TODO
-            # 'object': {
-            #     'type': 'ref',
-            #     'ref': '#object'
-            # },
             'array': ['x', 'y'],
             'boolean': True,
             'integer': 3,
             'string': 'z',
+            'datetime': '1985-04-12T23:20:50Z',
+            'object': {
+                'array': ['x', 'y'],
+                'boolean': True,
+                'integer': 3,
+                'string': 'z',
+                'subobject': {'boolean': False},
+            },
         })
 
         # TODO: test arrays of objects, refs, etc
