@@ -28,7 +28,6 @@ class BaseTest(TestCase):
             },
         }, self.base._get_def('io.example.kitchenSink#subobject'))
 
-    # TODO
     @skip
     def test_validate_lexicon_schema(self):
         for bad in 'foo bar', {'type': 'foo', 'properties': 3}:
@@ -121,3 +120,5 @@ class BaseTest(TestCase):
             'integer': 3,
             'string': 'z',
         })
+
+        # TODO: test arrays of objects, refs, etc

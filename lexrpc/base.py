@@ -284,8 +284,8 @@ class Base():
                 continue
 
             if type_ == 'token':
-                # TODO: anything to do here?
-                continue
+                if val not in self.defs:
+                    fail(f'not found')
 
             if type_ in ('blob', 'object', 'ref', 'union'):
                 if type_ == 'blob':
@@ -293,7 +293,10 @@ class Base():
                     accept = schema.get('accept')
                     schema = BLOB_DEF
                 if type_ == 'ref':
-                    schema = self._get_def(schema['ref'])
+                    ref = schema['ref']
+                    schema = self._get_def(ref)
+                    if schema.get('type') == 'token' and val != ref:
+                        fail('is not token value')
                 elif type_ == 'union':
                     refs = schema['refs']
                     if (not isinstance(val, (str, dict))
