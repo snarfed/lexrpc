@@ -267,8 +267,8 @@ class Base():
                 continue
 
             def trunc(val):
-                val_str = str(val)
-                return val_str if len(val_str) <= 20 else val_str[20] + '…'
+                val_str = repr(val)
+                return val_str if len(val_str) <= 50 else val_str[:50] + '…'
 
             def fail(msg):
                 raise ValidationError(f'{type_} property {name} value {trunc(val)} {msg}')
@@ -283,12 +283,14 @@ class Base():
             if type_ == 'unknown':
                 continue
 
-            elif type_ == 'token':
+            if type_ == 'token':
                 # TODO: anything to do here?
                 continue
 
-            elif type_ in ('blob', 'object', 'ref', 'union'):
+            if type_ in ('blob', 'object', 'ref', 'union'):
                 if type_ == 'blob':
+                    max_size = schema.get('maxSize')
+                    accept = schema.get('accept')
                     schema = BLOB_DEF
                 if type_ == 'ref':
                     schema = self._get_def(schema['ref'])
@@ -303,10 +305,20 @@ class Base():
                         fail('missing $type')
                     schema = self._get_def(inner_type)
 
-                self._validate_value(val, schema)
-                continue
+                if not isinstance(val, dict) and schema.get('type') != 'token':
+                    fail('is invalid')
 
-            elif type_ == 'ref':
+                self._validate_value(val, schema)
+
+                if type_ == 'blob':
+                    if max_size and val['size'] > max_size:
+                        fail(f'has size {val["size"]} over maxSize {max_size}')
+
+                    mime = val['mimeType']
+                    if (accept and mime not in accept and '*/*' not in accept
+                            and (mime.split('/')[0] + '/*') not in accept):
+                        fail(f'has unsupported MIME type {mime}')
+
                 continue
 
             # TODO: datetime
