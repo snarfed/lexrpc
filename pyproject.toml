@@ -27,6 +27,7 @@ keywords = ['XRPC', 'Lexicon', 'AT Protocol', 'ATP']
 dependencies = [
     'dag-cbor',
     'dag-json>=0.3',
+    'grapheme',
     'iterators',
     'libipld',
     'multiformats>=0.3.1.post4',

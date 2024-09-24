@@ -8,6 +8,7 @@ import re
 from types import NoneType
 import urllib.parse
 
+import grapheme
 from multiformats import CID
 
 logger = logging.getLogger(__name__)
@@ -313,16 +314,24 @@ class Base():
                     raise ValidationError(f'property {name} value {val} is less than minimum {minimum}')
             if maximum := schema.get('maximum'):
                 if val > maximum:
-                    raise ValidationError(f'property {name} value {val} is less than maximum {maximum}')
+                    raise ValidationError(f'property {name} value {val} is longer than maximum {maximum}')
 
             if type_ in ('array', 'bytes', 'string'):
                 min_length = schema.get('minLength')
                 max_length = schema.get('maxLength')
-                length = len(val)
+                length = len(val.encode('utf-8')) if type_ == 'string' else len(val)
                 if max_length and length > max_length:
                     raise ValidationError(f'array property {name} has {length} items, over maxLength {max_length}')
                 elif min_length and length < min_length:
                     raise ValidationError(f'array property {name} has {length} items, under minLength {min_length}')
+
+            min_graphemes = schema.get('minGraphemes')
+            max_graphemes = schema.get('maxGraphemes')
+            if type_ == 'string' and (min_graphemes or max_graphemes):
+                if min_graphemes and grapheme.length(val) < min_graphemes:
+                    raise ValidationError(f'string property {name} value {val} is shorter than minGraphemes {min_graphemes}')
+                if max_graphemes and grapheme.length(val) > max_graphemes:
+                    raise ValidationError(f'string property {name} value {val} is longer than maxGraphemes {max_graphemes}')
 
             if type_ == 'array':
                 for item in val:
