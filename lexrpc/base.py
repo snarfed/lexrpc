@@ -70,6 +70,9 @@ NSID_SEGMENT = '[a-zA-Z0-9-]+'
 NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
 NSID_RE = re.compile(rf'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
 
+# https://atproto.com/specs/lexicon#string-formats
+# https://datatracker.ietf.org/doc/html/rfc5646#section-2.1
+LANG_RE = re.compile(r'^[a-z]{2,3}(-[a-z0-9-]+)?')
 
 # wrapper for datetime.now, lets us mock it out in tests
 now = lambda tz=timezone.utc, **kwargs: datetime.now(tz=tz, **kwargs)
@@ -345,13 +348,18 @@ class Base():
                 elif min_length and length < min_length:
                     fail(f'is shorter ({length}) than minLength {min_length}')
 
-            min_graphemes = schema.get('minGraphemes')
-            max_graphemes = schema.get('maxGraphemes')
-            if type_ == 'string' and (min_graphemes or max_graphemes):
-                if min_graphemes and grapheme.length(val) < min_graphemes:
-                    fail(f'is shorter than minGraphemes {min_graphemes}')
-                if max_graphemes and grapheme.length(val) > max_graphemes:
-                    fail(f'is longer than maxGraphemes {max_graphemes}')
+            if type_ == 'string':
+                if format := schema.get('format'):
+                    self._validate_string_format(val, format)
+
+                min_graphemes = schema.get('minGraphemes')
+                max_graphemes = schema.get('maxGraphemes')
+                if min_graphemes or max_graphemes:
+                    length = grapheme.length(val)
+                    if min_graphemes and length < min_graphemes:
+                        fail(f'is shorter than minGraphemes {min_graphemes}')
+                    if max_graphemes and length > max_graphemes:
+                        fail(f'is longer than maxGraphemes {max_graphemes}')
 
             if type_ == 'array':
                 for item in val:
@@ -367,6 +375,57 @@ class Base():
                     fail(f'is not const value {const}')
 
         return obj
+
+    def _validate_string_format(self, val, format):
+        """Validates an ATProto string value against a format.
+
+        https://atproto.com/specs/lexicon#string-formats
+
+        Args:
+          val (str)
+          format (str): one of the ATProto string formats
+
+        Raises:
+          ValidationError: if the value is invalid for the given format
+        """
+        def check(condition):
+            if not condition:
+                raise ValidationError(f'is invalid for format {format}')
+
+        # TODO: switch to match once we require Python 3.10+
+        if format == 'at-identifier':
+            check(val.startswith('did:') or (NSID_RE.match(val) and '.' in val))
+
+        elif format == 'at-uri':
+            pass # TODO
+
+        elif format == 'cid':
+            pass # TODO
+
+        elif format == 'datetime':
+            pass # TODO
+
+        elif format == 'did':
+            check(val.startswith('did:'))
+
+        elif format in ('handle', 'nsid'):
+            check(NSID_RE.match(val) and '.' in val)
+
+        elif format == 'tid':
+            pass # TODO
+
+        elif format == 'record-key':
+            pass # TODO
+
+        elif format == 'uri':
+            parsed = urllib.parse.urlparse(val)
+            check(parsed.scheme and parsed.netloc)
+
+        elif format == 'language':
+            check(LANG_RE.match(val))
+
+        else:
+            raise ValidationError(f'unknown format {format}')
 
     def encode_params(self, params):
         """Encodes decoded parameter values.
