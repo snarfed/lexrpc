@@ -32,12 +32,16 @@ for input in dag_json.decode(Path('record-data-valid.json').read_bytes(),
 
     tests[test_name(input)] = test_fn()
 
-# for input in dag_json.decode(Path('record-data-invalid.json').read_bytes(),
-#                                   dialect='atproto'):
-#     def test(self):
-#         with self.assertRaises(ValidationError):
-#             base.maybe_validate(input['data']['$type'], 'record', input['data'])
-#     tests[test_name(input)] = test
+for input in dag_json.decode(Path('record-data-invalid.json').read_bytes(),
+                                  dialect='atproto'):
+    def test_fn():
+        data = input['data']
+        def test(self):
+            with self.assertRaises(ValidationError):
+                base.maybe_validate(data['$type'], 'record', data)
+        return test
+
+    tests[test_name(input)] = test_fn()
 
 
 os.chdir(prevdir)

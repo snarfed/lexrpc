@@ -268,28 +268,28 @@ class Base():
                     raise ValidationError(f'missing required property {name}')
                 continue
 
-            type = schema['type']
+            type_ = schema['type']
             val = obj[name]
             if val is None:
-                if type != 'null' and name not in lexicon.get('nullable', []):
+                if type_ != 'null' and name not in lexicon.get('nullable', []):
                     raise ValidationError(f'property {name} is not nullable')
                 continue
 
-            if type == 'unknown':
+            if type_ == 'unknown':
                 continue
 
-            elif type == 'token':
+            elif type_ == 'token':
                 # TODO: anything to do here?
                 continue
 
-            elif type in ('blob', 'object', 'ref', 'union'):
-                if type == 'blob':
+            elif type_ in ('blob', 'object', 'ref', 'union'):
+                if type_ == 'blob':
                     schema = BLOB_DEF
-                if type == 'ref':
+                if type_ == 'ref':
                     # print('@@', schema['ref'])
                     schema = self._get_def(schema['ref'])
                     # print('@@', schema)
-                elif type == 'union':
+                elif type_ == 'union':
                     inner_type = (val if isinstance(val, str)  # token
                                   else val.get('$type'))
                     if not inner_type:
@@ -299,21 +299,43 @@ class Base():
                 self._validate_value(val, schema)
                 continue
 
-            elif type == 'ref':
+            elif type_ == 'ref':
                 continue
 
             # TODO: datetime
             # TODO: token
-            if not isinstance(val, FIELD_TYPES[type]):
+            if type(val) is not FIELD_TYPES[type_]:
                 raise ValidationError(
                     f'unexpected value for {schema["type"]} property {name}: {val!r}')
 
-            if type == 'array':
+            if minimum := schema.get('minimum'):
+                if val < minimum:
+                    raise ValidationError(f'property {name} value {val} is less than minimum {minimum}')
+            if maximum := schema.get('maximum'):
+                if val > maximum:
+                    raise ValidationError(f'property {name} value {val} is less than maximum {maximum}')
+
+            if type_ in ('array', 'bytes', 'string'):
+                min_length = schema.get('minLength')
+                max_length = schema.get('maxLength')
+                length = len(val)
+                if max_length and length > max_length:
+                    raise ValidationError(f'array property {name} has {length} items, over maxLength {max_length}')
+                elif min_length and length < min_length:
+                    raise ValidationError(f'array property {name} has {length} items, under minLength {min_length}')
+
+            if type_ == 'array':
                 for item in val:
-                    if not isinstance(item, FIELD_TYPES[schema['items']['type']]):
-                        raise ValidationError(
-                            f'unexpected item for {schema["type"]} '
-                            f'array property {name}: {item!r}')
+                    if type(item) is not FIELD_TYPES[schema['items']['type']]:
+                        raise ValidationError(f'unexpected item for {schema["type"]} array property {name}: {item!r}')
+
+            if enums := schema.get('enum'):
+                if val not in enums:
+                    raise ValidationError(f'property {name} value {val} not one of enum values')
+
+            if const := schema.get('const'):
+                if val != const:
+                    raise ValidationError(f'property {name} value {val} is not const value {const}')
 
         return obj
 
