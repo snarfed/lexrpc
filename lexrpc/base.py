@@ -5,6 +5,7 @@ from importlib.resources import files
 import json
 import logging
 import re
+import string
 from types import NoneType
 import urllib.parse
 
@@ -72,7 +73,27 @@ NSID_RE = re.compile(rf'^{NSID_SEGMENT}(\.{NSID_SEGMENT})*$')
 
 # https://atproto.com/specs/lexicon#string-formats
 # https://datatracker.ietf.org/doc/html/rfc5646#section-2.1
-LANG_RE = re.compile(r'^[a-z]{2,3}(-[a-z0-9-]+)?')
+LANG_RE = re.compile(r'^[A-Za-z]{2,3}(-[A-Za-z0-9-]+)?$')
+
+# https://atproto.com/specs/record-key
+RKEY_RE = re.compile(r'^[A-Za-z0-9._:~-]{1,512}$')
+
+# https://atproto.com/specs/record-key#record-key-type-tid
+BASE32_CHARS = string.ascii_lowercase + "234567"
+TID_RE = re.compile(rf'^[{BASE32_CHARS}]{{13}}$')
+
+CID_BASE32_RE = re.compile(rf'^[{BASE32_CHARS}]+$')
+
+# https://atproto.com/specs/at-uri-scheme
+# NOTE: duplicated in granary.bluesky!
+# also see arroba.util.parse_at_uri
+_CHARS = 'a-zA-Z0-9-.:'
+AT_URI_RE = re.compile(rf"""
+    ^at://
+     (?P<repo>[{_CHARS}]+)
+      (?:/(?P<collection>[a-zA-Z0-9-.]+)
+       (?:/(?P<rkey>[{_CHARS}]+))?)?
+    $""", re.VERBOSE)
 
 # wrapper for datetime.now, lets us mock it out in tests
 now = lambda tz=timezone.utc, **kwargs: datetime.now(tz=tz, **kwargs)
@@ -350,7 +371,10 @@ class Base():
 
             if type_ == 'string':
                 if format := schema.get('format'):
-                    self._validate_string_format(val, format)
+                    try:
+                        self._validate_string_format(val, format)
+                    except ValidationError as e:
+                        fail(e.args[0])
 
                 min_graphemes = schema.get('minGraphemes')
                 max_graphemes = schema.get('maxGraphemes')
@@ -397,10 +421,10 @@ class Base():
             check(val.startswith('did:') or (NSID_RE.match(val) and '.' in val))
 
         elif format == 'at-uri':
-            pass # TODO
+            check(AT_URI_RE.match(val))
 
         elif format == 'cid':
-            pass # TODO
+            check(CID_BASE32_RE.match(val))
 
         elif format == 'datetime':
             pass # TODO
@@ -412,10 +436,10 @@ class Base():
             check(NSID_RE.match(val) and '.' in val)
 
         elif format == 'tid':
-            pass # TODO
+            check(TID_RE.match(val))
 
         elif format == 'record-key':
-            pass # TODO
+            check(val not in ('.', '..') and RKEY_RE.match(val))
 
         elif format == 'uri':
             parsed = urllib.parse.urlparse(val)
