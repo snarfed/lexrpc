@@ -54,18 +54,20 @@ class BaseTest(TestCase):
             },
         })
 
-    def testmaybe_validate_truncate(self):
+    def test_maybe_validate_truncate(self):
         base = Base(LEXICONS, truncate=True)
 
         for input, expected in (
             ('short', 'short'),
             ('too many graphemes', 'too many …'),
+            # ('🇨🇾🇬🇭🇨🇾🇬🇭🇨🇾🇬🇭', '🇨🇾🇬🇭🇨🇾🇬🇭🇨🇾🇬🇭'),
             # ('🇨🇾🇬🇭 bytes', '🇨🇾…'),  # TODO
         ):
-            self.assertEqual(
-                {'string': expected},
-                base.maybe_validate('com.example.stringLength', 'record',
-                                     {'string': input}))
+            with self.subTest(input=input, expected=expected):
+                self.assertEqual(
+                    {'string': expected},
+                    base.maybe_validate('com.example.stringLength', 'record',
+                                        {'string': input}))
 
     def test_validate_record_pass_nested_optional_field_missing(self):
         self.base.maybe_validate('io.example.record', 'record', {

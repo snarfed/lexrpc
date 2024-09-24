@@ -170,8 +170,6 @@ class Base():
         if not self.defs:
             logger.error('No lexicons loaded!')
 
-        # print(json.dumps(self.defs, indent=2))
-
     def _get_def(self, id):
         """Returns the given lexicon def.
 
@@ -228,14 +226,16 @@ class Base():
                 # TODO: recurse into reference, union, etc properties
                 if max_graphemes := config.get('maxGraphemes'):
                     val = obj.get(name)
-                    if val and len(val) > max_graphemes:
+                    if val and grapheme.length(val) > max_graphemes:
                         obj = {
                             **obj,
-                            name: val[:max_graphemes - 1] + '…',
+                            name: grapheme.slice(val, end=max_graphemes - 1) + '…',
                         }
 
         if self._validate:
             self._validate_value(obj, schema)
+
+        return obj
 
     def _validate_value(self, obj, lexicon):
         """Validates an ATProto object against a lexicon.
@@ -251,8 +251,6 @@ class Base():
         Raises:
           ValidationError: if the object is invalid
         """
-        # print(lexicon, obj)
-
         assert lexicon
         if lexicon.get('type') == 'token':
             if not isinstance(obj, str):
@@ -263,17 +261,23 @@ class Base():
         assert isinstance(obj, dict), obj
 
         for name, schema in lexicon.get('properties', {}).items():
-            # print('@', name)
             if name not in obj:
                 if name in lexicon.get('required', []):
                     raise ValidationError(f'missing required property {name}')
                 continue
 
+            def trunc(val):
+                val_str = str(val)
+                return val_str if len(val_str) <= 20 else val_str[20] + '…'
+
+            def fail(msg):
+                raise ValidationError(f'{type_} property {name} value {trunc(val)} {msg}')
+
             type_ = schema['type']
             val = obj[name]
             if val is None:
                 if type_ != 'null' and name not in lexicon.get('nullable', []):
-                    raise ValidationError(f'property {name} is not nullable')
+                    fail('is not nullable')
                 continue
 
             if type_ == 'unknown':
@@ -287,14 +291,12 @@ class Base():
                 if type_ == 'blob':
                     schema = BLOB_DEF
                 if type_ == 'ref':
-                    # print('@@', schema['ref'])
                     schema = self._get_def(schema['ref'])
-                    # print('@@', schema)
                 elif type_ == 'union':
                     inner_type = (val if isinstance(val, str)  # token
                                   else val.get('$type'))
                     if not inner_type:
-                        raise ValidationError(f'union property {name} missing $type')
+                        fail('missing $type')
                     schema = self._get_def(inner_type)
 
                 self._validate_value(val, schema)
@@ -306,45 +308,44 @@ class Base():
             # TODO: datetime
             # TODO: token
             if type(val) is not FIELD_TYPES[type_]:
-                raise ValidationError(
-                    f'unexpected value for {schema["type"]} property {name}: {val!r}')
+                fail(f'has unexpected type {type(val)}')
 
             if minimum := schema.get('minimum'):
                 if val < minimum:
-                    raise ValidationError(f'property {name} value {val} is less than minimum {minimum}')
+                    fail(f'is less than minimum {minimum}')
             if maximum := schema.get('maximum'):
                 if val > maximum:
-                    raise ValidationError(f'property {name} value {val} is longer than maximum {maximum}')
+                    fail(f'is longer than maximum {maximum}')
 
             if type_ in ('array', 'bytes', 'string'):
                 min_length = schema.get('minLength')
                 max_length = schema.get('maxLength')
                 length = len(val.encode('utf-8')) if type_ == 'string' else len(val)
                 if max_length and length > max_length:
-                    raise ValidationError(f'array property {name} has {length} items, over maxLength {max_length}')
+                    fail(f'is longer ({length}) than maxLength {max_length}')
                 elif min_length and length < min_length:
-                    raise ValidationError(f'array property {name} has {length} items, under minLength {min_length}')
+                    fail(f'is shorter ({length}) than minLength {min_length}')
 
             min_graphemes = schema.get('minGraphemes')
             max_graphemes = schema.get('maxGraphemes')
             if type_ == 'string' and (min_graphemes or max_graphemes):
                 if min_graphemes and grapheme.length(val) < min_graphemes:
-                    raise ValidationError(f'string property {name} value {val} is shorter than minGraphemes {min_graphemes}')
+                    fail(f'is shorter than minGraphemes {min_graphemes}')
                 if max_graphemes and grapheme.length(val) > max_graphemes:
-                    raise ValidationError(f'string property {name} value {val} is longer than maxGraphemes {max_graphemes}')
+                    fail(f'is longer than maxGraphemes {max_graphemes}')
 
             if type_ == 'array':
                 for item in val:
                     if type(item) is not FIELD_TYPES[schema['items']['type']]:
-                        raise ValidationError(f'unexpected item for {schema["type"]} array property {name}: {item!r}')
+                        fail(f'has element {trunc(item)} with invalid type {type(item)}')
 
             if enums := schema.get('enum'):
                 if val not in enums:
-                    raise ValidationError(f'property {name} value {val} not one of enum values')
+                    fail('is not one of enum values')
 
             if const := schema.get('const'):
                 if val != const:
-                    raise ValidationError(f'property {name} value {val} is not const value {const}')
+                    fail(f'is not const value {const}')
 
         return obj
 
