@@ -293,6 +293,10 @@ class Base():
                 if type_ == 'ref':
                     schema = self._get_def(schema['ref'])
                 elif type_ == 'union':
+                    refs = schema['refs']
+                    if (not isinstance(val, (str, dict))
+                            or isinstance(val, str) and val not in refs):
+                        fail("is invalid")
                     inner_type = (val if isinstance(val, str)  # token
                                   else val.get('$type'))
                     if not inner_type:
