@@ -416,6 +416,8 @@ class Base():
             if not condition:
                 raise ValidationError(f'is invalid for format {format}')
 
+        check(val)
+
         # TODO: switch to match once we require Python 3.10+
         if format == 'at-identifier':
             check(val.startswith('did:') or (NSID_RE.match(val) and '.' in val))
@@ -427,7 +429,10 @@ class Base():
             check(CID_BASE32_RE.match(val))
 
         elif format == 'datetime':
-            pass # TODO
+            try:
+                datetime.fromisoformat(val.rstrip('Z'))
+            except ValueError:
+                check(False)
 
         elif format == 'did':
             check(val.startswith('did:'))
