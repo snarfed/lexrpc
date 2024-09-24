@@ -236,7 +236,7 @@ class Base():
             return obj
 
         schema = base
-        if type != 'record':
+        if type in ('input', 'output', 'message'):
             schema = base.get('schema')
 
         if not schema:

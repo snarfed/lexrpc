@@ -155,7 +155,6 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None, data=None, headers={**HEADERS, 'Content-Type': 'application/xml'})
 
-    # TODO
     @skip
     @patch('requests.get', return_value=response())
     def test_no_output_error(self, mock_get):
