@@ -294,7 +294,7 @@ class Base():
         for name, schema in lexicon.get('properties', {}).items():
             if name not in obj:
                 if name in lexicon.get('required', []):
-                    raise ValidationError(f'missing required property {name}')
+                    raise ValidationError(f'{type_} missing required property {name}')
                 continue
 
             prop_type = schema['type']
@@ -362,7 +362,7 @@ class Base():
                 continue
 
             if type(val) is not FIELD_TYPES[prop_type]:
-                fail(f'has unexpected type {type(val)}')
+                fail(f'has unexpected type {type(val).__name__}')
 
             if minimum := schema.get('minimum'):
                 if val < minimum:
@@ -399,7 +399,7 @@ class Base():
             if prop_type == 'array':
                 for item in val:
                     if type(item) is not FIELD_TYPES[schema['items']['type']]:
-                        fail(f'has element {trunc(item)} with invalid type {type(item)}')
+                        fail(f'has element {trunc(item)} with invalid type {type(item).__name__}')
 
             if enums := schema.get('enum'):
                 if val not in enums:

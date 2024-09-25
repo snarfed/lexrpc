@@ -104,7 +104,6 @@ class ServerTest(TestCase):
             server.call('io.example.procedure', {'foo': 2, 'bar': 3})
 
     def test_query_bad_output(self):
-        global BAR
         self.QUERY_BAR = 'not an integer'
 
         with self.assertRaises(ValidationError):

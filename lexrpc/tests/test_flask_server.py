@@ -224,51 +224,40 @@ class XrpcEndpointTest(TestCase):
         second.join()
         self.assertEqual(0, len(subscribers['io.example.delayedSubscribe']))
 
-    # TODO
-    @skip
     def test_procedure_missing_input(self):
         resp = self.client.post('/xrpc/io.example.procedure')
         self.assertEqual(400, resp.status_code)
-        self.assertTrue(resp.json['message'].startswith(
-            'Error validating io.example.procedure input:'))
+        self.assertEqual('io.example.procedure missing required property foo',
+                         resp.json['message'])
 
         resp = self.client.post('/xrpc/io.example.procedure', json={'bar': 3})
         self.assertEqual(400, resp.status_code)
-        self.assertTrue(resp.json['message'].startswith(
-            'Error validating io.example.procedure input:'))
+        self.assertEqual('io.example.procedure missing required property foo',
+                         resp.json['message'])
 
-    # TODO
-    @skip
     def test_procedure_bad_input(self):
         resp = self.client.post('/xrpc/io.example.procedure',
                                 json={'foo': 2, 'bar': 3})
         self.assertEqual(400, resp.status_code)
-        self.assertTrue(resp.json['message'].startswith(
-            'Error validating io.example.procedure input:'))
+        self.assertEqual('string property foo value 2 has unexpected type int',
+                         resp.json['message'])
 
-    # TODO
-    @skip
     def test_query_bad_output(self):
-        global BAR
-        BAR = 'not an integer'
-
         resp = self.client.get('/xrpc/io.example.query?foo=abc')
         self.assertEqual(400, resp.status_code)
-        self.assertTrue(resp.json['message'].startswith(
-            'Error validating io.example.query output:'))
+        self.assertEqual('string property foo value None is not nullable',
+                         resp.json['message'])
 
-    # TODO
-    @skip
     def test_missing_params(self):
         resp = self.client.post('/xrpc/io.example.params')
         self.assertEqual(400, resp.status_code)
-        self.assertTrue(resp.json['message'].startswith(
-            'Error validating io.example.params parameters:'))
+        self.assertEqual('io.example.params missing required property bar',
+                         resp.json['message'])
 
         resp = self.client.post('/xrpc/io.example.params?foo=a')
         self.assertEqual(400, resp.status_code)
-        self.assertTrue(resp.json['message'].startswith(
-            'Error validating io.example.params parameters:'))
+        self.assertEqual('io.example.params missing required property bar',
+                         resp.json['message'])
 
     def test_raises_valueerror(self):
         @server.method('io.example.valueError')
