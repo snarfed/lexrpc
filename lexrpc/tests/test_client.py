@@ -1,7 +1,7 @@
 """Unit tests for client.py."""
 from io import BytesIO
 import json
-from unittest import skip, TestCase
+from unittest import TestCase
 from unittest.mock import call, patch
 import urllib.parse
 
@@ -155,7 +155,6 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None, data=None, headers={**HEADERS, 'Content-Type': 'application/xml'})
 
-    @skip
     @patch('requests.get', return_value=response())
     def test_no_output_error(self, mock_get):
         with self.assertRaises(ValidationError):
@@ -202,8 +201,6 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None, data=None, headers=HEADERS)
 
-    # TODO
-    @skip
     def test_missing_params(self):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({})
@@ -211,8 +208,6 @@ class ClientTest(TestCase):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({}, foo='a')
 
-    # TODO
-    @skip
     def test_invalid_params(self):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({}, bar='c')

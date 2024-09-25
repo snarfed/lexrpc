@@ -277,23 +277,25 @@ class Base():
           ValidationError: if the object is invalid
         """
         assert lexicon
+
+        def trunc(val):
+            val_str = repr(val)
+            return val_str if len(val_str) <= 50 else val_str[:50] + '…'
+
         if lexicon.get('type') == 'token':
-            if not isinstance(obj, str):
-                raise ValidationError(f'got value {obj} for type token')
+            if obj != type_:
+                raise ValidationError(f'got value {trunc(obj)} for type token')
             # TODO: anything else to do here?
             return
 
-        assert isinstance(obj, dict), obj
+        if not isinstance(obj, dict):
+            raise ValidationError(f'expected object for {type_} property; got {trunc(obj)}')
 
         for name, schema in lexicon.get('properties', {}).items():
             if name not in obj:
                 if name in lexicon.get('required', []):
                     raise ValidationError(f'missing required property {name}')
                 continue
-
-            def trunc(val):
-                val_str = repr(val)
-                return val_str if len(val_str) <= 50 else val_str[:50] + '…'
 
             prop_type = schema['type']
 
