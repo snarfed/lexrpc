@@ -10,6 +10,30 @@ import dag_json
 from ..base import Base, ValidationError
 
 
+def load_file_lines(file):
+  """Reads lines from a file and returns them as a set.
+
+  Leading and trailing whitespace is trimmed. Blank lines and lines beginning
+  with ``#`` (ie comments) are ignored.
+
+  NOTE: duplicates oauth_dropins.webutil.util.load_file_lines!
+
+  Args:
+    file: a file object or other iterable that returns lines
+
+  Returns:
+    set of str
+  """
+  items = []
+
+  for line in file:
+    val = line.strip()
+    if val and not val.startswith('#'):
+      items.append(val)
+
+  return items
+
+
 # All test data files live in testdata/.
 prevdir = os.getcwd()
 os.chdir(os.path.join(os.path.dirname(__file__), 'testdata/'))
@@ -68,6 +92,22 @@ for input in json.load(Path('lexicon-invalid.json').open()):
         return test
 
     tests[test_name('lexicon_invalid_' + input['name'])] = test_fn()
+
+
+# valid string formats
+for file in Path('.').glob('*_syntax_valid.txt'):
+    for i, line in enumerate(load_file_lines(file.open())):
+        def test_fn():
+            format = file.name.split('_')[0]
+            val = line
+            def test(self):
+                try:
+                    Base()._validate_string_format(val, format)
+                except ValidationError as e:
+                    raise ValidationError(f'{val} {e.args[0]}')
+            return test
+
+        tests[test_name(f'{file.stem}_{i}')] = test_fn()
 
 
 os.chdir(prevdir)
