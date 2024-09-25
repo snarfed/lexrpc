@@ -166,8 +166,10 @@ class Base():
 
         for i, lexicon in enumerate(copy.deepcopy(lexicons)):
             nsid = lexicon.get('id')
-            if not nsid:
-                raise ValidationError(f'Lexicon {i} missing id field')
+            if not nsid or not isinstance(nsid, str):
+                raise ValidationError(f'Lexicon {i} missing or invalid id field')
+            elif lexicon.get('lexicon') != 1:
+                raise ValidationError(f'{nsid} lexicon field should be 1')
             # logger.debug(f'Loading lexicon {nsid}')
 
             for name, defn in lexicon.get('defs', {}).items():
@@ -178,12 +180,14 @@ class Base():
                 if type not in LEXICON_TYPES | PARAMETER_TYPES:
                     raise ValidationError(f'Bad type for lexicon {id}: {type}')
 
-                for field in ('input', 'output', 'message',
-                              'parameters', 'record'):
-                    if validate:
-                        # logger.debug(f'Validating {id} {field} schema')
-                        # TODO
-                        pass
+                if validate:
+                    for field in ('input', 'output', 'message', 'parameters',
+                                  'record'):
+                        if schema := defn.get('field'):
+                            if not isinstance(schema, dict):
+                                raise ValidationError(f'{nsid} {field} is invalid')
+                            elif not isinstance(schema.get('properties'), dict):
+                                raise ValidationError(f'{nsid} {field} properties is invalid')
 
                 # TODO: fully qualify #... references? or are we already doing that?
 

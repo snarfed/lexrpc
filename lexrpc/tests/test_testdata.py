@@ -19,19 +19,23 @@ base = Base(lexicons=lexicons)
 
 tests = {}
 
-def test_name(input):
-  return 'test_' + input['name'].replace(' ', '_')
+def test_name(name):
+  return 'test_' + name.replace(' ', '_')
 
 
+# valid records
 for input in dag_json.decode(Path('record-data-valid.json').read_bytes(),
                              dialect='atproto'):
     def test_fn():
         data = input['data']
-        # shouldn't raise
-        return lambda self: base.maybe_validate(data['$type'], 'record', data)
+        def test(self):
+          # shouldn't raise
+          base.maybe_validate(data['$type'], 'record', data)
+        return test
 
-    tests[test_name(input)] = test_fn()
+    tests[test_name('record_valid_' + input['name'])] = test_fn()
 
+# invalid records
 for input in dag_json.decode(Path('record-data-invalid.json').read_bytes(),
                                   dialect='atproto'):
     def test_fn():
@@ -41,7 +45,29 @@ for input in dag_json.decode(Path('record-data-invalid.json').read_bytes(),
                 base.maybe_validate(data['$type'], 'record', data)
         return test
 
-    tests[test_name(input)] = test_fn()
+    tests[test_name('record_invalid_' + input['name'])] = test_fn()
+
+# valid lexicons
+for input in json.load(Path('lexicon-valid.json').open()):
+    def test_fn():
+        lexicon = input['lexicon']
+        def test(self):
+          # shouldn't raise
+          Base([lexicon])
+        return test
+
+    tests[test_name('lexicon_valid_' + input['name'])] = test_fn()
+
+# invalid lexicons
+for input in json.load(Path('lexicon-invalid.json').open()):
+    def test_fn():
+        lexicon = input['lexicon']
+        def test(self):
+            with self.assertRaises(ValidationError):
+                Base([lexicon])
+        return test
+
+    tests[test_name('lexicon_invalid_' + input['name'])] = test_fn()
 
 
 os.chdir(prevdir)

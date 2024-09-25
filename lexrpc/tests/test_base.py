@@ -28,23 +28,6 @@ class BaseTest(TestCase):
             },
         }, self.base._get_def('io.example.kitchenSink#subobject'))
 
-    @skip
-    def test_validate_lexicon_schema(self):
-        for bad in 'foo bar', {'type': 'foo', 'properties': 3}:
-            with self.assertRaises(ValidationError):
-                Base([{
-                    'lexicon': 1,
-                    'id': 'io.example.procedure',
-                    'defs': {
-                        'main': {
-                            'type': 'procedure',
-                            'input': {
-                                'schema': bad,
-                            },
-                        },
-                    },
-                }])
-
     def test_validate_record_pass(self):
         self.base.maybe_validate('io.example.record', 'record', {
             'baz': 3,
