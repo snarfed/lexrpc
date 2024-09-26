@@ -227,37 +227,42 @@ class XrpcEndpointTest(TestCase):
     def test_procedure_missing_input(self):
         resp = self.client.post('/xrpc/io.example.procedure')
         self.assertEqual(400, resp.status_code)
-        self.assertEqual('io.example.procedure missing required property foo',
-                         resp.json['message'])
+        self.assertEqual(
+            'io.example.procedure input with value {} missing required property foo',
+            resp.json['message'])
 
         resp = self.client.post('/xrpc/io.example.procedure', json={'bar': 3})
         self.assertEqual(400, resp.status_code)
-        self.assertEqual('io.example.procedure missing required property foo',
-                         resp.json['message'])
+        self.assertEqual(
+            "io.example.procedure input with value {'bar': 3} missing required property foo",
+            resp.json['message'])
 
     def test_procedure_bad_input(self):
         resp = self.client.post('/xrpc/io.example.procedure',
                                 json={'foo': 2, 'bar': 3})
         self.assertEqual(400, resp.status_code)
-        self.assertEqual('string property foo value 2 has unexpected type int',
+        self.assertEqual('string foo with value 2 has unexpected type int',
                          resp.json['message'])
 
     def test_query_bad_output(self):
         resp = self.client.get('/xrpc/io.example.query?foo=abc')
         self.assertEqual(400, resp.status_code)
-        self.assertEqual('string property foo value None is not nullable',
-                         resp.json['message'])
+        self.assertEqual(
+            "io.example.query output with value {'foo': None, 'bar': 5} property foo is not nullable",
+            resp.json['message'])
 
     def test_missing_params(self):
         resp = self.client.post('/xrpc/io.example.params')
         self.assertEqual(400, resp.status_code)
-        self.assertEqual('io.example.params missing required property bar',
-                         resp.json['message'])
+        self.assertEqual(
+            'io.example.params parameters with value {} missing required property bar',
+            resp.json['message'])
 
         resp = self.client.post('/xrpc/io.example.params?foo=a')
         self.assertEqual(400, resp.status_code)
-        self.assertEqual('io.example.params missing required property bar',
-                         resp.json['message'])
+        self.assertEqual(
+            "io.example.params parameters with value {'foo': 'a'} missing required property bar",
+            resp.json['message'])
 
     def test_raises_valueerror(self):
         @server.method('io.example.valueError')

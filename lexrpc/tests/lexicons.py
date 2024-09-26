@@ -169,12 +169,12 @@ LEXICONS = [
             'main': {
                 'type': 'record',
                 'record': {
-                    'required': ['bar'],
                     'properties': {
                         'foo': {
                             'type': 'array',
                             'items': {
                                 'type': 'object',
+                                'required': ['bar'],
                                 'properties': {
                                     'bar': {'type': 'integer'},
                                     'baj': {'type': 'string'},
