@@ -85,7 +85,7 @@ LEXICONS = [
 
     {
         'lexicon': 1,
-        'id': 'io.example.dashed-name',
+        'id': 'io.exa-mple.dashedName',
         'defs': {
             'main': {
                 'type': 'procedure',

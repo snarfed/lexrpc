@@ -17,7 +17,7 @@ class BaseTest(TestCase):
         self.base = Base(LEXICONS)
 
     def test_get_def(self):
-        for nsid in 'io.example.dashed-name', 'io.example.noParamsInputOutput':
+        for nsid in 'io.exa-mple.dashedName', 'io.example.noParamsInputOutput':
             self.assertEqual({'type': 'procedure'}, self.base._get_def(nsid))
 
         self.assertEqual({

@@ -27,7 +27,7 @@ def no_params_input_output(input, **params):
     pass
 
 
-@server.method('io.example.dashed-name')
+@server.method('io.exa-mple.dashedName')
 def dashed_name_fn(input, **params):
     pass
 
@@ -86,7 +86,7 @@ class ServerTest(TestCase):
         self.assertIsNone(server.call('io.example.noParamsInputOutput', {}))
 
     def test_dashed_name(self):
-        self.assertIsNone(server.call('io.example.dashed-name', {}))
+        self.assertIsNone(server.call('io.exa-mple.dashedName', {}))
 
     def test_defs(self):
         output = server.call('io.example.defs', {'in': 'foo'})

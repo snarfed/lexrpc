@@ -174,10 +174,10 @@ class ClientTest(TestCase):
 
     @patch('requests.post', return_value=response())
     def test_dashed_name(self, mock_post):
-        self.assertIsNone(self.client.io.example.dashed_name({}))
+        self.assertIsNone(self.client.io.exa_mple.dashedName({}))
 
         mock_post.assert_called_once_with(
-            'http://ser.ver/xrpc/io.example.dashed-name',
+            'http://ser.ver/xrpc/io.exa-mple.dashedName',
             json=None, data=None, headers=HEADERS)
 
     @patch('requests.get', return_value=response({'out': 'foo'}))
@@ -333,10 +333,10 @@ class ClientTest(TestCase):
             'accessJwt': 'new-towkin',
             'refreshJwt': 'reephrush',
             'handle': 'han.dull',
-            'did': 'did:dyd',
+            'did': 'did:dyd:x',
         }
         output = {
-            'did': 'did:unused',
+            'did': 'did:unu:sed',
             'availableUserDomains': ['moo.com'],
         }
         mock_get.side_effect = [
@@ -415,7 +415,7 @@ class ClientTest(TestCase):
             'accessJwt': 'towkin',
             'refreshJwt': 'unused',
             'handle': 'unu.sed',
-            'did': 'did:unused',
+            'did': 'did:unu:sed',
         }
         mock_post.return_value = response(session)
 

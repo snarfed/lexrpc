@@ -75,7 +75,7 @@ class XrpcEndpointTest(TestCase):
         self.assertEqual(200, resp.status_code)
 
     def test_dashed_name(self):
-        resp = self.client.post('/xrpc/io.example.dashed-name')
+        resp = self.client.post('/xrpc/io.exa-mple.dashedName')
         self.assertEqual(200, resp.status_code)
 
     def test_not_nsid(self):
@@ -288,19 +288,19 @@ class XrpcEndpointTest(TestCase):
         self.assertEqual(200, resp.status_code, resp.json)
 
     def test_unknown_methods(self):
-        resp = self.client.get('/xrpc/io.unknown')
+        resp = self.client.get('/xrpc/io.un.known')
         self.assertEqual(501, resp.status_code)
         self.assertEqual({
             'error': 'MethodNotImplemented',
-            'message': 'io.unknown not found',
+            'message': 'io.un.known not found',
         }, resp.json)
 
     def test_undefined_method(self):
-        resp = self.client.post('/xrpc/not.defined')
+        resp = self.client.post('/xrpc/not.de.fined')
         self.assertEqual(501, resp.status_code)
         self.assertEqual({
             'error': 'MethodNotImplemented',
-            'message': 'not.defined not found',
+            'message': 'not.de.fined not found',
         }, resp.json)
 
     def test_encodings(self):
