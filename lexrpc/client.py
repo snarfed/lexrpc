@@ -147,12 +147,12 @@ class Client(Base):
 
         # strip null params, validate params and input, then encode params
         params = {k: v for k, v in params.items() if v is not None}
-        params = self.maybe_validate(nsid, 'parameters', params)
+        params = self.validate(nsid, 'parameters', params)
         params_str = self.encode_params(params)
 
         type = self._get_def(nsid)['type']
         if type == 'subscription':
-            input = self.maybe_validate(nsid, 'input', input)
+            input = self.validate(nsid, 'input', input)
 
         req_headers = {
             **DEFAULT_HEADERS,
@@ -222,7 +222,7 @@ class Client(Base):
 
         resp.raise_for_status()
 
-        output = self.maybe_validate(nsid, 'output', output)
+        output = self.validate(nsid, 'output', output)
         return output
 
     def _subscribe(self, url, decode=True):

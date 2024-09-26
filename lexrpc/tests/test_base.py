@@ -14,7 +14,7 @@ class BaseTest(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.base = Base(LEXICONS)
+        self.base = Base(LEXICONS, validate=True)
 
     def test_get_def(self):
         for nsid in 'io.exa-mple.dashedName', 'io.example.noParamsInputOutput':
@@ -29,14 +29,14 @@ class BaseTest(TestCase):
         }, self.base._get_def('io.example.kitchenSink#subobject'))
 
     def test_validate_record_pass(self):
-        self.base.maybe_validate('io.example.record', 'record', {
+        self.base.validate('io.example.record', 'record', {
             'baz': 3,
             'biff': {
                 'baj': 'foo',
             },
         })
 
-    def test_maybe_validate_truncate(self):
+    def test_validate_truncate(self):
         base = Base(LEXICONS, truncate=True)
 
         for input, expected in (
@@ -48,26 +48,25 @@ class BaseTest(TestCase):
             with self.subTest(input=input, expected=expected):
                 self.assertEqual(
                     {'string': expected},
-                    base.maybe_validate('com.example.stringLength', 'record',
+                    base.validate('com.example.stringLength', 'record',
                                         {'string': input}))
 
     def test_validate_record_pass_nested_optional_field_missing(self):
-        self.base.maybe_validate('io.example.record', 'record', {
+        self.base.validate('io.example.record', 'record', {
             'baz': 3,
             'biff': {
             },
         })
 
     def test_validate_record_pass_optional_field_missing(self):
-        self.base.maybe_validate('io.example.record', 'record', {
+        self.base.validate('io.example.record', 'record', {
             'baz': 3,
         })
 
 
     def test_validate_record_fail_integer_field_bad_type(self):
-        self.base._validate = True
         with self.assertRaises(ValidationError):
-            self.base.maybe_validate('io.example.record', 'record', {
+            self.base.validate('io.example.record', 'record', {
                 'baz': 'x',
                 'biff': {
                     'baj': 'foo',
@@ -75,24 +74,22 @@ class BaseTest(TestCase):
             })
 
     def test_validate_record_fail_object_field_bad_type(self):
-        self.base._validate = True
         with self.assertRaises(ValidationError):
-            self.base.maybe_validate('io.example.record', 'record', {
+            self.base.validate('io.example.record', 'record', {
                 'baz': 3,
                 'biff': 4,
             })
 
     def test_validate_record_fail_missing_required_field(self):
-        self.base._validate = True
         with self.assertRaises(ValidationError):
-            self.base.maybe_validate('io.example.record', 'record', {
+            self.base.validate('io.example.record', 'record', {
                 'biff': {
                     'baj': 'foo',
                 },
             })
 
     def test_validate_record_kitchen_sink_pass(self):
-        self.base.maybe_validate('io.example.kitchenSink', 'record', {
+        self.base.validate('io.example.kitchenSink', 'record', {
             'array': ['x', 'y'],
             'boolean': True,
             'integer': 3,
@@ -107,4 +104,28 @@ class BaseTest(TestCase):
             },
         })
 
-        # TODO: test arrays of objects, refs, etc
+    def test_validate_record_object_array_pass(self):
+        self.base.validate('io.example.objectArray', 'record', {'foo': []})
+
+        self.base.validate('io.example.objectArray', 'record', {
+            'foo': [
+                {'bar': 3, 'baj': 'foo'},
+                {'bar': 4},
+            ],
+        })
+
+    def test_validate_record_object_array_fail_bad_type(self):
+        with self.assertRaises(ValidationError):
+            self.base.validate('io.example.objectArray', 'record', {
+                'foo': [
+                    {'bar': 'x'}
+                ],
+            })
+
+    def test_validate_record_object_array_fail_missing_required(self):
+        with self.assertRaises(ValidationError):
+            self.base.validate('io.example.objectArray', 'record', {
+                'foo': [
+                    {'baz': 'x'}
+                ],
+            })

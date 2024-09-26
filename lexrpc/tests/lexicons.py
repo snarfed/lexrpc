@@ -164,6 +164,77 @@ LEXICONS = [
 
     {
         'lexicon': 1,
+        'id': 'io.example.objectArray',
+        'defs': {
+            'main': {
+                'type': 'record',
+                'record': {
+                    'required': ['bar'],
+                    'properties': {
+                        'foo': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'bar': {'type': 'integer'},
+                                    'baj': {'type': 'string'},
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+
+    {
+        'lexicon': 1,
+        'id': 'io.example.refArray',
+        'defs': {
+            'main': {
+                'type': 'record',
+                'record': {
+                    'properties': {
+                        'foo': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'ref',
+                                'ref': '#object'
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+
+    {
+        'lexicon': 1,
+        'id': 'io.example.unionArray',
+        'defs': {
+            'main': {
+                'type': 'record',
+                'record': {
+                    'required': ['bar'],
+                    'properties': {
+                        'foo': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'union',
+                                'refs': [
+                                    'com.example.kitchenSink#object',
+                                    'com.example.kitchenSink#subobject',
+                                ],
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+
+    {
+        'lexicon': 1,
         'id': 'io.example.token',
         'defs': {
             'main': {

@@ -54,7 +54,7 @@ for input in dag_json.decode(Path('record-data-valid.json').read_bytes(),
         data = input['data']
         def test(self):
           # shouldn't raise
-          base.maybe_validate(data['$type'], 'record', data)
+          base.validate(data['$type'], 'record', data)
         return test
 
     tests[test_name('record_valid_' + input['name'])] = test_fn()
@@ -66,7 +66,7 @@ for input in dag_json.decode(Path('record-data-invalid.json').read_bytes(),
         data = input['data']
         def test(self):
             with self.assertRaises(ValidationError):
-                base.maybe_validate(data['$type'], 'record', data)
+                base.validate(data['$type'], 'record', data)
         return test
 
     tests[test_name('record_invalid_' + input['name'])] = test_fn()

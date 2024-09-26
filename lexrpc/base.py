@@ -219,7 +219,7 @@ class Base():
 
         return lexicon
 
-    def maybe_validate(self, nsid, type, obj):
+    def validate(self, nsid, type, obj):
         """If configured to do so, validates a ATProto value against its lexicon.
 
         Returns ``None`` if the object validates, otherwise raises an exception.
