@@ -48,8 +48,8 @@ class BaseTest(TestCase):
             with self.subTest(input=input, expected=expected):
                 self.assertEqual(
                     {'string': expected},
-                    base.validate('com.example.stringLength', 'record',
-                                        {'string': input}))
+                    base.validate('io.example.stringLength', 'record',
+                                  {'string': input}))
 
     def test_validate_record_pass_nested_optional_field_missing(self):
         self.base.validate('io.example.record', 'record', {
@@ -118,7 +118,7 @@ class BaseTest(TestCase):
         with self.assertRaises(ValidationError):
             self.base.validate('io.example.objectArray', 'record', {
                 'foo': [
-                    {'bar': 'x'}
+                    {'bar': 'x'},
                 ],
             })
 
@@ -126,6 +126,80 @@ class BaseTest(TestCase):
         with self.assertRaises(ValidationError):
             self.base.validate('io.example.objectArray', 'record', {
                 'foo': [
-                    {'baz': 'x'}
+                    {'baz': 'x'},
                 ],
             })
+
+    def test_validate_record_ref_array_pass(self):
+        self.base.validate('io.example.refArray', 'record', {'foo': []})
+
+        self.base.validate('io.example.refArray', 'record', {
+            'foo': [
+                {'baz': 5},
+                {'baz': 5, 'biff': {'baj': 'ok'}},
+            ],
+        })
+
+    def test_validate_record_ref_array_fail_bad_type(self):
+        with self.assertRaises(ValidationError):
+            self.base.validate('io.example.refArray', 'record', {
+                'foo': [{'baz': 'x'}],
+            })
+
+        with self.assertRaises(ValidationError):
+            self.base.validate('io.example.refArray', 'record', {
+                'foo': [{
+                    'baz': 'x',
+                    'biff': {'baj': 5},
+                }],
+            })
+
+    def test_validate_record_ref_array_fail_item_not_nullable(self):
+        with self.assertRaises(ValidationError):
+            self.base.validate('io.example.refArray', 'record', {
+                'foo': [
+                    {'baz': None},
+                ],
+            })
+
+    def test_validate_record_union_array_pass(self):
+        self.base.validate('io.example.unionArray', 'record', {'foo': []})
+
+        self.base.validate('io.example.unionArray', 'record', {
+            'foo': [{
+                '$type': 'io.example.kitchenSink#object',
+                'subobject': {'boolean': True},
+                'array': [],
+                'boolean': False,
+                'integer': 0,
+                'string': 'ok',
+            }, {
+                '$type': 'io.example.kitchenSink#subobject',
+                'boolean': False,
+            }],
+        })
+
+    def test_validate_record_union_array_fail_bad_type(self):
+        for bad in [
+                123,
+                {'$type': 'io.example.kitchenSink#subobject', 'boolean': 123},
+                {'$type': 'io.example.record', 'baz': 123},
+        ]:
+            with self.subTest(bad=bad), self.assertRaises(ValidationError):
+                self.base.validate('io.example.unionArray', 'record', {
+                    'foo': [123],
+                })
+
+    def test_validate_record_union_array_fail_inner_array(self):
+        for bad in 123, [123], ['x', 123], [{'y': 'z'}]:
+            with self.subTest(bad=bad), self.assertRaises(ValidationError):
+                self.base.validate('io.example.unionArray', 'record', {
+                    'foo': [{
+                        '$type': 'io.example.kitchenSink#object',
+                        'subobject': {'boolean': True},
+                        'array': bad,
+                        'boolean': False,
+                        'integer': 0,
+                        'string': 'ok',
+                    }],
+                })

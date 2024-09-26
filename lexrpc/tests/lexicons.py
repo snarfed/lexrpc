@@ -199,7 +199,7 @@ LEXICONS = [
                             'type': 'array',
                             'items': {
                                 'type': 'ref',
-                                'ref': '#object'
+                                'ref': 'io.example.record'
                             },
                         },
                     },
@@ -222,8 +222,8 @@ LEXICONS = [
                             'items': {
                                 'type': 'union',
                                 'refs': [
-                                    'com.example.kitchenSink#object',
-                                    'com.example.kitchenSink#subobject',
+                                    'io.example.kitchenSink#object',
+                                    'io.example.kitchenSink#subobject',
                                 ],
                             },
                         },
@@ -380,7 +380,7 @@ LEXICONS = [
 
     {
         'lexicon': 1,
-        'id': 'com.example.stringLength',
+        'id': 'io.example.stringLength',
         'defs': {
             'main': {
                 'type': 'record',
@@ -459,7 +459,7 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.union',
+    #     'id': 'io.example.union',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
@@ -472,16 +472,16 @@ LEXICONS = [
     #                     'unionOpen': {
     #                         'type': 'union',
     #                         'refs': [
-    #                             'com.example.kitchenSink#object',
-    #                             'com.example.kitchenSink#subobject',
+    #                             'io.example.kitchenSink#object',
+    #                             'io.example.kitchenSink#subobject',
     #                         ],
     #                     },
     #                     'unionClosed': {
     #                         'type': 'union',
     #                         'closed': True,
     #                         'refs': [
-    #                             'com.example.kitchenSink#object',
-    #                             'com.example.kitchenSink#subobject',
+    #                             'io.example.kitchenSink#object',
+    #                             'io.example.kitchenSink#subobject',
     #                         ],
     #                     },
     #                 },
@@ -492,7 +492,7 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.unknown',
+    #     'id': 'io.example.unknown',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
@@ -512,7 +512,7 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.arrayLength',
+    #     'id': 'io.example.arrayLength',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
@@ -533,7 +533,7 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.boolConst',
+    #     'id': 'io.example.boolConst',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
@@ -552,7 +552,7 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.integerRange',
+    #     'id': 'io.example.integerRange',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
@@ -572,7 +572,7 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.integerEnum',
+    #     'id': 'io.example.integerEnum',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
@@ -591,7 +591,7 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.integerConst',
+    #     'id': 'io.example.integerConst',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
@@ -610,7 +610,7 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.integerRange',
+    #     'id': 'io.example.integerRange',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
@@ -630,7 +630,7 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.integerEnum',
+    #     'id': 'io.example.integerEnum',
     #     'defs': {
     #         'main': {
     #             'type': 'record',
@@ -649,7 +649,7 @@ LEXICONS = [
 
     # {
     #     'lexicon': 1,
-    #     'id': 'com.example.integerConst',
+    #     'id': 'io.example.integerConst',
     #     'defs': {
     #         'main': {
     #             'type': 'record',

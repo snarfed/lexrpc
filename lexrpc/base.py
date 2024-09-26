@@ -294,6 +294,16 @@ class Base():
         Raises:
           ValidationError: if the value is invalid
         """
+        def get_schema(name):
+            """Returns (fully qualified lexicon name, lexicon) tuple."""
+            schema_name = urljoin(type_, name)
+            schema = self._get_def(schema_name)
+            if schema.get('type') == 'record':
+                schema = schema.get('record')
+            if not schema:
+                fail(f'lexicon {schema_name} not found')
+            return schema_name, schema
+
         def fail(msg):
             val_str = repr(val)
             if len(val_str) > 50:
@@ -353,22 +363,29 @@ class Base():
             elif val not in self.defs:
                 fail(f'not found')
 
-        if type_ in ('ref', 'union'):
-            if not isinstance(val, (str, dict)):
-                fail("is invalid")
+        if type_ == 'ref':
+            ref = schema['ref']
+            if isinstance(val, str) and val != ref:
+                fail(f'is not {ref}')
+            elif not isinstance(val, dict):
+                fail('is not object')
+            type_, schema = get_schema(ref)
 
-            if type_ == 'ref':
-                inner_type = schema['ref']
-            else:
-                inner_type = val.get('$type') if isinstance(val, dict) else val
+        if type_ == 'union':
+            if isinstance(val, dict):
+                inner_type = val.get('$type')
                 if not inner_type:
                     fail('missing $type')
-                refs = schema['refs']
-                if inner_type not in refs:
-                    fail(f"isn't one of {refs}")
+            elif isinstance(val, str):
+                inner_type = val
+            else:
+                fail("is invalid")
 
-            # if it's a fragment, fully qualify it
-            schema = self._get_def(urljoin(type_, inner_type))
+            refs = schema['refs']
+            if inner_type not in refs:
+                fail(f"{inner_type} isn't one of {refs}")
+
+            type_, schema = get_schema(inner_type)
 
         if type_ == 'blob':
             max_size = schema.get('maxSize')
@@ -406,10 +423,7 @@ class Base():
                 continue
 
             if inner_type == 'ref':
-                # if it's a fragment, fully qualify it
-                inner_type = urljoin(type_, inner_schema['ref'])
-                inner_schema = self._get_def(inner_type)
-            # TODO: union
+                inner_type, inner_schema = get_schema(inner_schema['ref'])
 
             self._validate_schema(inner_val, inner_type, name=inner_name,
                                   schema=inner_schema)
