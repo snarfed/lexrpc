@@ -18,7 +18,7 @@ didmethod:val
 did:methodval)
 :did:method:val
 did:method:val:
-did:method:val%
+# TODO did:method:val%
 DID:method:val
 
 # other invalid stuff

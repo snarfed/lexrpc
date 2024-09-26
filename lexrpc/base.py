@@ -67,12 +67,14 @@ BLOB_DEF = {
 }
 
 # duplicated in bridgy-fed/common.py
-DOMAIN_RE = re.compile(r'^([a-z0-9][a-z0-9-]{0,62}(?<!-)\.){1,}[a-z][a-z0-9]+$')
+DOMAIN_PATTERN = r'([a-z0-9][a-z0-9-]{0,62}(?<!-)\.){1,}[a-z][a-z0-9-]*(?<!-)'
+DOMAIN_RE = re.compile(f'^{DOMAIN_PATTERN}$')
 
 # https://atproto.com/specs/nsid
 NSID_SEGMENT = '[a-zA-Z0-9-]+'
 NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
-NSID_RE = re.compile(r'^(?!-)([a-z][a-z0-9-]{0,62}(?<!-)\.){2,}[a-zA-Z]{1,63}$')
+NSID_PATTERN = r'(?![0-9])((?!-)[a-z0-9-]{1,63}(?<!-)\.){2,}[a-zA-Z]{1,63}'
+NSID_RE = re.compile(f'^{NSID_PATTERN}$')
 
 # https://atproto.com/specs/lexicon#string-formats
 # https://datatracker.ietf.org/doc/html/rfc5646#section-2.1
@@ -88,7 +90,8 @@ TID_RE = re.compile(rf'^[{BASE32_CHARS}]{{13}}$')
 CID_RE = re.compile(r'^[A-Za-z0-9+]{8,}$')
 
 # https://www.w3.org/TR/did-core/#did-syntax
-DID_RE = re.compile('^did:[a-z]+:[A-Za-z0-9._%-]{1,2048}$')
+DID_PATTERN = r'did:[a-z]+:[A-Za-z0-9._%:-]{1,2048}(?<!:)'
+DID_RE = re.compile(f'^{DID_PATTERN}$')
 
 # https://atproto.com/specs/at-uri-scheme
 # NOTE: duplicated in granary.bluesky!
@@ -96,9 +99,9 @@ DID_RE = re.compile('^did:[a-z]+:[A-Za-z0-9._%-]{1,2048}$')
 _CHARS = 'a-zA-Z0-9-.'
 AT_URI_RE = re.compile(rf"""
     ^at://
-     (?P<repo>[{_CHARS}:]+)
-      /(?P<collection>([{_CHARS}]+\.[{_CHARS}]+))    # NSID, approximation
-       /(?P<rkey>[{_CHARS}:~_]+)
+     (?P<repo>{DID_PATTERN}|{DOMAIN_PATTERN})
+      (?:/(?P<collection>{NSID_PATTERN})
+       (?:/(?P<rkey>[{_CHARS}:~_]+))?)?
     $""", re.VERBOSE)
 
 # wrapper for datetime.now, lets us mock it out in tests
@@ -441,14 +444,15 @@ class Base():
 
         # TODO: switch to match once we require Python 3.10+
         if format == 'at-identifier':
-            check(val.startswith('did:plc:')
-                  or val.startswith('did:web:')
-                  or (NSID_RE.match(val) and '.' in val))
+            check(DID_RE.match(val) or DOMAIN_RE.match(val.lower()))
 
         elif format == 'at-uri':
             check(len(val) < 8 * 1024)
             check(AT_URI_RE.match(val))
-            check('/.' not in val and '/..' not in val)
+            check('/./' not in val
+                  and '/../' not in val
+                  and not val.endswith('/.')
+                  and not val.endswith('/..'))
 
         elif format == 'cid':
             # ideally I'd use CID.decode here, but it doesn't support CIDv5,
@@ -456,8 +460,18 @@ class Base():
             check(CID_RE.match(val))
 
         elif format == 'datetime':
+            check('T' in val)
+
+            orig_val = val
+            # timezone is required
+            val = re.sub(r'([+-][0-9]{2}:[0-9]{2}|Z)$', '', orig_val)
+            check(val != orig_val)
+
+            # strip fractional seconds
+            val = re.sub(r'\.[0-9]+$', '', val)
+
             try:
-                datetime.fromisoformat(val.rstrip('Z'))
+                datetime.fromisoformat(val)
             except ValueError:
                 check(False)
 
@@ -465,12 +479,12 @@ class Base():
             check(DID_RE.match(val))
 
         elif format == 'nsid':
-            check(len(val) < 317)
+            check(len(val) <= 317)
             check(NSID_RE.match(val) and '.' in val)
 
         elif format in 'handle':
-            check(len(val) < 253)
-            check(DOMAIN_RE.match(val))
+            check(len(val) <= 253)
+            check(DOMAIN_RE.match(val.lower()))
 
         elif format == 'tid':
             check(TID_RE.match(val))

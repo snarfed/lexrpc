@@ -93,20 +93,20 @@ for input in json.load(Path('lexicon-invalid.json').open()):
 
     tests[test_name('lexicon_invalid_' + input['name'])] = test_fn()
 
-# # valid string formats
-# for file in Path('.').glob('*_syntax_valid.txt'):
-#     for i, line in enumerate(load_file_lines(file.open())):
-#         def test_fn():
-#             format = file.name.split('_')[0]
-#             val = line
-#             def test(self):
-#                 try:
-#                     Base()._validate_string_format(val, format)
-#                 except ValidationError as e:
-#                     raise ValidationError(f'{val} {e.args[0]}')
-#             return test
+# valid string formats
+for file in Path('.').glob('*_syntax_valid.txt'):
+    for i, line in enumerate(load_file_lines(file.open())):
+        def test_fn():
+            format = file.name.split('_')[0]
+            val = line
+            def test(self):
+                try:
+                    Base()._validate_string_format(val, format)
+                except ValidationError as e:
+                    raise ValidationError(f'{val} {e.args[0]}')
+            return test
 
-#         tests[test_name(f'{file.stem}_{i}')] = test_fn()
+        tests[test_name(f'{file.stem}_{i}')] = test_fn()
 
 # invalid string formats
 for file in Path('.').glob('*_syntax_invalid.txt'):
