@@ -109,7 +109,7 @@ for file in Path('.').glob('*_syntax_valid.txt'):
         tests[test_name(f'{file.stem}_{i}')] = test_fn()
 
 # invalid string formats
-for file in Path('.').glob('*_syntax_invalid.txt'):
+for file in Path('.').glob('*_invalid.txt'):
     for i, line in enumerate(load_file_lines(file.open())):
         def test_fn():
             format = file.name.split('_')[0]
