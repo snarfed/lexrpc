@@ -29,7 +29,7 @@ dependencies = [
     'dag-json>=0.3',
     'grapheme',
     'iterators',
-    'libipld',
+    'libipld<2.0.0',
     'multiformats>=0.3.1.post4',
     'requests>=2.0',
     'simple-websocket',
