@@ -6,7 +6,6 @@ import json
 import logging
 import re
 import string
-from types import NoneType
 from urllib.parse import urlencode, urljoin, urlparse
 
 import grapheme
@@ -34,7 +33,7 @@ PARAMETER_TYPES = frozenset((
 ))
 # https://atproto.com/specs/lexicon#overview-of-types
 FIELD_TYPES = {
-    'null': NoneType,
+    'null': type(None),
     'blob': dict,
     'boolean': bool,
     'cid-link': CID,
