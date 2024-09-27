@@ -134,11 +134,6 @@ init_flask(server, app)
 This configures the Flask app to serve the methods registered with the lexrpc server [as per the spec](https://atproto.com/specs/xrpc#path). Each method is served at the path `/xrpc/[NSID]`, procedures via POSTs and queries via GETs. Parameters are decoded from query parameters, input is taken from the JSON HTTP request body, and output is returned in the JSON HTTP response body. The `Content-Type` response header is set to `application/json`.
 
 
-## TODO
-
-* schema validation for records
-
-
 Release instructions
 ---
 Here's how to package, test, and ship a new release.
@@ -228,6 +223,8 @@ Here's how to package, test, and ship a new release.
 ## Changelog
 
 ### 0.8 - unreleased
+
+* Add full [lexicon schema validation](https://atproto.com/specs/lexicon) for records and XRPC method parameters, input, and output. Includes primitive and `object` types, `ref`s and `union`s, string formats, type-specific constraints, etc.
 * Dependencies: start to switch from `dag-cbor` to `libipld`, for performance.
 * `client`:
   * Add new `decode` kwarg to subscription methods to control whether DAG-CBOR messages should be decoded into native dicts for header and payload.
