@@ -273,11 +273,12 @@ class Base():
                         }
 
         if self._validate:
-            self._validate_schema(obj, nsid, name=type, schema=schema)
+            self._validate_schema(name=type, val=obj, type_=nsid, lexicon=nsid,
+                                  schema=schema)
 
         return obj
 
-    def _validate_schema(self, val, type_, name=None, schema=None):
+    def _validate_schema(self, *, name, val, type_, lexicon, schema):
         """Validates an ATProto value against a lexicon schema.
 
         Returns ``None`` if the value validates, otherwise raises an exception.
@@ -285,18 +286,20 @@ class Base():
         https://atproto.com/specs/lexicon
 
         Args:
-          val
-          type_ (str): name of type, eg ``integer`` or ``app.bsky.feed.post#replyRef``
           name (str): field name
+          val: value
+          type_ (str): name of type, eg ``integer`` or ``app.bsky.feed.post#replyRef``
+          lexicon (str): fully qualified lexicon name that contains this schema,
+            eg ``app.bsky.feed.post`` or ``app.bsky.feed.post#replyRef``
           schema (dict): schema to validate against if this is a compound
             object and not a primitive
 
         Raises:
           ValidationError: if the value is invalid
         """
-        def get_schema(name):
+        def get_schema(lex_name):
             """Returns (fully qualified lexicon name, lexicon) tuple."""
-            schema_name = urljoin(type_, name)
+            schema_name = urljoin(lexicon, lex_name)
             schema = self._get_def(schema_name)
             if schema.get('type') == 'record':
                 schema = schema.get('record')
@@ -308,7 +311,9 @@ class Base():
             val_str = repr(val)
             if len(val_str) > 50:
                 val_str = val_str[:50] + '…'
-            raise ValidationError(f'{type_} {name} with value {val_str} {msg}')
+            prefix = f'in {lexicon}, ' if lexicon != type_ else ''
+            raise ValidationError(
+                f'{prefix}{type_} {name} with value `{val_str}`: {msg}')
 
         if const := schema.get('const'):
             if val != const:
@@ -358,8 +363,8 @@ class Base():
                 fail(f'is higher than maximum {maximum}')
 
         if schema and schema.get('type') == 'token':
-            if val != type_:
-                fail(f'is not token {type_}')
+            if val != lexicon:
+                fail(f'is not token {lexicon}')
             elif val not in self.defs:
                 fail(f'not found')
 
@@ -369,7 +374,7 @@ class Base():
                 fail(f'is not {ref}')
             elif not isinstance(val, dict):
                 fail('is not object')
-            type_, schema = get_schema(ref)
+            lexicon, schema = get_schema(ref)
 
         if type_ == 'union':
             if isinstance(val, dict):
@@ -381,11 +386,11 @@ class Base():
             else:
                 fail("is invalid")
 
-            refs = schema['refs']
+            refs = [urljoin(lexicon, ref) for ref in schema['refs']]
             if inner_type not in refs:
                 fail(f"{inner_type} isn't one of {refs}")
 
-            type_, schema = get_schema(inner_type)
+            lexicon, schema = get_schema(inner_type)
 
         if type_ == 'blob':
             max_size = schema.get('maxSize')
@@ -400,8 +405,9 @@ class Base():
 
         if type_ == 'array':
             for item in val:
-                self._validate_schema(item, schema['items']['type'], name=name,
-                                      schema=schema['items'])
+                self._validate_schema(
+                    name=name, val=item, type_=schema['items']['type'],
+                    lexicon=lexicon, schema=schema['items'])
 
         props = schema.get('properties', {})
         if props and not isinstance(val, dict):
@@ -423,10 +429,11 @@ class Base():
                 continue
 
             if inner_type == 'ref':
-                inner_type, inner_schema = get_schema(inner_schema['ref'])
+                lexicon, inner_schema = get_schema(inner_schema['ref'])
+                inner_type = inner_schema['type']
 
-            self._validate_schema(inner_val, inner_type, name=inner_name,
-                                  schema=inner_schema)
+            self._validate_schema(name=inner_name, val=inner_val, type_=inner_type,
+                                  lexicon=lexicon, schema=inner_schema)
 
         return val
 
