@@ -299,6 +299,8 @@ class Base():
         Raises:
           ValidationError: if the value is invalid
         """
+        # logger.debug(f'@ {name} {type_} {val} {lexicon} {schema}')
+
         def get_schema(lex_name):
             """Returns (fully qualified lexicon name, lexicon) tuple."""
             schema_name = urljoin(lexicon, lex_name)
@@ -395,9 +397,12 @@ class Base():
             lexicon, schema = get_schema(inner_type)
 
         if type_ == 'blob':
-            max_size = schema.get('maxSize')
-            if max_size and val['size'] > max_size:
-                fail(f'has size {val["size"]} over maxSize {max_size}')
+            if max_size := schema.get('maxSize'):
+                # old-style blobs don't have size
+                # https://atproto.com/specs/data-model#blob-type
+                if size := val.get('size'):
+                    if size > max_size:
+                        fail(f'has size {val["size"]} over maxSize {max_size}')
 
             accept = schema.get('accept')
             mime = val['mimeType']
