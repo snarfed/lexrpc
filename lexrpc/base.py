@@ -242,6 +242,9 @@ class Base():
             lexicon does not define a schema for the given type
           ValidationError: if the object is invalid
         """
+        if not self._validate and not self._truncate:
+            return obj
+
         assert type in ('input', 'output', 'message', 'parameters', 'record'), type
 
         base = self._get_def(nsid).get(type, {})

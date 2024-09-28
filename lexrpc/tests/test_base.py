@@ -203,3 +203,9 @@ class BaseTest(TestCase):
                         'string': 'ok',
                     }],
                 })
+
+    def test_no_validate_or_truncate(self):
+        # shouldn't raise
+        base = Base(LEXICONS, validate=False, truncate=False)
+        base.validate(None, None, {'x': 'y'})
+
