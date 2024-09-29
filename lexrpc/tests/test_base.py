@@ -209,3 +209,31 @@ class BaseTest(TestCase):
         base = Base(LEXICONS, validate=False, truncate=False)
         base.validate(None, None, {'x': 'y'})
 
+    def test_ref_property_lexicon(self):
+        Base(validate=True).validate('app.bsky.feed.getTimeline', 'output', {
+            'feed': [{
+                'post': {
+                    'uri': 'at://did:plc:5sko7vyzw7e6bitpyp7oelzj/app.bsky.feed.post/3l5ajft22yp2a',
+                    'cid': 'bafyreib6m3p4xn3mdxpphlnhrplithpubug5njyalnrphdmvrfqwa3ccee',
+                    'author': {
+                        'did': 'did:plc:5sko7vyzw7e6bitpyp7oelzj',
+                        'handle': 'villein.bsky.social',
+                    },
+                    'record': {
+                        '$type': 'app.bsky.feed.post',
+                        'createdAt': '2024-09-28T20:33:01.685Z',
+                        'text': 'hello world',
+                    },
+                    'indexedAt': '2024-09-28T20:30:27.248Z',
+                    'threadgate': {
+                        'uri': 'at://did:plc:5sko7vyzw7e6bitpyp7oelzj/app.bsky.feed.threadgate/3l5ajft22yp2a',
+                        'cid': 'bafyreifssmoyx3pritr23lbulfmby4g6mbuvncwzqdnhpzg6bk36qwrb64',
+                        'record': {
+                            '$type': 'app.bsky.feed.threadgate',
+                            'createdAt': '2024-09-28T20:33:01.855Z',
+                            'post': 'at://did:plc:5sko7vyzw7e6bitpyp7oelzj/app.bsky.feed.post/3l5ajft22yp2a',
+                        },
+                    },
+                },
+            }],
+        })

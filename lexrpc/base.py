@@ -200,8 +200,6 @@ class Base():
                             elif not isinstance(schema.get('properties'), dict):
                                 raise ValidationError(f'{nsid} {field} properties is invalid')
 
-                # TODO: fully qualify #... references? or are we already doing that?
-
                 self.defs[id] = defn
 
         self.defs['blob'] = BLOB_DEF
@@ -299,7 +297,7 @@ class Base():
         Raises:
           ValidationError: if the value is invalid
         """
-        # logger.debug(f'@ {name} {type_} {val} {lexicon} {schema}')
+        # logger.debug(f'@ {name} {type_} {lexicon} {str(val)[:100]} {str(schema)[:100]}')
 
         def get_schema(lex_name):
             """Returns (fully qualified lexicon name, lexicon) tuple."""
@@ -327,6 +325,7 @@ class Base():
             if val not in enums:
                 fail('is not one of enum values')
 
+        # TODO: if $type, validate inside
         if type_ == 'unknown':
             return
 
@@ -422,27 +421,26 @@ class Base():
 
         required = schema.get('required', [])
         nullable = schema.get('nullable', [])
-        for inner_name, inner_schema in props.items():
-            if inner_name not in val:
-                if inner_name in required:
-                    fail(f'missing required property {inner_name}')
+        for prop_name, prop_schema in props.items():
+            if prop_name not in val:
+                if prop_name in required:
+                    fail(f'missing required property {prop_name}')
                 continue
 
-            inner_type = inner_schema['type']
-            inner_val = val[inner_name]
-            if inner_val is None:
-                if inner_type != 'null' and inner_name not in nullable:
-                    fail(f'property {inner_name} is not nullable')
+            prop_type = prop_schema['type']
+            prop_lexicon = lexicon
+            prop_val = val[prop_name]
+            if prop_val is None:
+                if prop_type != 'null' and prop_name not in nullable:
+                    fail(f'property {prop_name} is not nullable')
                 continue
 
-            if inner_type == 'ref':
-                lexicon, inner_schema = get_schema(inner_schema['ref'])
-                inner_type = inner_schema['type']
+            if prop_type == 'ref':
+                prop_lexicon, prop_schema = get_schema(prop_schema['ref'])
+                prop_type = prop_schema['type']
 
-            self._validate_schema(name=inner_name, val=inner_val, type_=inner_type,
-                                  lexicon=lexicon, schema=inner_schema)
-
-        return val
+            self._validate_schema(name=prop_name, val=prop_val, type_=prop_type,
+                                  lexicon=prop_lexicon, schema=prop_schema)
 
     def _validate_string_format(self, val, format):
         """Validates an ATProto string value against a format.

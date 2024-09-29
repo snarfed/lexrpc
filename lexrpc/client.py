@@ -222,6 +222,7 @@ class Client(Base):
 
         resp.raise_for_status()
 
+        # logger.debug(json.dumps(output, indent=2))
         output = self.validate(nsid, 'output', output)
         return output
 
