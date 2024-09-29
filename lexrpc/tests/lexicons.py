@@ -455,6 +455,24 @@ LEXICONS = [
         },
     },
 
+    {
+        'lexicon': 1,
+        'id': 'io.example.unknown',
+        'defs': {
+            'main': {
+                'type': 'record',
+                'description': 'A record',
+                'key': 'tid',
+                'record': {
+                    'type': 'object',
+                    'properties': {
+                        'unknown': {'type': 'unknown'},
+                    },
+                },
+            },
+        },
+    },
+
     # TODO
 
     # {
@@ -484,26 +502,6 @@ LEXICONS = [
     #                             'io.example.kitchenSink#subobject',
     #                         ],
     #                     },
-    #                 },
-    #             },
-    #         },
-    #     },
-    # },
-
-    # {
-    #     'lexicon': 1,
-    #     'id': 'io.example.unknown',
-    #     'defs': {
-    #         'main': {
-    #             'type': 'record',
-    #             'description': 'A record',
-    #             'key': 'tid',
-    #             'record': {
-    #                 'type': 'object',
-    #                 'required': ['unknown'],
-    #                 'properties': {
-    #                     'unknown': {'type': 'unknown'},
-    #                     'optUnknown': {'type': 'unknown'},
     #                 },
     #             },
     #         },

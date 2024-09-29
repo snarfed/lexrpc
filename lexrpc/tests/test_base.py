@@ -140,6 +140,22 @@ class BaseTest(TestCase):
             ],
         })
 
+    def test_validate_unknown_with_type(self):
+        self.base.validate('io.example.unknown', 'record', {
+            'unknown': {
+                '$type': 'io.example.kitchenSink#subobject',
+                'boolean': False,
+            },
+        })
+
+        with self.assertRaises(ValidationError):
+            self.base.validate('io.example.unknown', 'record', {
+                'unknown': {
+                    '$type': 'io.example.kitchenSink#subobject',
+                    'boolean': 'xyz',
+                },
+            })
+
     def test_validate_record_ref_array_fail_bad_type(self):
         with self.assertRaises(ValidationError):
             self.base.validate('io.example.refArray', 'record', {
@@ -209,7 +225,7 @@ class BaseTest(TestCase):
         base = Base(LEXICONS, validate=False, truncate=False)
         base.validate(None, None, {'x': 'y'})
 
-    def test_ref_property_lexicon(self):
+    def test_validate_ref_property_lexicon(self):
         Base(validate=True).validate('app.bsky.feed.getTimeline', 'output', {
             'feed': [{
                 'post': {

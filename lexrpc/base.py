@@ -325,9 +325,12 @@ class Base():
             if val not in enums:
                 fail('is not one of enum values')
 
-        # TODO: if $type, validate inside
         if type_ == 'unknown':
-            return
+            if lexicon := val.get('$type'):
+                lexicon, schema = get_schema(lexicon)
+                # pass through and validate with this schema
+            else:
+                return
 
         if expected := FIELD_TYPES.get(type_):
             if type(val) != expected:
