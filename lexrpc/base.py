@@ -326,8 +326,8 @@ class Base():
                 fail('is not one of enum values')
 
         if type_ == 'unknown':
-            if lexicon := val.get('$type'):
-                lexicon, schema = get_schema(lexicon)
+            if isinstance(val, dict) and val.get('$type'):
+                lexicon, schema = get_schema(val['$type'])
                 # pass through and validate with this schema
             else:
                 return

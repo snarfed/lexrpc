@@ -140,6 +140,9 @@ class BaseTest(TestCase):
             ],
         })
 
+    def test_validate_unknown_primitive(self):
+        self.base.validate('io.example.unknown', 'record', {'unknown': 3})
+
     def test_validate_unknown_with_type(self):
         self.base.validate('io.example.unknown', 'record', {
             'unknown': {
