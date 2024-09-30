@@ -408,12 +408,7 @@ class Base():
             #     if size := val.get('size'):
             #         if size > max_size:
             #             fail(f'has size {val["size"]} over maxSize {max_size}')
-
-            accept = schema.get('accept')
-            mime = val['mimeType']
-            if (accept and mime not in accept and '*/*' not in accept
-                    and (mime.split('/')[0] + '/*') not in accept):
-                fail(f'has unsupported MIME type {mime}')
+            self.validate_mime_type(val['mimeType'], schema.get('accept'), name=name)
 
         if type_ == 'array':
             for item in val:
@@ -532,6 +527,29 @@ class Base():
 
         else:
             raise ValidationError(f'unknown format {format}')
+
+    @staticmethod
+    def validate_mime_type(mime_type, accept, name=''):
+        """Validates that a MIME type matches an accept range.
+
+        For validating blob types. Returns ``None`` if the ``accept`` is empty
+        or ``mime_type`` matches, otherwise raises an exception.
+
+        https://atproto.com/specs/lexicon#field-type-definitions
+
+        Args:
+          mime_type (str)
+          accept (sequence of str): blob ``accept`` field value, list of MIME
+            type patterns, eg ``image/jpeg``, ``image/*``, or ``*/*``.
+          name: blob field name, only used in exception message
+
+        Raises:
+          ValidationError: if ``mime_type`` doesn't match any pattern in ``accept``
+        """
+        if (accept and mime_type not in accept
+                and '*/*' not in accept
+                and (mime_type.split('/')[0] + '/*') not in accept):
+            raise ValidationError(f'blob {name} MIME type {mime_type} not in accept types {accept}')
 
     def encode_params(self, params):
         """Encodes decoded parameter values.
