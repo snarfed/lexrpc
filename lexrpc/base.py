@@ -546,9 +546,11 @@ class Base():
         Raises:
           ValidationError: if ``mime_type`` doesn't match any pattern in ``accept``
         """
-        if (accept and mime_type not in accept
-                and '*/*' not in accept
-                and (mime_type.split('/')[0] + '/*') not in accept):
+        if not accept or '*/*' in accept:
+            return
+
+        if not mime_type or (mime_type not in accept
+                             and (mime_type.split('/')[0] + '/*') not in accept):
             raise ValidationError(f'blob {name} MIME type {mime_type} not in accept types {accept}')
 
     def encode_params(self, params):

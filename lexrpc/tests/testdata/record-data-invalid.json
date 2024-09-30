@@ -167,6 +167,16 @@
                 "$link": "bafyreiclp443lavogvhj3d2ob2cxbfuscni2k5jk7bebjzg7khl3esabwq"
             }
     }}},
+    { "name": "blob blank type",
+      "rkey": "demo",
+      "data": { "$type": "example.lexicon.record", "integer": 1, "acceptBlob": {
+            "$type": "blob",
+            "size": 12345,
+            "mimeType": "",
+            "ref": {
+                "$link": "bafyreiclp443lavogvhj3d2ob2cxbfuscni2k5jk7bebjzg7khl3esabwq"
+            }
+    }}},
     { "name": "out of closed union",
       "rkey": "demo",
       "data": { "$type": "example.lexicon.record", "integer": 1, "closedUnion": "other" }
