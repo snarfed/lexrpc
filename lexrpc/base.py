@@ -398,17 +398,17 @@ class Base():
 
             lexicon, schema = get_schema(inner_type)
 
-        if type_ == 'blob':
-            # TODO: maybe bring back once we figure out why the AppView isn't
-            # currently enforcing this:
-            # https://github.com/snarfed/bridgy-fed/issues/1348#issuecomment-2381056468
-            # if max_size := schema.get('maxSize'):
-            #     # old-style blobs don't have size
-            #     # https://atproto.com/specs/data-model#blob-type
-            #     if size := val.get('size'):
-            #         if size > max_size:
-            #             fail(f'has size {val["size"]} over maxSize {max_size}')
-            self.validate_mime_type(val['mimeType'], schema.get('accept'), name=name)
+        # TODO: maybe bring back once we figure out why the AppView isn't
+        # currently enforcing these:
+        # https://github.com/snarfed/bridgy-fed/issues/1348#issuecomment-2381056468
+        # if type_ == 'blob':
+        #     if max_size := schema.get('maxSize'):
+        #         # old-style blobs don't have size
+        #         # https://atproto.com/specs/data-model#blob-type
+        #         if size := val.get('size'):
+        #             if size > max_size:
+        #                 fail(f'has size {val["size"]} over maxSize {max_size}')
+        #     self.validate_mime_type(val['mimeType'], schema.get('accept'), name=name)
 
         if type_ == 'array':
             for item in val:
