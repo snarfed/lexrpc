@@ -16,7 +16,7 @@ where = ['.']
 
 [project]
 name = 'lexrpc'
-version = '0.8'
+version = '1.0'
 authors = [
     { name='Ryan Barrett', email='lexrpc@ryanb.org' },
 ]

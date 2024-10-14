@@ -11,7 +11,6 @@ License: This project is placed in the public domain. You may also use it under 
 * [Server](#server)
 * [Flask server](#flask-server)
 * [Reference docs](https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html)
-* [TODO](#todo)
 * [Release instructions](#release-instructions)
 * [Changelog](#changelog)
 
@@ -222,7 +221,7 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 0.8 - unreleased
+### 1.0 - 2024-10-14
 
 * Add full [lexicon schema validation](https://atproto.com/specs/lexicon) for records and XRPC method parameters, input, and output. Includes primitive and `object` types, `ref`s and `union`s, string formats, type-specific constraints, etc.
 * Dependencies: switch from `dag-cbor` to `libipld`, for performance.

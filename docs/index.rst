@@ -22,7 +22,6 @@ License <https://creativecommons.org/publicdomain/zero/1.0/>`__.
 -  `Flask server <#flask-server>`__
 -  `Reference
    docs <https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html>`__
--  `TODO <#todo>`__
 -  `Release instructions <#release-instructions>`__
 -  `Changelog <#changelog>`__
 
@@ -186,11 +185,6 @@ input is taken from the JSON HTTP request body, and output is returned
 in the JSON HTTP response body. The ``Content-Type`` response header is
 set to ``application/json``.
 
-TODO
-----
-
--  schema validation for records
-
 Release instructions
 --------------------
 
@@ -311,6 +305,30 @@ Here’s how to package, test, and ship a new release.
 Changelog
 ---------
 
+1.0 - 2024-10-14
+~~~~~~~~~~~~~~~~
+
+-  Add full `lexicon schema
+   validation <https://atproto.com/specs/lexicon>`__ for records and
+   XRPC method parameters, input, and output. Includes primitive and
+   ``object`` types, ``ref``\ s and ``union``\ s, string formats,
+   type-specific constraints, etc.
+-  Dependencies: switch from ``dag-cbor`` to ``libipld``, for
+   performance.
+-  ``client``:
+
+   -  Add new ``decode`` kwarg to subscription methods to control
+      whether DAG-CBOR messages should be decoded into native dicts for
+      header and payload.
+
+-  ``flask_server``: add new top-level ``subscribers`` attr that tracks
+   clients connected (subscribed) to each event stream.
+-  ``server``:
+
+   -  Add ``status`` param to ``Redirect``.
+
+.. _section-1:
+
 0.7 - 2024-06-24
 ~~~~~~~~~~~~~~~~
 
@@ -341,7 +359,7 @@ Changelog
 -  Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
    `bluesky-social/atproto@15cc6ff37c326d5c186385037c4bfe8b60ea41b1 <https://github.com/bluesky-social/atproto/commit/15cc6ff37c326d5c186385037c4bfe8b60ea41b1>`__.
 
-.. _section-1:
+.. _section-2:
 
 0.6 - 2024-03-16
 ~~~~~~~~~~~~~~~~
@@ -352,7 +370,7 @@ Changelog
 -  Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
    `bluesky-social/atproto@f45eef3 <https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282>`__.
 
-.. _section-2:
+.. _section-3:
 
 0.5 - 2023-12-10
 ~~~~~~~~~~~~~~~~
@@ -367,7 +385,7 @@ Changelog
    -  Bug fix: don’t infinite loop if ``refreshSession`` fails.
    -  Other minor authentication bug fixes.
 
-.. _section-3:
+.. _section-4:
 
 0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
@@ -408,7 +426,7 @@ Changelog
    -  Add the ``error`` field to the JSON response bodies for most error
       responses.
 
-.. _section-4:
+.. _section-5:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
@@ -420,7 +438,7 @@ Changelog
 -  Add new ``Server.register`` method for manually registering handlers.
 -  Bug fix for server ``@method`` decorator.
 
-.. _section-5:
+.. _section-6:
 
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
@@ -437,7 +455,7 @@ put more effort into matching and fully implementing them. Stay tuned!
    format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
    Original format is no longer supported.
 
-.. _section-6:
+.. _section-7:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~
