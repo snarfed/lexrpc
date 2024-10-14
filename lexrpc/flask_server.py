@@ -3,12 +3,12 @@ from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta
 import logging
 
-import dag_cbor
 from flask import after_this_request, redirect, request
 from flask.json import jsonify
 from flask.views import View
 from flask_sock import Sock
 from iterators import TimeoutIterator
+import libipld
 from simple_websocket import ConnectionClosed
 
 from . import base
@@ -161,7 +161,8 @@ def subscription(xrpc_server, nsid):
             logger.debug(f'Sending to {nsid} websocket client: {header} {str(payload)[:500]}...')
 
             try:
-                ws.send(dag_cbor.encode(header) + dag_cbor.encode(payload))
+                ws.send(libipld.encode_dag_cbor(header)
+                        + libipld.encode_dag_cbor(payload))
             except (ConnectionError, ConnectionClosed) as err:
                 logger.debug(f'Websocket client disconnected from {nsid}: {err}')
                 iter.interrupt()

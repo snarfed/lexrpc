@@ -225,7 +225,7 @@ Here's how to package, test, and ship a new release.
 ### 0.8 - unreleased
 
 * Add full [lexicon schema validation](https://atproto.com/specs/lexicon) for records and XRPC method parameters, input, and output. Includes primitive and `object` types, `ref`s and `union`s, string formats, type-specific constraints, etc.
-* Dependencies: start to switch from `dag-cbor` to `libipld`, for performance.
+* Dependencies: switch from `dag-cbor` to `libipld`, for performance.
 * `client`:
   * Add new `decode` kwarg to subscription methods to control whether DAG-CBOR messages should be decoded into native dicts for header and payload.
 * `flask_server`: add new top-level `subscribers` attr that tracks clients connected (subscribed) to each event stream.

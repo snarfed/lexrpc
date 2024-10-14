@@ -5,7 +5,7 @@ from unittest import TestCase
 from unittest.mock import call, patch
 import urllib.parse
 
-import dag_cbor
+import libipld
 import requests
 import simple_websocket
 
@@ -48,8 +48,8 @@ class FakeWebsocketClient:
         if not self.to_receive:
             raise simple_websocket.ConnectionClosed(message='foo')
 
-        return (dag_cbor.encode({'op': 1, 't': '#foo'}) +
-                dag_cbor.encode(self.to_receive.pop(0)))
+        return (libipld.encode_dag_cbor({'op': 1, 't': '#foo'}) +
+                libipld.encode_dag_cbor(self.to_receive.pop(0)))
 
 
 class ClientTest(TestCase):

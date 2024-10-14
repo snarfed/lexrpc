@@ -5,8 +5,8 @@ import time
 from unittest import skip, TestCase
 from unittest.mock import patch
 
-import dag_cbor
 from flask import Flask
+import libipld
 from simple_websocket import ConnectionClosed
 
 from .. import base
@@ -109,11 +109,11 @@ class XrpcEndpointTest(TestCase):
         subscriber.start()
         subscriber.join()
 
-        header_bytes = dag_cbor.encode({'hea': 'der'})
+        header_bytes = libipld.encode_dag_cbor({'hea': 'der'})
         self.assertEqual([
-            header_bytes + dag_cbor.encode({'num': 3}),
-            header_bytes + dag_cbor.encode({'num': 4}),
-            header_bytes + dag_cbor.encode({'num': 5}),
+            header_bytes + libipld.encode_dag_cbor({'num': 3}),
+            header_bytes + libipld.encode_dag_cbor({'num': 4}),
+            header_bytes + libipld.encode_dag_cbor({'num': 5}),
         ], FakeConnection.sent)
 
     def test_subscription_client_disconnects(self):
@@ -163,8 +163,8 @@ class XrpcEndpointTest(TestCase):
         subscriber.join()
 
         self.assertEqual([
-            dag_cbor.encode({'foo': 'bar'}) + dag_cbor.encode({}),
-            dag_cbor.encode({'foo 2': 'bar'}) + dag_cbor.encode({}),
+            libipld.encode_dag_cbor({'foo': 'bar'}) + libipld.encode_dag_cbor({}),
+            libipld.encode_dag_cbor({'foo 2': 'bar'}) + libipld.encode_dag_cbor({}),
         ], FakeConnection.sent)
 
     def test_subscription_http_not_websocket_405s(self):
