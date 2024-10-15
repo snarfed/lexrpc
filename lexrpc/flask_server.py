@@ -10,6 +10,7 @@ from flask.views import View
 from flask_sock import Sock
 from iterators import TimeoutIterator
 import libipld
+from multiformats import CID
 from simple_websocket import ConnectionClosed
 
 from . import base
@@ -160,8 +161,18 @@ def subscription(xrpc_server, nsid):
             header, payload = result
             # TODO: validate header, payload?
 
-            logger.debug(f'Sending to {nsid} websocket client: {header} {dag_json.encode(payload, dialect="atproto")[:500]}...')
+            # log
+            seq = payload.get('seq')
+            did = payload.get('did') or payload.get('repo')
+            commit = payload.get('commit')
+            if isinstance(commit, CID):
+                commit = f'commit {commit.encode("base32")}'
+            # can't DAG-JSON encode payload here, it hits
+            # ValueError: Failed to encode DAG-CBOR. Unknown cbor tag `0`
+            # https://console.cloud.google.com/errors/detail/CNzlgrvr2bHuvwE;time=PT1H;refresh=true;locations=global?project=bridgy-federated
+            logger.debug(f'Sending to {nsid} websocket client for repo {did} seq {seq} {commit} : {header} {str(payload)}')
 
+            # emit!
             try:
                 ws.send(libipld.encode_dag_cbor(header)
                         + libipld.encode_dag_cbor(payload))
