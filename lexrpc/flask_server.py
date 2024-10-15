@@ -3,6 +3,7 @@ from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta
 import logging
 
+import dag_json
 from flask import after_this_request, redirect, request
 from flask.json import jsonify
 from flask.views import View
@@ -158,7 +159,8 @@ def subscription(xrpc_server, nsid):
 
             header, payload = result
             # TODO: validate header, payload?
-            logger.debug(f'Sending to {nsid} websocket client: {header} {str(payload)[:500]}...')
+
+            logger.debug(f'Sending to {nsid} websocket client: {header} {dag_json.encode(payload, dialect="atproto")[:500]}...')
 
             try:
                 ws.send(libipld.encode_dag_cbor(header)
