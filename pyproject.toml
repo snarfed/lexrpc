@@ -25,6 +25,7 @@ readme = 'README.md'
 requires-python = '>=3.7'
 keywords = ['XRPC', 'Lexicon', 'AT Protocol', 'ATP']
 dependencies = [
+    'dag-cbor',
     'dag-json>=0.3',
     'grapheme',
     'iterators',

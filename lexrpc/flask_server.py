@@ -3,6 +3,7 @@ from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta
 import logging
 
+import dag_cbor
 import dag_json
 from flask import after_this_request, redirect, request
 from flask.json import jsonify
@@ -170,12 +171,11 @@ def subscription(xrpc_server, nsid):
             # can't DAG-JSON encode payload here, it hits
             # ValueError: Failed to encode DAG-CBOR. Unknown cbor tag `0`
             # https://console.cloud.google.com/errors/detail/CNzlgrvr2bHuvwE;time=PT1H;refresh=true;locations=global?project=bridgy-federated
-            logger.debug(f'Sending to {nsid} websocket client for repo {did} seq {seq} {commit} : {header} {str(payload)}')
+            logger.debug(f'Sending to {nsid} websocket client for repo {did} seq {seq} {commit} : {header} {dag_json.encode(payload, dialect="atproto")[:500]}')
 
             # emit!
             try:
-                ws.send(libipld.encode_dag_cbor(header)
-                        + libipld.encode_dag_cbor(payload))
+                ws.send(dag_cbor.encode(header) + dag_cbor.encode(payload))
             except (ConnectionError, ConnectionClosed) as err:
                 logger.debug(f'Websocket client disconnected from {nsid}: {err}')
                 iter.interrupt()

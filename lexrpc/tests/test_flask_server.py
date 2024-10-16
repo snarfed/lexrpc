@@ -5,8 +5,9 @@ import time
 from unittest import skip, TestCase
 from unittest.mock import patch
 
+import dag_cbor
 from flask import Flask
-import libipld
+from multiformats import CID
 from simple_websocket import ConnectionClosed
 
 from .. import base
@@ -109,12 +110,40 @@ class XrpcEndpointTest(TestCase):
         subscriber.start()
         subscriber.join()
 
-        header_bytes = libipld.encode_dag_cbor({'hea': 'der'})
+        header_bytes = dag_cbor.encode({'hea': 'der'})
         self.assertEqual([
-            header_bytes + libipld.encode_dag_cbor({'num': 3}),
-            header_bytes + libipld.encode_dag_cbor({'num': 4}),
-            header_bytes + libipld.encode_dag_cbor({'num': 5}),
+            header_bytes + dag_cbor.encode({'num': 3}),
+            header_bytes + dag_cbor.encode({'num': 4}),
+            header_bytes + dag_cbor.encode({'num': 5}),
         ], FakeConnection.sent)
+
+    patch.dict(server._methods, {
+        'io.example.subscribe': lambda: ({'hea': 'der'}, {'cid': cid}),
+    })
+    def test_subscription_with_cids(self):
+        """Check that we DAG-CBOR encode CID objects ok.
+
+        https://console.cloud.google.com/errors/detail/CNzlgrvr2bHuvwE;service=atproto-hub;time=PT1H;refresh=true;locations=global?project=bridgy-federated
+        """
+        handler = subscription(server, 'io.example.subscribe')
+
+        cid = CID.decode('bafyreiblaotetvwobe7cu2uqvnddr6ew2q3cu75qsoweulzku2egca4dxq')
+
+        def cid_subscribe():
+            yield ({'hea': 'der'}, {'cid': cid})
+
+        def subscribe():
+            with self.app.test_request_context(), \
+                 patch.dict(server._methods, {'io.example.subscribe': cid_subscribe}):
+                handler(FakeConnection)
+
+        subscriber = Thread(target=subscribe)
+        subscriber.start()
+        subscriber.join()
+
+        self.assertEqual(
+            [dag_cbor.encode({'hea': 'der'}) + dag_cbor.encode({'cid': cid})],
+            FakeConnection.sent)
 
     def test_subscription_client_disconnects(self):
         handler = subscription(server, 'io.example.subscribe')
@@ -163,8 +192,8 @@ class XrpcEndpointTest(TestCase):
         subscriber.join()
 
         self.assertEqual([
-            libipld.encode_dag_cbor({'foo': 'bar'}) + libipld.encode_dag_cbor({}),
-            libipld.encode_dag_cbor({'foo 2': 'bar'}) + libipld.encode_dag_cbor({}),
+            dag_cbor.encode({'foo': 'bar'}) + dag_cbor.encode({}),
+            dag_cbor.encode({'foo 2': 'bar'}) + dag_cbor.encode({}),
         ], FakeConnection.sent)
 
     def test_subscription_http_not_websocket_405s(self):
