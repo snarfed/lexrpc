@@ -18,6 +18,12 @@ HEADERS = {
     'Content-Type': 'application/json',
 }
 
+FULL_HEADERS = {
+    **HEADERS,
+    'foo': 'ey',
+}
+
+
 def response(body=None, status=200, headers=None):
     resp = requests.Response()
     resp.status_code = status
@@ -38,11 +44,13 @@ def response(body=None, status=200, headers=None):
 class FakeWebsocketClient:
     """Fake of :class:`simple_websocket.Client`."""
     url = None
+    headers = None
     sent = []
     to_receive = []
 
-    def __init__(self, url):
+    def __init__(self, url, headers=None, **kwargs):
         FakeWebsocketClient.url = url
+        FakeWebsocketClient.headers = headers
 
     def send(self, msg):
         self.sent.append(json.loads(msg))
@@ -59,9 +67,12 @@ class ClientTest(TestCase):
     maxDiff = None
 
     def setUp(self):
-        self.client = Client('http://ser.ver', lexicons=LEXICONS)
+        self.client = Client('http://ser.ver', lexicons=LEXICONS,
+                             headers={'foo': 'ey'})
 
         simple_websocket.Client = FakeWebsocketClient
+        FakeWebsocketClient.url = None
+        FakeWebsocketClient.headers = None
         FakeWebsocketClient.sent = []
         FakeWebsocketClient.to_receive = []
 
@@ -75,7 +86,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, data=None, headers=HEADERS)
+            json=None, data=None, headers=FULL_HEADERS)
 
     @patch('requests.get', return_value=response({'foo': 'asdf'}))
     def test_call_address_trailing_slash(self, mock_get):
@@ -95,7 +106,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, data=None, headers=HEADERS)
+            json=None, data=None, headers=FULL_HEADERS)
 
     @patch('requests.post')
     def test_procedure(self, mock_post):
@@ -108,7 +119,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure?x=y',
-            json=input, data=None, headers=HEADERS)
+            json=input, data=None, headers=FULL_HEADERS)
 
     @patch('requests.get')
     def test_boolean_param(self, mock_get):
@@ -120,7 +131,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?z=true',
-            json=None, data=None, headers=HEADERS)
+            json=None, data=None, headers=FULL_HEADERS)
 
     @patch('requests.get')
     def test_omit_None_param(self, mock_get):
@@ -132,7 +143,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            json=None, data=None, headers=HEADERS)
+            json=None, data=None, headers=FULL_HEADERS)
 
     @patch('requests.get')
     def test_call_headers(self, mock_get):
@@ -144,7 +155,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, data=None, headers={**HEADERS, 'foo': 'bar'})
+            json=None, data=None, headers={**FULL_HEADERS, 'foo': 'bar'})
 
     @patch('requests.get')
     def test_call_headers_override_content_type(self, mock_get):
@@ -156,7 +167,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, data=None, headers={**HEADERS, 'Content-Type': 'application/xml'})
+            json=None, data=None, headers={**FULL_HEADERS, 'Content-Type': 'application/xml'})
 
     @patch('requests.get', return_value=response())
     def test_no_output_error(self, mock_get):
@@ -165,7 +176,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            json=None, data=None, headers=HEADERS)
+            json=None, data=None, headers=FULL_HEADERS)
 
     @patch('requests.post', return_value=response())
     def test_no_params_input_output(self, mock_post):
@@ -173,7 +184,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.noParamsInputOutput',
-            json=None, data=None, headers=HEADERS)
+            json=None, data=None, headers=FULL_HEADERS)
 
     @patch('requests.post', return_value=response())
     def test_dashed_name(self, mock_post):
@@ -181,7 +192,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.exa-mple.dashedName',
-            json=None, data=None, headers=HEADERS)
+            json=None, data=None, headers=FULL_HEADERS)
 
     @patch('requests.get', return_value=response({'out': 'foo'}))
     def test_defs(self, mock_get):
@@ -190,7 +201,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.defs',
-            json={'in': 'bar'}, data=None, headers=HEADERS)
+            json={'in': 'bar'}, data=None, headers=FULL_HEADERS)
 
     @patch('requests.get', return_value=response(status=400, body={
         'error': 'Something',
@@ -202,7 +213,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, data=None, headers=HEADERS)
+            json=None, data=None, headers=FULL_HEADERS)
 
     def test_missing_params(self):
         with self.assertRaises(ValidationError):
@@ -222,7 +233,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.array?foo=a&foo=b',
-            json=None, data=None, headers=HEADERS)
+            json=None, data=None, headers=FULL_HEADERS)
 
     def test_subscription(self):
         msgs = [
@@ -237,6 +248,10 @@ class ClientTest(TestCase):
         self.assertEqual(expected, list(gen))
         self.assertEqual('http://ser.ver/xrpc/io.example.subscribe?start=3&end=6',
                          FakeWebsocketClient.url)
+        self.assertEqual({
+            **client.DEFAULT_HEADERS,
+            'foo': 'ey',
+        }, FakeWebsocketClient.headers)
 
     def test_subscription_decode_false(self):
         msgs = [
@@ -251,6 +266,10 @@ class ClientTest(TestCase):
         self.assertEqual(expected, list(gen))
         self.assertEqual('http://ser.ver/xrpc/io.example.subscribe?start=3&end=6',
                          FakeWebsocketClient.url)
+        self.assertEqual({
+            **client.DEFAULT_HEADERS,
+            'foo': 'ey',
+        }, FakeWebsocketClient.headers)
 
     @patch('requests.post')
     def test_validate_false(self, mock_post):
@@ -457,6 +476,7 @@ class ClientTest(TestCase):
             json=None, data=b'foo bar', headers={
                 **client.DEFAULT_HEADERS,
                 'Content-Type': 'foo/bar',
+                'foo': 'ey',
             })
 
     @patch('requests.post')
@@ -474,4 +494,5 @@ class ClientTest(TestCase):
             json=None, data=b'foo bar', headers={
                 **client.DEFAULT_HEADERS,
                 'Content-Type': 'foo/bar',
+                'foo': 'ey',
             })

@@ -236,7 +236,10 @@ class Client(Base):
           (dict header, dict payload) or bytes: tuple of dicts if ``decode`` is
             True, otherwise raw bytes
         """
-        ws = simple_websocket.Client(url)
+        ws = simple_websocket.Client(url, headers={
+            **DEFAULT_HEADERS,
+            **self.headers,
+        })
 
         try:
             while True:

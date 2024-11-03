@@ -224,6 +224,8 @@ Here's how to package, test, and ship a new release.
 ### 1.1 - 2024-10-14
 
 * Schema validation: bug fix for open unions, allow types that aren't in `refs`.
+* `Client`:
+  * Include headers in websocket connections for event streams.
 
 ### 1.0 - 2024-10-14
 
