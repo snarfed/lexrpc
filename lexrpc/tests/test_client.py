@@ -37,6 +37,9 @@ def response(body=None, status=200, headers=None):
 
 class FakeWebsocketClient:
     """Fake of :class:`simple_websocket.Client`."""
+    url = None
+    sent = []
+    to_receive = []
 
     def __init__(self, url):
         FakeWebsocketClient.url = url

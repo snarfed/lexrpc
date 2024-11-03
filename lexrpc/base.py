@@ -392,9 +392,10 @@ class Base():
             else:
                 fail("is invalid")
 
-            refs = [urljoin(lexicon, ref) for ref in schema['refs']]
-            if inner_type not in refs:
-                fail(f"{inner_type} isn't one of {refs}")
+            if schema.get('closed'):
+                refs = [urljoin(lexicon, ref) for ref in schema['refs']]
+                if inner_type not in refs:
+                    fail(f"{inner_type} isn't one of {refs}")
 
             lexicon, schema = get_schema(inner_type)
 

@@ -198,6 +198,19 @@ class BaseTest(TestCase):
             }],
         })
 
+    def test_validate_record_union_open(self):
+        # in refs
+        self.base.validate('io.example.union', 'record', {'unionOpen': {
+            '$type': 'io.example.kitchenSink#subobject',
+            'boolean': False,
+        }})
+
+        # not in refs
+        self.base.validate('io.example.union', 'record', {'unionOpen': {
+            '$type': 'io.example.record',
+            'baz': 5,
+        }})
+
     def test_validate_record_union_array_fail_bad_type(self):
         for bad in [
                 123,

@@ -221,6 +221,10 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
+### 1.1 - 2024-10-14
+
+* Schema validation: bug fix for open unions, allow types that aren't in `refs`.
+
 ### 1.0 - 2024-10-14
 
 * Add full [lexicon schema validation](https://atproto.com/specs/lexicon) for records and XRPC method parameters, input, and output. Includes primitive and `object` types, `ref`s and `union`s, string formats, type-specific constraints, etc.

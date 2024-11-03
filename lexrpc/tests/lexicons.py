@@ -473,40 +473,32 @@ LEXICONS = [
         },
     },
 
-    # TODO
+    {
+        'lexicon': 1,
+        'id': 'io.example.union',
+        'defs': {
+            'main': {
+                'type': 'record',
+                'description': 'A record',
+                'key': 'tid',
+                'record': {
+                    'type': 'object',
+                    'required': ['unionOpen'],
+                    'properties': {
+                        'unionOpen': {
+                            'type': 'union',
+                            'refs': [
+                                'io.example.kitchenSink#object',
+                                'io.example.kitchenSink#subobject',
+                            ],
+                        },
+                    },
+                },
+            },
+        },
+    },
 
-    # {
-    #     'lexicon': 1,
-    #     'id': 'io.example.union',
-    #     'defs': {
-    #         'main': {
-    #             'type': 'record',
-    #             'description': 'A record',
-    #             'key': 'tid',
-    #             'record': {
-    #                 'type': 'object',
-    #                 'required': ['unionOpen', 'unionClosed'],
-    #                 'properties': {
-    #                     'unionOpen': {
-    #                         'type': 'union',
-    #                         'refs': [
-    #                             'io.example.kitchenSink#object',
-    #                             'io.example.kitchenSink#subobject',
-    #                         ],
-    #                     },
-    #                     'unionClosed': {
-    #                         'type': 'union',
-    #                         'closed': True,
-    #                         'refs': [
-    #                             'io.example.kitchenSink#object',
-    #                             'io.example.kitchenSink#subobject',
-    #                         ],
-    #                     },
-    #                 },
-    #             },
-    #         },
-    #     },
-    # },
+    # TODO
 
     # {
     #     'lexicon': 1,
