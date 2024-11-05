@@ -397,7 +397,13 @@ class Base():
                 if inner_type not in refs:
                     fail(f"{inner_type} isn't one of {refs}")
 
-            lexicon, schema = get_schema(inner_type)
+            try:
+                lexicon, schema = get_schema(inner_type)
+            except NotImplementedError:
+                # https://github.com/bluesky-social/atproto/discussions/2940
+                # https://github.com/snarfed/lexrpc/issues/16
+                logger.debug(f'Skipping unknown type {inner_type}')
+                return
 
         # TODO: maybe bring back once we figure out why the AppView isn't
         # currently enforcing these:

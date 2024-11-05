@@ -211,6 +211,12 @@ class BaseTest(TestCase):
             'baz': 5,
         }})
 
+        # unknown
+        self.base.validate('io.example.union', 'record', {'unionOpen': {
+            '$type': 'un.known',
+            'foo': 'bar',
+        }})
+
     def test_validate_record_union_array_fail_bad_type(self):
         for bad in [
                 123,
