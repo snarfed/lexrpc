@@ -271,6 +271,25 @@ class ClientTest(TestCase):
             'foo': 'ey',
         }, FakeWebsocketClient.headers)
 
+    def test_subscription_validate_param_fails(self):
+        with self.assertRaises(ValidationError):
+            self.client.io.example.subscribe(end='not integer')
+
+    def test_subscription_validate_output_fails(self):
+        msgs = [
+            {'num': 3},
+            {'num': 'not integer'},
+        ]
+        FakeWebsocketClient.to_receive = msgs
+        expected = [({'op': 1, 't': '#foo'}, msg) for msg in msgs]
+
+        gen = self.client.io.example.subscribe(start=3, end=6)
+        _, payload = next(gen)
+        self.assertEqual({'num': 3}, payload)
+
+        with self.assertRaises(ValidationError):
+            next(gen)
+
     @patch('requests.post')
     def test_validate_false(self, mock_post):
         client = Client('http://ser.ver', lexicons=LEXICONS, validate=False)

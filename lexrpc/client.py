@@ -177,7 +177,7 @@ class Client(Base):
 
         # event stream
         if type == 'subscription':
-            return self._subscribe(url, decode=decode)
+            return self._subscribe(url, nsid, decode=decode)
 
         # query or procedure
         fn = requests.get if type == 'query' else requests.post
@@ -226,15 +226,21 @@ class Client(Base):
         output = self.validate(nsid, 'output', output)
         return output
 
-    def _subscribe(self, url, decode=True):
+    def _subscribe(self, url, nsid, decode=True):
         """Connects to a subscription websocket, yields the returned messages.
 
         Args:
+          url (str): websocket URL to connect to
+          nsid (str): subscription method NSID
           decode (bool): if True, decodes messages before returning
 
         Returns:
           (dict header, dict payload) or bytes: tuple of dicts if ``decode`` is
             True, otherwise raw bytes
+
+        Raises:
+          ValidationError: if ``decode`` is True and an output payload doesn't
+            validate gainst the subscription method's lexicon
         """
         ws = simple_websocket.Client(url, headers={
             **DEFAULT_HEADERS,
@@ -246,6 +252,7 @@ class Client(Base):
                 msg = ws.receive()
                 if decode:
                     header, payload = libipld.decode_dag_cbor_multi(msg)
+                    payload = self.validate(nsid, 'message', payload)
                     yield (header, payload)
                 else:
                     yield msg

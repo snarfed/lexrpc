@@ -221,9 +221,11 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 1.1 - 2024-10-14
+### 1.1 - unreleased
 
-* Schema validation: bug fix for open unions, allow types that aren't in `refs`.
+* Schema validation:
+  * Validate subscription (event stream websocket) parameters and output message payloads in both `Client` and `Server`.
+  * Bug fix for open unions, allow types that aren't in `refs`.
 * `Client`:
   * Include headers in websocket connections for event streams.
 

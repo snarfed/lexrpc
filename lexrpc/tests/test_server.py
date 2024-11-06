@@ -1,5 +1,6 @@
 """Unit tests for server.py."""
 from unittest import TestCase
+from unittest.mock import patch
 
 from ..base import ValidationError
 from .lexicons import LEXICONS
@@ -131,6 +132,22 @@ class ServerTest(TestCase):
             ({'hea': 'der'}, {'num': 4}),
             ({'hea': 'der'}, {'num': 5}),
         ], list(gen))
+
+    def test_subscription_params_validate_fails(self):
+        with self.assertRaises(ValidationError):
+            server.call('io.example.subscribe', start='not integer')
+
+    def test_subscription_output_validate_fails(self):
+        def subscribe(start=None, end=None):
+            yield {'hea': 'der'}, {'num': 3}
+            yield {'hea': 'der'}, {'num': 'not integer'}
+
+        with patch.dict(server._methods, values={'io.example.subscribe': subscribe}):
+            gen = server.call('io.example.subscribe', start=3, end=6)
+            self.assertEqual(({'hea': 'der'}, {'num': 3}), next(gen))
+
+            with self.assertRaises(ValidationError):
+                next(gen)
 
     def test_unknown_methods(self):
         with self.assertRaises(NotImplementedError):

@@ -103,15 +103,18 @@ class Server(Base):
 
         # validate params and input, then encode params
         params = self.validate(nsid, 'parameters', params)
-        if not subscription:
-            input = self.validate(nsid, 'input', input)
+        input = self.validate(nsid, 'input', input)
 
         logger.debug('Running method')
         args = [] if subscription else [input]
         output = fn(*args, **params)
 
-        if not subscription:
+        if subscription:
+            def validator():
+                for header, payload in output:
+                    payload = self.validate(nsid, 'message', payload)
+                    yield header, payload
+            return validator()
+        else:
             logger.debug(f'Got: {loggable(output)}')
-            output = self.validate(nsid, 'output', output)
-
-        return output
+            return self.validate(nsid, 'output', output)
