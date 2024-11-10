@@ -159,6 +159,16 @@ class BaseTest(TestCase):
                 },
             })
 
+    def test_validate_unknown_with_type_hash_main_suffix(self):
+        # https://github.com/bluesky-social/atproto/discussions/1968#discussioncomment-11201278
+        with self.assertRaises(ValidationError):
+            self.base.validate('io.example.unknown', 'record', {
+                'unknown': {
+                    '$type': 'io.example.record#main',
+                    'baz': 5,
+                },
+            })
+
     def test_validate_record_ref_array_fail_bad_type(self):
         with self.assertRaises(ValidationError):
             self.base.validate('io.example.refArray', 'record', {

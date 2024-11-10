@@ -213,6 +213,10 @@ class Base():
         Raises:
           NotImplementedError: if no def exists for the given id
         """
+        if id.endswith('#main'):
+            # https://atproto.com/specs/lexicon#:~:text=main%20suffix
+            raise ValidationError(f'#main suffix not allowed on $type: {id}')
+
         lexicon = self.defs.get(id)
         if not lexicon:
             fail(f'{id} not found')
