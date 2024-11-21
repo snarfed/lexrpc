@@ -168,10 +168,11 @@ def subscription(xrpc_server, nsid):
             commit = payload.get('commit')
             if isinstance(commit, CID):
                 commit = f'commit {commit.encode("base32")}'
-            # can't DAG-JSON encode payload here, it hits
+            # can't DAG-JSON encode payload here? maybe? it hits
             # ValueError: Failed to encode DAG-CBOR. Unknown cbor tag `0`
             # https://console.cloud.google.com/errors/detail/CNzlgrvr2bHuvwE;time=PT1H;refresh=true;locations=global?project=bridgy-federated
-            logger.debug(f'Sending to {nsid} websocket client for repo {did} seq {seq} {commit} : {header} {dag_json.encode(payload, dialect="atproto")[:500]}')
+            # eg dag_json.encode(payload, dialect="atproto")[:500]
+            logger.debug(f'Sending {nsid.split(".")[-1]} {seq} {did} {header.get("t")}')
 
             # emit!
             try:
