@@ -159,6 +159,9 @@ class BaseTest(TestCase):
                 },
             })
 
+    # TODO: bring back once the Bluesky appview validates this too
+    # https://github.com/bluesky-social/atproto/discussions/1968#discussioncomment-11195092
+    @skip
     def test_validate_unknown_with_type_hash_main_suffix(self):
         # https://github.com/bluesky-social/atproto/discussions/1968#discussioncomment-11201278
         with self.assertRaises(ValidationError):

@@ -213,9 +213,11 @@ class Base():
         Raises:
           NotImplementedError: if no def exists for the given id
         """
-        if id.endswith('#main'):
-            # https://atproto.com/specs/lexicon#:~:text=main%20suffix
-            raise ValidationError(f'#main suffix not allowed on $type: {id}')
+        # TODO: bring back once the Bluesky appview validates this too
+        # https://github.com/bluesky-social/atproto/discussions/1968#discussioncomment-11195092
+        # if id.endswith('#main'):
+        #     # https://atproto.com/specs/lexicon#:~:text=main%20suffix
+        #     raise ValidationError(f'#main suffix not allowed on $type: {id}')
 
         lexicon = self.defs.get(id)
         if not lexicon:
