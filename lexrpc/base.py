@@ -633,3 +633,12 @@ class Base():
                 decoded.setdefault(name, []).append(val)
 
         return decoded
+
+    @classmethod
+    def loggable(cls, val):
+        return (
+            f'{len(val)} bytes' if isinstance(val, bytes)
+            else val[:100] if isinstance(val, str)
+            else [cls.loggable(v) for v in val] if isinstance(val, list)
+            else {k: cls.loggable(v) for k, v in val.items()} if isinstance(val, dict)
+            else val)

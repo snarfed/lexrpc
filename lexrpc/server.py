@@ -90,10 +90,7 @@ class Server(Base):
           ValidationError: if the parameters, input, or returned output don't
             validate against the method's schemas
         """
-        def loggable(val):
-            return f'{len(val)} bytes' if isinstance(val, bytes) else val
-
-        logger.debug(f'{nsid}: {params} {loggable(input)}')
+        logger.debug(f'{nsid}: {params} {self.loggable(input)}')
 
         fn = self._methods.get(nsid)
         if not fn:
@@ -105,7 +102,6 @@ class Server(Base):
         params = self.validate(nsid, 'parameters', params)
         input = self.validate(nsid, 'input', input)
 
-        logger.debug('Running method')
         args = [] if subscription else [input]
         output = fn(*args, **params)
 
@@ -116,5 +112,5 @@ class Server(Base):
                     yield header, payload
             return validator()
         else:
-            logger.debug(f'Got: {loggable(output)}')
+            logger.debug(f'Got: {self.loggable(output)}')
             return self.validate(nsid, 'output', output)

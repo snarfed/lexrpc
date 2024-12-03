@@ -141,9 +141,7 @@ class Client(Base):
           requests.RequestException: if the connection or HTTP request to the
             remote server failed
         """
-        def loggable(val):
-            return f'{len(val)} bytes' if isinstance(val, bytes) else val
-        logger.debug(f'{nsid}: {params} {loggable(input)}')
+        # logger.debug(f'{nsid}: {params} {self.loggable(input)}')
 
         # strip null params, validate params and input, then encode params
         params = {k: v for k, v in params.items() if v is not None}
@@ -154,21 +152,18 @@ class Client(Base):
         if type == 'subscription':
             input = self.validate(nsid, 'input', input)
 
-        req_headers = {
+        headers = {
             **DEFAULT_HEADERS,
             'Content-Type': 'application/json',
             **self.headers,
             **headers,
         }
 
-        log_headers = copy.copy(req_headers)
-
         # auth
         token = (self.session.get('refreshJwt') if nsid == REFRESH_NSID
                  else self.session.get('accessJwt'))
         if token:
-            req_headers['Authorization'] = f'Bearer {token}'
-            log_headers['Authorization'] = '...'
+            headers['Authorization'] = f'Bearer {token}'
 
         # run method
         url = urljoin(self.address, f'/xrpc/{nsid}')
@@ -188,12 +183,12 @@ class Client(Base):
         if isinstance(input, IOBase) or hasattr(input, 'read'):
             input = input.read()
 
-        logger.debug(f'Running requests.{fn} {url} {loggable(input)} {params_str} {log_headers}')
+        logger.debug(f'requests.{fn} {url} {params_str} {self.loggable(input)}')
         resp = fn(
           url,
           json=input if input and isinstance(input, dict) else None,
           data=input if input and not isinstance(input, dict) else None,
-          headers=req_headers
+          headers=headers
         )
 
         output = None
@@ -218,7 +213,7 @@ class Client(Base):
         elif not resp.ok:  # token expired, try to refresh it
             if output and output.get('error') in TOKEN_ERRORS:
                 self.call(REFRESH_NSID)
-                return self.call(nsid, input=input, headers=req_headers, **params)  # retry
+                return self.call(nsid, input=input, headers=headers, **params)  # retry
 
         resp.raise_for_status()
 
