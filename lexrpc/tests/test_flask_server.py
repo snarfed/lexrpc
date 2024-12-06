@@ -275,7 +275,7 @@ class XrpcEndpointTest(TestCase):
             resp.json['message'])
 
     def test_query_bad_output(self):
-        resp = self.client.get('/xrpc/io.example.query?foo=abc')
+        resp = self.client.get('/xrpc/io.example.query')
         self.assertEqual(400, resp.status_code)
         self.assertEqual(
             "io.example.query output with value `{'foo': None, 'bar': 5}`: property foo is not nullable",

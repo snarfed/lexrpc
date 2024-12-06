@@ -456,6 +456,11 @@ class Base():
             self._validate_schema(name=prop_name, val=prop_val, type_=prop_type,
                                   lexicon=prop_lexicon, schema=prop_schema)
 
+        # unknown parameters aren't allowed
+        if schema.get('type') == 'params':
+            if unknown := val.keys() - props.keys():
+                fail(f'unknown parameters: {unknown}')
+
     def _validate_string_format(self, val, format):
         """Validates an ATProto string value against a format.
 

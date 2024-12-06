@@ -117,6 +117,10 @@ class ServerTest(TestCase):
         with self.assertRaises(ValidationError):
             server.call('io.example.params', {}, foo='a')
 
+    def test_unknown_param(self):
+        with self.assertRaises(ValidationError) as e:
+            server.call('io.example.params', {}, bar=3, nope='x')
+
     def test_invalid_params(self):
         with self.assertRaises(ValidationError):
             server.call('io.example.params', {}, bar='c')
