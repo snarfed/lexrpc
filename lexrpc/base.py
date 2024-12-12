@@ -475,7 +475,7 @@ class Base():
         """
         def check(condition):
             if not condition:
-                raise ValidationError(f'is invalid for format {format}')
+                raise ValidationError(f'{val} is invalid for format {format}')
 
         check(val)
 
