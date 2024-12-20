@@ -13,6 +13,7 @@ from iterators import TimeoutIterator
 import libipld
 from multiformats import CID
 from simple_websocket import ConnectionClosed
+from werkzeug.exceptions import TooManyRequests
 
 from . import base
 from .base import NSID_RE, ValidationError
@@ -190,6 +191,13 @@ def subscription(xrpc_server, nsid):
             ip = x_forwarded_for.split(',')[0]
         else:
             ip = request.remote_addr
+
+        logger.info(repr(ip))
+        for client in subscribers[nsid]:
+            logger.info(repr(client.ip))
+            if client.ip == ip:
+                logger.debug(f'Rejecting connection, already connected for {nsid}: {ip} {request.user_agent}')
+                raise TooManyRequests()
 
         logger.debug(f'New websocket client for {nsid}: {ip} {request.user_agent}')
         subscriber = Subscriber(ip=ip,
