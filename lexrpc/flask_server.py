@@ -192,9 +192,7 @@ def subscription(xrpc_server, nsid):
         else:
             ip = request.remote_addr
 
-        logger.info(repr(ip))
         for client in subscribers[nsid]:
-            logger.info(repr(client.ip))
             if client.ip == ip:
                 logger.debug(f'Rejecting connection, already connected for {nsid}: {ip} {request.user_agent}')
                 raise TooManyRequests()
