@@ -112,5 +112,5 @@ class Server(Base):
                     yield header, payload
             return validator()
         else:
-            logger.debug(f'Got: {self.loggable(output)}')
+            logger.debug(f'Returning {self.loggable(output)}')
             return self.validate(nsid, 'output', output)
