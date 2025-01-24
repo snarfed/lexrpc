@@ -5,7 +5,7 @@ import logging
 
 import dag_cbor
 import dag_json
-from flask import after_this_request, redirect, request
+from flask import after_this_request, make_response, request
 from flask.json import jsonify
 from flask.views import View
 from flask_sock import Sock
@@ -102,7 +102,7 @@ class XrpcEndpoint(View):
             # io.BufferedReader/Writer?
             output = self.server.call(nsid, input=input, **params)
         except Redirect as r:
-            return redirect(r.to, code=r.status)
+            return make_response('', r.status, {'Location': r.to, **r.headers})
         except NotImplementedError as e:
             return {
                 'error': 'MethodNotImplemented',

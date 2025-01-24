@@ -17,11 +17,12 @@ class Redirect(Exception):
       to (str): URL to redirect to
       status (int): HTTP status code, defaults to 302
     """
-    def __init__(self, to, status=302):
+    def __init__(self, to, status=302, headers=None):
         assert to
         assert status
         self.to = to
         self.status = status
+        self.headers = headers or {}
 
 
 class Server(Base):

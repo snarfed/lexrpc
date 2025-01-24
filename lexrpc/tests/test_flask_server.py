@@ -347,16 +347,19 @@ class XrpcEndpointTest(TestCase):
 
     def test_redirect(self):
         @server.method('io.example.redirect')
-        def redirect(input, status=None):
+        def redirect(input, status=None, x=None):
             kwargs = {}
             if status:
                 kwargs['status'] = status
+            if x:
+                kwargs['headers'] = {'x': x}
             raise Redirect('http://to/here', **kwargs)
 
         resp = self.client.post('/xrpc/io.example.redirect')
         self.assertEqual(302, resp.status_code)
         self.assertEqual('http://to/here', resp.headers['Location'])
 
-        resp = self.client.post('/xrpc/io.example.redirect?status=301')
-        self.assertEqual(301, resp.status_code)
+        resp = self.client.post('/xrpc/io.example.redirect?x=y')
+        self.assertEqual(302, resp.status_code)
         self.assertEqual('http://to/here', resp.headers['Location'])
+        self.assertEqual('y', resp.headers['x'])
