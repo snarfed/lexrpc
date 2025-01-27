@@ -114,7 +114,7 @@ class XrpcEndpoint(View):
             return {
                 'error': getattr(e, 'name', 'InvalidRequest'),
                 'message': getattr(e, 'message', str(e)),
-            }, 400, RESPONSE_HEADERS
+            }, 400, {**RESPONSE_HEADERS, **getattr(e, 'headers', {})}
 
         # prepare output
         out_encoding = lexicon.get('output', {}).get('encoding')

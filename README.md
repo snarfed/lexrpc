@@ -232,6 +232,8 @@ Here's how to package, test, and ship a new release.
   * Include headers in websocket connections for event streams.
 * `server`:
   * `Redirect`: Add `headers` kwarg.
+* `flask_server`:
+  * Interpret second positional arg to `ValueError` and `ValidationError`, ie `err.args[1]`, as a dict of additional HTTP headers to return with the HTTP 400 response.
 
 ### 1.0 - 2024-10-14
 
