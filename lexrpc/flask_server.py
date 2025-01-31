@@ -130,7 +130,7 @@ class XrpcEndpoint(View):
 def subscription(xrpc_server, nsid):
     """Generates websocket handlers for inbound XRPC subscription methods.
 
-    Note that this calls the XRPC method on a _different thread_, so that it can
+    Note that this calls the XRPC method on a *different thread*, so that it can
     block on it there while still periodically checking in the request thread
     that the websocket client is still connected.
 

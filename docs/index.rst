@@ -17,13 +17,13 @@ License: This project is placed in the public domain. You may also use
 it under the `CC0
 License <https://creativecommons.org/publicdomain/zero/1.0/>`__.
 
--  `Client <#client>`__
--  `Server <#server>`__
--  `Flask server <#flask-server>`__
--  `Reference
-   docs <https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html>`__
--  `Release instructions <#release-instructions>`__
--  `Changelog <#changelog>`__
+- `Client <#client>`__
+- `Server <#server>`__
+- `Flask server <#flask-server>`__
+- `Reference
+  docs <https://lexrpc.readthedocs.io/en/latest/source/lexrpc.html>`__
+- `Release instructions <#release-instructions>`__
+- `Changelog <#changelog>`__
 
 Client
 ------
@@ -305,138 +305,162 @@ Here’s how to package, test, and ship a new release.
 Changelog
 ---------
 
+1.1 - unreleased
+~~~~~~~~~~~~~~~~
+
+- Schema validation:
+
+  - Validate subscription (event stream websocket) parameters and output
+    message payloads in both ``Client`` and ``Server``.
+  - ``Server``: raise ``ValidationError`` on unknown parameters.
+  - [STRIKEOUT:Don’t allow ``#main`` in ``$type``
+    (]\ `bluesky-social/atproto#1968 <https://github.com/bluesky-social/atproto/discussions/1968>`__\ [STRIKEOUT:).]
+  - Bug fix for open unions, allow types that aren’t in ``refs``.
+
+- ``Client``:
+
+  - Include headers in websocket connections for event streams.
+
+- ``server``:
+
+  - ``Redirect``: Add ``headers`` kwarg.
+
+- ``flask_server``:
+
+  - Interpret second positional arg to ``ValueError`` and
+    ``ValidationError``, ie ``err.args[1]``, as a dict of additional
+    HTTP headers to return with the HTTP 400 response.
+
 1.0 - 2024-10-14
 ~~~~~~~~~~~~~~~~
 
--  Add full `lexicon schema
-   validation <https://atproto.com/specs/lexicon>`__ for records and
-   XRPC method parameters, input, and output. Includes primitive and
-   ``object`` types, ``ref``\ s and ``union``\ s, string formats,
-   type-specific constraints, etc.
--  Dependencies: switch from ``dag-cbor`` to ``libipld``, for
-   performance.
--  ``client``:
+- Add full `lexicon schema
+  validation <https://atproto.com/specs/lexicon>`__ for records and XRPC
+  method parameters, input, and output. Includes primitive and
+  ``object`` types, ``ref``\ s and ``union``\ s, string formats,
+  type-specific constraints, etc.
+- Dependencies: start to switch from ``dag-cbor`` to ``libipld``, for
+  performance.
+- ``client``:
 
-   -  Add new ``decode`` kwarg to subscription methods to control
-      whether DAG-CBOR messages should be decoded into native dicts for
-      header and payload.
+  - Add new ``decode`` kwarg to subscription methods to control whether
+    DAG-CBOR messages should be decoded into native dicts for header and
+    payload.
 
--  ``flask_server``: add new top-level ``subscribers`` attr that tracks
-   clients connected (subscribed) to each event stream.
--  ``server``:
+- ``flask_server``: add new top-level ``subscribers`` attr that tracks
+  clients connected (subscribed) to each event stream.
+- ``server``:
 
-   -  Add ``status`` param to ``Redirect``.
+  - Add ``status`` param to ``Redirect``.
 
 .. _section-1:
 
 0.7 - 2024-06-24
 ~~~~~~~~~~~~~~~~
 
--  Fix websocket subscription server hang with blocking server XRPC
-   methods due to exhausting worker thread pool
-   (`#8 <https://github.com/snarfed/lexrpc/issues/8>`__).
--  Add ``truncate`` kwarg to ``Client`` and ``Server`` constructors to
-   automatically truncate (ellipsize) string values that are longer than
-   their ``maxGraphemes`` or ``maxLength`` in their lexicon. Defaults to
-   ``False``.
--  Add new ``base.XrpcError`` exception type for named errors in method
-   definitions.
--  ``flask_server``:
+- Fix websocket subscription server hang with blocking server XRPC
+  methods due to exhausting worker thread pool
+  (`#8 <https://github.com/snarfed/lexrpc/issues/8>`__).
+- Add ``truncate`` kwarg to ``Client`` and ``Server`` constructors to
+  automatically truncate (ellipsize) string values that are longer than
+  their ``maxGraphemes`` or ``maxLength`` in their lexicon. Defaults to
+  ``False``.
+- Add new ``base.XrpcError`` exception type for named errors in method
+  definitions.
+- ``flask_server``:
 
-   -  Handle ``base.XrpcError``, convert to `JSON error
-      response <https://atproto.com/specs/xrpc#error-responses>`__ with
-      ``error`` and ``message`` fields.
+  - Handle ``base.XrpcError``, convert to `JSON error
+    response <https://atproto.com/specs/xrpc#error-responses>`__ with
+    ``error`` and ``message`` fields.
 
--  ``Client``:
+- ``Client``:
 
-   -  Bug fix for calls with binary inputs that refresh the access
-      token. Calls with binary input now buffer the entire input in
-      memory.
-      (`snarfed/bridgy#1670 <https://github.com/snarfed/bridgy/issues/1670>`__)
-   -  Bug fix: omit null (``None``) parameters instead of passing them
-      with string value ``None``.
+  - Bug fix for calls with binary inputs that refresh the access token.
+    Calls with binary input now buffer the entire input in memory.
+    (`snarfed/bridgy#1670 <https://github.com/snarfed/bridgy/issues/1670>`__)
+  - Bug fix: omit null (``None``) parameters instead of passing them
+    with string value ``None``.
 
--  Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
-   `bluesky-social/atproto@15cc6ff37c326d5c186385037c4bfe8b60ea41b1 <https://github.com/bluesky-social/atproto/commit/15cc6ff37c326d5c186385037c4bfe8b60ea41b1>`__.
+- Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
+  `bluesky-social/atproto@15cc6ff37c326d5c186385037c4bfe8b60ea41b1 <https://github.com/bluesky-social/atproto/commit/15cc6ff37c326d5c186385037c4bfe8b60ea41b1>`__.
 
 .. _section-2:
 
 0.6 - 2024-03-16
 ~~~~~~~~~~~~~~~~
 
--  Drop ``typing-extensions`` version pin now that `typing-validation
-   has been updated to be compatible with
-   it <https://github.com/hashberg-io/typing-validation/issues/1>`__.
--  Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
-   `bluesky-social/atproto@f45eef3 <https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282>`__.
+- Drop ``typing-extensions`` version pin now that `typing-validation has
+  been updated to be compatible with
+  it <https://github.com/hashberg-io/typing-validation/issues/1>`__.
+- Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
+  `bluesky-social/atproto@f45eef3 <https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282>`__.
 
 .. _section-3:
 
 0.5 - 2023-12-10
 ~~~~~~~~~~~~~~~~
 
--  ``Client``:
+- ``Client``:
 
-   -  Support binary request data automatically based on input type, eg
-      ``dict`` vs ``bytes``.
-   -  Add new ``headers`` kwarg to ``call`` and auto-generated lexicon
-      method calls, useful for providing an explicit ``Content-Type``
-      when sending binary data.
-   -  Bug fix: don’t infinite loop if ``refreshSession`` fails.
-   -  Other minor authentication bug fixes.
+  - Support binary request data automatically based on input type, eg
+    ``dict`` vs ``bytes``.
+  - Add new ``headers`` kwarg to ``call`` and auto-generated lexicon
+    method calls, useful for providing an explicit ``Content-Type`` when
+    sending binary data.
+  - Bug fix: don’t infinite loop if ``refreshSession`` fails.
+  - Other minor authentication bug fixes.
 
 .. _section-4:
 
 0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
 
--  Bundle `the official
-   lexicons <https://github.com/bluesky-social/atproto/tree/main/lexicons/>`__
-   for ``app.bsky`` and ``com.atproto``, use them by default.
--  ``Base``:
+- Bundle `the official
+  lexicons <https://github.com/bluesky-social/atproto/tree/main/lexicons/>`__
+  for ``app.bsky`` and ``com.atproto``, use them by default.
+- ``Base``:
 
-   -  Expose lexicons in ``defs`` attribute.
+  - Expose lexicons in ``defs`` attribute.
 
--  ``Client``:
+- ``Client``:
 
-   -  Add minimal auth support with ``access_token`` and
-      ``refresh_token`` constructor kwargs and ``session`` attribute. If
-      you use a ``Client`` to call ``com.atproto.server.createSession``
-      or ``com.atproto.server.refreshSession``, the returned tokens will
-      be automatically stored and used in future requests.
-   -  Bug fix: handle trailing slash on server address, eg
-      ``http://ser.ver/`` vs ``http://ser.ver``.
-   -  Default server address to official ``https://bsky.social`` PDS.
-   -  Add default
-      ``User-Agent: lexrpc (https://lexrpc.readthedocs.io/)`` request
-      header.
+  - Add minimal auth support with ``access_token`` and ``refresh_token``
+    constructor kwargs and ``session`` attribute. If you use a
+    ``Client`` to call ``com.atproto.server.createSession`` or
+    ``com.atproto.server.refreshSession``, the returned tokens will be
+    automatically stored and used in future requests.
+  - Bug fix: handle trailing slash on server address, eg
+    ``http://ser.ver/`` vs ``http://ser.ver``.
+  - Default server address to official ``https://bsky.social`` PDS.
+  - Add default ``User-Agent: lexrpc (https://lexrpc.readthedocs.io/)``
+    request header.
 
--  ``Server``:
+- ``Server``:
 
-   -  Add new ``Redirect`` class. Handlers can raise this to indicate
-      that the web server should serve an HTTP redirect. `Whether this
-      is official supported by the XRPC spec is still
-      TBD. <https://github.com/bluesky-social/atproto/discussions/1228>`__
+  - Add new ``Redirect`` class. Handlers can raise this to indicate that
+    the web server should serve an HTTP redirect. `Whether this is
+    official supported by the XRPC spec is still
+    TBD. <https://github.com/bluesky-social/atproto/discussions/1228>`__
 
--  ``flask_server``:
+- ``flask_server``:
 
-   -  Return HTTP 405 error on HTTP requests to subscription (websocket)
-      XRPCs.
-   -  Support the new ``Redirect`` exception.
-   -  Add the ``error`` field to the JSON response bodies for most error
-      responses.
+  - Return HTTP 405 error on HTTP requests to subscription (websocket)
+    XRPCs.
+  - Support the new ``Redirect`` exception.
+  - Add the ``error`` field to the JSON response bodies for most error
+    responses.
 
 .. _section-5:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
 
--  Add array type support.
--  Add support for non-JSON input and output encodings.
--  Add ``subscription`` method type support over websockets.
--  Add ``headers`` kwarg to ``Client`` constructor.
--  Add new ``Server.register`` method for manually registering handlers.
--  Bug fix for server ``@method`` decorator.
+- Add array type support.
+- Add support for non-JSON input and output encodings.
+- Add ``subscription`` method type support over websockets.
+- Add ``headers`` kwarg to ``Client`` constructor.
+- Add new ``Server.register`` method for manually registering handlers.
+- Bug fix for server ``@method`` decorator.
 
 .. _section-6:
 
@@ -451,9 +475,9 @@ put more effort into matching and fully implementing them. Stay tuned!
 
 *Breaking changes:*
 
--  Fully migrate to `new lexicon
-   format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
-   Original format is no longer supported.
+- Fully migrate to `new lexicon
+  format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
+  Original format is no longer supported.
 
 .. _section-7:
 
