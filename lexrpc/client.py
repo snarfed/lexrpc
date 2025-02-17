@@ -71,11 +71,12 @@ class Client(Base):
       session (dict): ``createSession`` response with ``accessJwt``,
         `refreshJwt``, ``handle``, and ``did``
       headers (dict): HTTP headers to include in every request
+      auth (requests.auth.AuthBase): optional, used to authenticate requests
     """
 
     def __init__(self, address=DEFAULT_PDS, access_token=None,
                  refresh_token=None, headers=None, session_callback=None,
-                 **kwargs):
+                 auth=None, **kwargs):
         """Constructor.
 
         Args:
@@ -95,12 +96,14 @@ class Client(Base):
         """
         super().__init__(**kwargs)
 
+        assert not ((access_token or refresh_token) and auth)
+
         # logger.debug(f'Using server at {address}')
         assert address.startswith('http://') or address.startswith('https://'), \
             f"{address} doesn't start with http:// or https://"
         self.address = address
         self.headers = headers or {}
-
+        self.auth = auth
         self.session = {}
         if access_token or refresh_token:
             self.session.update({
@@ -183,12 +186,13 @@ class Client(Base):
         if isinstance(input, IOBase) or hasattr(input, 'read'):
             input = input.read()
 
-        logger.debug(f'requests.{fn} {url} {params_str} {self.loggable(input)}')
+        logger.debug(f'requests.{fn} {url} {params_str} {self.loggable(input)} {headers}')
         resp = fn(
           url,
           json=input if input and isinstance(input, dict) else None,
           data=input if input and not isinstance(input, dict) else None,
-          headers=headers
+          headers=headers,
+          auth=self.auth,
         )
 
         output = None

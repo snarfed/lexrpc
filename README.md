@@ -230,6 +230,7 @@ Here's how to package, test, and ship a new release.
   * Bug fix for open unions, allow types that aren't in `refs`.
 * `Client`:
   * Include headers in websocket connections for event streams.
+  * Add new `auth` constructor kwarg to support any `requests` auth instance, eg `requests_oauth2client.DPoPToken`.
 * `server`:
   * `Redirect`: Add `headers` kwarg.
 * `flask_server`:

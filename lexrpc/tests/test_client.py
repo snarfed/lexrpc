@@ -7,6 +7,7 @@ import urllib.parse
 
 import dag_cbor
 import requests
+from requests.auth import HTTPBasicAuth
 import simple_websocket
 
 from .lexicons import LEXICONS
@@ -86,7 +87,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, data=None, headers=FULL_HEADERS)
+            json=None, data=None, auth=None, headers=FULL_HEADERS)
 
     @patch('requests.get', return_value=response({'foo': 'asdf'}))
     def test_call_address_trailing_slash(self, mock_get):
@@ -94,7 +95,7 @@ class ClientTest(TestCase):
         got = client.call('io.example.query', {})
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            json=None, data=None, headers=HEADERS)
+            json=None, data=None, auth=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_query(self, mock_get):
@@ -106,7 +107,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, data=None, headers=FULL_HEADERS)
+            json=None, data=None, auth=None, headers=FULL_HEADERS)
 
     @patch('requests.post')
     def test_procedure(self, mock_post):
@@ -119,7 +120,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure?x=y',
-            json=input, data=None, headers=FULL_HEADERS)
+            json=input, data=None, auth=None, headers=FULL_HEADERS)
 
     @patch('requests.get')
     def test_boolean_param(self, mock_get):
@@ -131,7 +132,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?z=true',
-            json=None, data=None, headers=FULL_HEADERS)
+            json=None, data=None, auth=None, headers=FULL_HEADERS)
 
     @patch('requests.get')
     def test_omit_None_param(self, mock_get):
@@ -143,7 +144,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            json=None, data=None, headers=FULL_HEADERS)
+            json=None, data=None, auth=None, headers=FULL_HEADERS)
 
     @patch('requests.get')
     def test_call_headers(self, mock_get):
@@ -155,7 +156,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, data=None, headers={**FULL_HEADERS, 'foo': 'bar'})
+            json=None, data=None, auth=None, headers={**FULL_HEADERS, 'foo': 'bar'})
 
     @patch('requests.get')
     def test_call_headers_override_content_type(self, mock_get):
@@ -167,7 +168,8 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, data=None, headers={**FULL_HEADERS, 'Content-Type': 'application/xml'})
+            json=None, data=None, auth=None,
+            headers={**FULL_HEADERS, 'Content-Type': 'application/xml'})
 
     @patch('requests.get', return_value=response())
     def test_no_output_error(self, mock_get):
@@ -176,7 +178,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query',
-            json=None, data=None, headers=FULL_HEADERS)
+            json=None, data=None, auth=None, headers=FULL_HEADERS)
 
     @patch('requests.post', return_value=response())
     def test_no_params_input_output(self, mock_post):
@@ -184,7 +186,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.noParamsInputOutput',
-            json=None, data=None, headers=FULL_HEADERS)
+            json=None, data=None, auth=None, headers=FULL_HEADERS)
 
     @patch('requests.post', return_value=response())
     def test_dashed_name(self, mock_post):
@@ -192,7 +194,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.exa-mple.dashedName',
-            json=None, data=None, headers=FULL_HEADERS)
+            json=None, data=None, auth=None, headers=FULL_HEADERS)
 
     @patch('requests.get', return_value=response({'out': 'foo'}))
     def test_defs(self, mock_get):
@@ -201,7 +203,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.defs',
-            json={'in': 'bar'}, data=None, headers=FULL_HEADERS)
+            json={'in': 'bar'}, data=None, auth=None, headers=FULL_HEADERS)
 
     @patch('requests.get', return_value=response(status=400, body={
         'error': 'Something',
@@ -213,7 +215,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None, data=None, headers=FULL_HEADERS)
+            json=None, data=None, auth=None, headers=FULL_HEADERS)
 
     def test_missing_params(self):
         with self.assertRaises(ValidationError):
@@ -233,7 +235,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.array?foo=a&foo=b',
-            json=None, data=None, headers=FULL_HEADERS)
+            json=None, data=None, auth=None, headers=FULL_HEADERS)
 
     def test_subscription(self):
         msgs = [
@@ -303,7 +305,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.procedure',
-            json=input, data=None, headers=HEADERS)
+            json=input, data=None, auth=None, headers=HEADERS)
 
     @patch('requests.get')
     def test_client_headers(self, mock_get):
@@ -317,9 +319,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None,
-            data=None,
-            headers={
+            json=None, data=None, auth=None, headers={
                 **HEADERS,
                 'Baz': 'biff',
             },
@@ -337,9 +337,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None,
-            data=None,
-            headers={
+            json=None, data=None, auth=None, headers={
                 **HEADERS,
                 'Baz': 'biff',
                 'Content-Type': 'application/xml',
@@ -358,9 +356,7 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.query?x=y',
-            json=None,
-            data=None,
-            headers={
+            json=None, data=None, auth=None, headers={
                 **HEADERS,
                 'Baz': 'biff',
                 'Authorization': 'Bearer towkin',
@@ -403,18 +399,15 @@ class ClientTest(TestCase):
 
         mock_get.assert_any_call(
             'https://bsky.social/xrpc/com.atproto.server.describeServer',
-            json=None,
-            data=None,
+            json=None, data=None, auth=None,
             headers={**HEADERS, 'Authorization': 'Bearer towkin'})
         mock_post.assert_any_call(
             'https://bsky.social/xrpc/com.atproto.server.refreshSession',
-            json=None,
-            data=None,
+            json=None, data=None, auth=None,
             headers={**HEADERS, 'Authorization': 'Bearer reephrush'})
         mock_get.assert_any_call(
             'https://bsky.social/xrpc/com.atproto.server.describeServer',
-            json=None,
-            data=None,
+            json=None, data=None, auth=None,
             headers={**HEADERS, 'Authorization': 'Bearer new-towkin'})
 
     @patch('requests.get', return_value=response(status=400, body={
@@ -441,13 +434,11 @@ class ClientTest(TestCase):
 
         mock_get.assert_called_with(
             'https://bsky.social/xrpc/com.atproto.server.describeServer?x=y',
-            json=None,
-            data=None,
+            json=None, data=None, auth=None,
             headers={**HEADERS, 'Authorization': 'Bearer towkin'})
         mock_post.assert_called_with(
             'https://bsky.social/xrpc/com.atproto.server.refreshSession',
-            json=None,
-            data=None,
+            json=None, data=None, auth=None,
             headers={**HEADERS, 'Authorization': 'Bearer reephrush'})
 
     @patch('requests.post')
@@ -471,7 +462,25 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'https://bsky.social/xrpc/com.atproto.server.createSession',
-            json=input, data=None, headers=HEADERS)
+            json=input, data=None, auth=None, headers=HEADERS)
+
+    def test_not_both_auth_and_session(self):
+        with self.assertRaises(AssertionError):
+            Client('http://ser.ver', access_token='x',
+                   auth=HTTPBasicAuth('user', 'pwd'))
+
+    @patch('requests.get')
+    def test_auth(self, mock_get):
+        mock_get.return_value = response({'foo': 'asdf'})
+
+        auth = HTTPBasicAuth('user', 'pwd')
+        client = Client('http://ser.ver', lexicons=LEXICONS, auth=auth)
+
+        got = client.call('io.example.query', {}, x='y')
+        self.assertEqual({'foo': 'asdf'}, got)
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query?x=y',
+            json=None, data=None, auth=auth, headers=HEADERS)
 
     @patch('requests.get')
     def test_bundled_lexicons(self, mock_get):
@@ -492,7 +501,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.encodings',
-            json=None, data=b'foo bar', headers={
+            json=None, data=b'foo bar', auth=None, headers={
                 **client.DEFAULT_HEADERS,
                 'Content-Type': 'foo/bar',
                 'foo': 'ey',
@@ -510,7 +519,7 @@ class ClientTest(TestCase):
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.encodings',
-            json=None, data=b'foo bar', headers={
+            json=None, data=b'foo bar', auth=None, headers={
                 **client.DEFAULT_HEADERS,
                 'Content-Type': 'foo/bar',
                 'foo': 'ey',
