@@ -85,14 +85,16 @@ class Client(Base):
           refresh_token (str): optional; used to refresh access token
           headers (dict): optional, HTTP headers to include in every request
           session_callback (callable, dict => None): called when a new session
-            is created with new access and refresh tokens. This callable is
-            passed one positional argument, the dict JSON output from
-            ``com.atproto.server.createSession`` or
-            ``com.atproto.server.refreshSession``.
+            is created with new access and refresh tokens, or when ``auth.token``
+            changes, eg it gets refreshed. This callable is passed one positional
+            argument: if the client has ``access_token``, the dict JSON output
+            from ``com.atproto.server.createSession`` or
+            ``com.atproto.server.refreshSession``; or if the client has ``auth``,
+            ``auth itself.
           kwargs: passed through to :class:`Base`
 
         Raises:
-          ValidationError: if any schema is invalid
+          ValidationError: if any lexicon schema is invalid
         """
         super().__init__(**kwargs)
 
@@ -186,7 +188,10 @@ class Client(Base):
         if isinstance(input, IOBase) or hasattr(input, 'read'):
             input = input.read()
 
-        logger.debug(f'requests.{fn} {url} {params_str} {self.loggable(input)} {headers}')
+        logger.debug(f'requests.{fn} {url} {params_str} {self.loggable(input)} {headers} {self.auth}')
+
+        if self.auth:
+            orig_token = getattr(self.auth, 'token', None)
         resp = fn(
           url,
           json=input if input and isinstance(input, dict) else None,
@@ -194,6 +199,10 @@ class Client(Base):
           headers=headers,
           auth=self.auth,
         )
+
+        if (self.auth and self.session_callback
+                and getattr(self.auth, 'token', None) != orig_token):
+            self.session_callback(self.auth)
 
         output = None
         content_type = resp.headers.get('Content-Type', '').split(';')[0]

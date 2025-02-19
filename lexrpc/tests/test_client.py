@@ -7,7 +7,7 @@ import urllib.parse
 
 import dag_cbor
 import requests
-from requests.auth import HTTPBasicAuth
+from requests.auth import AuthBase, HTTPBasicAuth
 import simple_websocket
 
 from .lexicons import LEXICONS
@@ -440,6 +440,32 @@ class ClientTest(TestCase):
             'https://bsky.social/xrpc/com.atproto.server.refreshSession',
             json=None, data=None, auth=None,
             headers={**HEADERS, 'Authorization': 'Bearer reephrush'})
+
+    @patch('requests.get')
+    def test_auth_refresh_token(self, mock_get):
+        class TokenAuth(AuthBase):
+            token = 'before'
+
+        callback_got = []
+        def callback(auth):
+            nonlocal callback_got
+            callback_got.append(auth)
+
+        output = {
+            'did': 'did:unu:sed',
+            'availableUserDomains': ['moo.com'],
+        }
+        def get(*args, auth=None, **kwargs):
+            auth.token = 'after'
+            return response(output)
+
+        mock_get.side_effect = get
+
+        auth = TokenAuth()
+        client = Client(auth=auth, session_callback=callback)
+        got = client.com.atproto.server.describeServer()
+        self.assertEqual(output, got)
+        self.assertEqual([auth], callback_got)
 
     @patch('requests.post')
     def test_createSession_sets_session(self, mock_post):
