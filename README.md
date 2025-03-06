@@ -91,6 +91,8 @@ You can also register a method handler with [`Server.register`](https://lexrpc.r
 server.register('com.example.my-query', my_query_handler)
 ```
 
+If a method has non-JSON (eg binary) input, the positional `input` arg will be `bytes`. Similarly, for binary output, return `bytes` from your handler.
+
 As with `Client`, you can use custom lexicons by passing them to the `Server` constructor:
 
 ```
