@@ -37,6 +37,35 @@ class BaseTest(TestCase):
         })
 
     def test_validate_truncate(self):
+        outer = {
+            'lexicon': 1,
+            'id': 'io.example.outer',
+            'defs': {'main': {
+                'type': 'record',
+                'record': {
+                    'type': 'object',
+                    'properties': {
+                        'str': {
+                            'type': 'ref',
+                            'ref': 'io.example.stringLength',
+                        },
+                    },
+                },
+            }},
+        }
+
+        base = Base(LEXICONS + [outer], truncate=True)
+
+        for input, expected in (
+            ('short', 'short'),
+            ('too many graphemes', 'too many …'),
+        ):
+            with self.subTest(input=input, expected=expected):
+                self.assertEqual({'str': {'string': expected}},
+                                 base.validate('io.example.outer', 'record',
+                                               {'str': {'string': input}}))
+
+    def test_validate_truncate_ref(self):
         base = Base(LEXICONS, truncate=True)
 
         for input, expected in (

@@ -267,20 +267,8 @@ class Base():
             # we'd fail if a query with no params gets requested with any query
             # params at all, eg utm_* tracking params
 
-        if self._truncate:
-            for name, config in schema.get('properties', {}).items():
-                # TODO: recurse into reference, union, etc properties
-                if max_graphemes := config.get('maxGraphemes'):
-                    val = obj.get(name)
-                    if val and grapheme.length(val) > max_graphemes:
-                        obj = {
-                            **obj,
-                            name: grapheme.slice(val, end=max_graphemes - 1) + '…',
-                        }
-
-        if self._validate:
-            self._validate_schema(name=type, val=obj, type_=nsid, lexicon=nsid,
-                                  schema=schema)
+        self._validate_schema(name=type, val=obj, type_=nsid, lexicon=nsid,
+                              schema=schema)
 
         return obj
 
@@ -316,12 +304,13 @@ class Base():
             return schema_name, schema
 
         def fail(msg):
-            val_str = repr(val)
-            if len(val_str) > 50:
-                val_str = val_str[:50] + '…'
-            prefix = f'in {lexicon}, ' if lexicon != type_ else ''
-            raise ValidationError(
-                f'{prefix}{type_} {name} with value `{val_str}`: {msg}')
+            if self._validate:
+                val_str = repr(val)
+                if len(val_str) > 50:
+                    val_str = val_str[:50] + '…'
+                prefix = f'in {lexicon}, ' if lexicon != type_ else ''
+                raise ValidationError(
+                    f'{prefix}{type_} {name} with value `{val_str}`: {msg}')
 
         if const := schema.get('const'):
             if val != const:
@@ -449,7 +438,12 @@ class Base():
                     fail(f'property {prop_name} is not nullable')
                 continue
 
-            if prop_type == 'ref':
+            elif self._truncate and (max_graphemes := prop_schema.get('maxGraphemes')):
+                if grapheme.length(prop_val) > max_graphemes:
+                    prop_val = val[prop_name] = grapheme.slice(
+                        prop_val, end=max_graphemes - 1) + '…'
+
+            elif prop_type == 'ref':
                 prop_lexicon, prop_schema = get_schema(prop_schema['ref'])
                 prop_type = prop_schema['type']
 
