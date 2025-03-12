@@ -75,7 +75,7 @@ DOMAIN_RE = re.compile(f'^{DOMAIN_PATTERN}$')
 # https://atproto.com/specs/nsid
 NSID_SEGMENT = '[a-zA-Z0-9-]+'
 NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
-NSID_PATTERN = r'(?![0-9])((?!-)[a-z0-9-]{1,63}(?<!-)\.){2,}[a-zA-Z]{1,63}'
+NSID_PATTERN = r'(?![0-9])((?!-)[a-z0-9-]{1,63}(?<!-)\.){2,}[a-zA-Z][a-zA-Z0-9]{0,62}'
 NSID_RE = re.compile(f'^{NSID_PATTERN}$')
 
 # https://atproto.com/specs/lexicon#string-formats

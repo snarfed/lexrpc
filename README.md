@@ -228,7 +228,8 @@ Here's how to package, test, and ship a new release.
 * Schema validation:
   * Validate subscription (event stream websocket) parameters and output message payloads in both `Client` and `Server`.
   * When `truncate` is set, recurse into refs and arrays to truncate their string properties as necessary too.
-  * `Server`: raise `ValidationError` on unknown parameters.
+  * Allow digits in NSID name (last segment) ([background](https://github.com/bluesky-social/atproto-website/pull/402)).
+* `Server`: raise `ValidationError` on unknown parameters.
   * ~~Don't allow `#main` in `$type` ([bluesky-social/atproto#1968](https://github.com/bluesky-social/atproto/discussions/1968)).~~
   * Bug fix for open unions, allow types that aren't in `refs`.
 * `Client`:
