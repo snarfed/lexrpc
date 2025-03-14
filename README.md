@@ -223,7 +223,7 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 1.1 - unreleased
+### 1.1 - 2025-03-13
 
 * Schema validation:
   * Validate subscription (event stream websocket) parameters and output message payloads in both `Client` and `Server`.

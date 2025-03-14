@@ -124,6 +124,10 @@ You can also register a method handler with
 
    server.register('com.example.my-query', my_query_handler)
 
+If a method has non-JSON (eg binary) input, the positional ``input`` arg
+will be ``bytes``. Similarly, for binary output, return ``bytes`` from
+your handler.
+
 As with ``Client``, you can use custom lexicons by passing them to the
 ``Server`` constructor:
 
@@ -305,14 +309,20 @@ Here’s how to package, test, and ship a new release.
 Changelog
 ---------
 
-1.1 - unreleased
+1.1 - 2025-03-13
 ~~~~~~~~~~~~~~~~
 
 - Schema validation:
 
   - Validate subscription (event stream websocket) parameters and output
     message payloads in both ``Client`` and ``Server``.
-  - ``Server``: raise ``ValidationError`` on unknown parameters.
+  - When ``truncate`` is set, recurse into refs and arrays to truncate
+    their string properties as necessary too.
+  - Allow digits in NSID name (last segment)
+    (`background <https://github.com/bluesky-social/atproto-website/pull/402>`__).
+
+- ``Server``: raise ``ValidationError`` on unknown parameters.
+
   - [STRIKEOUT:Don’t allow ``#main`` in ``$type``
     (]\ `bluesky-social/atproto#1968 <https://github.com/bluesky-social/atproto/discussions/1968>`__\ [STRIKEOUT:).]
   - Bug fix for open unions, allow types that aren’t in ``refs``.
@@ -320,6 +330,8 @@ Changelog
 - ``Client``:
 
   - Include headers in websocket connections for event streams.
+  - Add new ``auth`` constructor kwarg to support any ``requests`` auth
+    instance, eg ``requests_oauth2client.DPoPToken``.
 
 - ``server``:
 
@@ -330,6 +342,8 @@ Changelog
   - Interpret second positional arg to ``ValueError`` and
     ``ValidationError``, ie ``err.args[1]``, as a dict of additional
     HTTP headers to return with the HTTP 400 response.
+
+.. _section-1:
 
 1.0 - 2024-10-14
 ~~~~~~~~~~~~~~~~
@@ -353,7 +367,7 @@ Changelog
 
   - Add ``status`` param to ``Redirect``.
 
-.. _section-1:
+.. _section-2:
 
 0.7 - 2024-06-24
 ~~~~~~~~~~~~~~~~
@@ -384,7 +398,7 @@ Changelog
 - Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
   `bluesky-social/atproto@15cc6ff37c326d5c186385037c4bfe8b60ea41b1 <https://github.com/bluesky-social/atproto/commit/15cc6ff37c326d5c186385037c4bfe8b60ea41b1>`__.
 
-.. _section-2:
+.. _section-3:
 
 0.6 - 2024-03-16
 ~~~~~~~~~~~~~~~~
@@ -395,7 +409,7 @@ Changelog
 - Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
   `bluesky-social/atproto@f45eef3 <https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282>`__.
 
-.. _section-3:
+.. _section-4:
 
 0.5 - 2023-12-10
 ~~~~~~~~~~~~~~~~
@@ -410,7 +424,7 @@ Changelog
   - Bug fix: don’t infinite loop if ``refreshSession`` fails.
   - Other minor authentication bug fixes.
 
-.. _section-4:
+.. _section-5:
 
 0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
@@ -450,7 +464,7 @@ Changelog
   - Add the ``error`` field to the JSON response bodies for most error
     responses.
 
-.. _section-5:
+.. _section-6:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
@@ -462,7 +476,7 @@ Changelog
 - Add new ``Server.register`` method for manually registering handlers.
 - Bug fix for server ``@method`` decorator.
 
-.. _section-6:
+.. _section-7:
 
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
@@ -479,7 +493,7 @@ put more effort into matching and fully implementing them. Stay tuned!
   format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
   Original format is no longer supported.
 
-.. _section-7:
+.. _section-8:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~
