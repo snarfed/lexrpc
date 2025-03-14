@@ -74,9 +74,8 @@ class Client(Base):
       auth (requests.auth.AuthBase): optional, used to authenticate requests
     """
 
-    def __init__(self, address=DEFAULT_PDS, access_token=None,
-                 refresh_token=None, headers=None, session_callback=None,
-                 auth=None, **kwargs):
+    def __init__(self, address=None, access_token=None, refresh_token=None,
+                 headers=None, session_callback=None, auth=None, **kwargs):
         """Constructor.
 
         Args:
@@ -100,10 +99,14 @@ class Client(Base):
 
         assert not ((access_token or refresh_token) and auth)
 
+        if address:
+            assert address.startswith('http://') or address.startswith('https://'), \
+                f"{address} doesn't start with http:// or https://"
+            self.address = address
+        else:
+            self.address = DEFAULT_PDS
         # logger.debug(f'Using server at {address}')
-        assert address.startswith('http://') or address.startswith('https://'), \
-            f"{address} doesn't start with http:// or https://"
-        self.address = address
+
         self.headers = headers or {}
         self.auth = auth
         self.session = {}
