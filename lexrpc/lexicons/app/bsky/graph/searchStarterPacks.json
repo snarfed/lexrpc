@@ -1,30 +1,23 @@
 {
   "lexicon": 1,
-  "id": "tools.ozone.team.listMembers",
+  "id": "app.bsky.graph.searchStarterPacks",
   "defs": {
     "main": {
       "type": "query",
-      "description": "List all members with access to the ozone service.",
+      "description": "Find starter packs matching search criteria. Does not require auth.",
       "parameters": {
         "type": "params",
+        "required": ["q"],
         "properties": {
           "q": {
-            "type": "string"
-          },
-          "disabled": {
-            "type": "boolean"
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+            "type": "string",
+            "description": "Search query string. Syntax, phrase, boolean, and faceting is unspecified, but Lucene query syntax is recommended."
           },
           "limit": {
             "type": "integer",
             "minimum": 1,
             "maximum": 100,
-            "default": 50
+            "default": 25
           },
           "cursor": {
             "type": "string"
@@ -35,16 +28,16 @@
         "encoding": "application/json",
         "schema": {
           "type": "object",
-          "required": ["members"],
+          "required": ["starterPacks"],
           "properties": {
             "cursor": {
               "type": "string"
             },
-            "members": {
+            "starterPacks": {
               "type": "array",
               "items": {
                 "type": "ref",
-                "ref": "tools.ozone.team.defs#member"
+                "ref": "app.bsky.graph.defs#starterPackViewBasic"
               }
             }
           }
