@@ -192,10 +192,11 @@ def subscription(xrpc_server, nsid):
         else:
             ip = request.remote_addr
 
-        for client in subscribers[nsid]:
-            if client.ip == ip:
-                logger.debug(f'Rejecting connection, already connected for {nsid}: {ip} {request.user_agent}')
-                raise TooManyRequests()
+        # TODO: parameterize this (see allow_duplicate_clients stash)
+        # for client in subscribers[nsid]:
+        #     if client.ip == ip:
+        #         logger.debug(f'Rejecting connection, already connected for {nsid}: {ip} {request.user_agent}')
+        #         raise TooManyRequests()
 
         logger.debug(f'New websocket client for {nsid}: {ip} {request.user_agent}')
         subscriber = Subscriber(ip=ip,
