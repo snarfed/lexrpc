@@ -14,6 +14,7 @@ import libipld
 from multiformats import CID
 from simple_websocket import ConnectionClosed
 from werkzeug.exceptions import TooManyRequests
+from wsproto.utilities import ProtocolError
 
 from . import base
 from .base import NSID_RE, ValidationError
@@ -178,7 +179,7 @@ def subscription(xrpc_server, nsid):
             # emit!
             try:
                 ws.send(dag_cbor.encode(header) + dag_cbor.encode(payload))
-            except (ConnectionError, ConnectionClosed, OSError) as err:
+            except (ConnectionError, ConnectionClosed, OSError, ProtocolError) as err:
                 logger.debug(f'Websocket client disconnected from {nsid}: {err}')
                 iter.interrupt()
                 return
