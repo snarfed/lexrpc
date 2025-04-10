@@ -32,12 +32,13 @@ def response(body=None, status=200, headers=None):
     if headers:
         resp.headers.update(headers)
 
-    if body is not None:
-        assert isinstance(body, (dict, list))
+    if isinstance(body, (dict, list)):
         body = json.dumps(body, indent=2)
         resp._text = body
         resp._content = body.encode('utf-8')
         resp.headers.setdefault('Content-Type', 'application/json')
+    elif isinstance(body, bytes):
+        resp._content = body
 
     return resp
 
@@ -518,12 +519,12 @@ class ClientTest(TestCase):
         got = client.call('com.atproto.server.getSession', {})
         self.assertEqual(output, got)
 
-    @patch('requests.post', return_value=response({'ok': 'ok'}))
-    def test_binary_data(self, mock_post):
+    @patch('requests.post', return_value=response(b'baz biff'))
+    def test_binary_output_input_data(self, mock_post):
         resp = self.client.io.example.encodings(b'foo bar', headers={
             'Content-Type': 'foo/bar',
         })
-        self.assertEqual({'ok': 'ok'}, resp)
+        self.assertEqual(b'baz biff', resp)
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.encodings',
@@ -533,15 +534,13 @@ class ClientTest(TestCase):
                 'foo': 'ey',
             })
 
-    @patch('requests.post')
-    def test_binary_stream(self, mock_post):
-        mock_post.return_value = response({'ok': 'ok'})
-
+    @patch('requests.post', return_value=response(b'baz biff'))
+    def test_binary_output_input_stream(self, mock_post):
         stream = BytesIO(b'foo bar')
         resp = self.client.io.example.encodings(stream, headers={
             'Content-Type': 'foo/bar',
         })
-        self.assertEqual({'ok': 'ok'}, resp)
+        self.assertEqual(b'baz biff', resp)
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.encodings',

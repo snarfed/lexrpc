@@ -223,6 +223,11 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
+### 1.2 - unreleased
+
+* `Client`:
+  * Handle non-JSON output encodings.
+
 ### 1.1 - 2025-03-13
 
 * Schema validation:

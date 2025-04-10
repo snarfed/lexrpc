@@ -207,7 +207,7 @@ class Client(Base):
                 and getattr(self.auth, 'token', None) != orig_token):
             self.session_callback(self.auth)
 
-        output = None
+        output = resp.content
         content_type = resp.headers.get('Content-Type', '').split(';')[0]
         if content_type == 'application/json' and resp.content:
             output = resp.json()
