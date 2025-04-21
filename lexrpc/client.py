@@ -82,14 +82,15 @@ class Client(Base):
           address (str): base URL of XRPC server, eg ``https://bsky.social/``
           access_token (str): optional, will be sent in ``Authorization`` header
           refresh_token (str): optional; used to refresh access token
+          auth (requests.auth.AuthBase): optional, used to authenticate requests
           headers (dict): optional, HTTP headers to include in every request
-          session_callback (callable, dict => None): called when a new session
-            is created with new access and refresh tokens, or when ``auth.token``
-            changes, eg it gets refreshed. This callable is passed one positional
-            argument: if the client has ``access_token``, the dict JSON output
-            from ``com.atproto.server.createSession`` or
+          session_callback (callable, dict or requests.auth.AuthBase => None): called
+            when a new session is created with new access and refresh tokens, or when
+            ``auth.token`` changes, eg it gets refreshed. This callable is passed one
+            positional argument: if the client has ``access_token``, the dict JSON
+            output from ``com.atproto.server.createSession`` or
             ``com.atproto.server.refreshSession``; or if the client has ``auth``,
-            ``auth itself.
+            auth itself.
           kwargs: passed through to :class:`Base`
 
         Raises:
@@ -226,6 +227,7 @@ class Client(Base):
             if self.session_callback:
                 self.session_callback(output)
 
+        # TODO: this 400s if the PLC code is expired
         elif not resp.ok:  # token expired, try to refresh it
             if output and output.get('error') in TOKEN_ERRORS:
                 self.call(REFRESH_NSID)
