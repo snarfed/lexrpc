@@ -442,6 +442,26 @@ class ClientTest(TestCase):
             json=None, data=None, auth=None,
             headers={**HEADERS, 'Authorization': 'Bearer reephrush'})
 
+    @patch('requests.post', return_value=response(status=400, body={
+        'error': 'InvalidToken',
+        'message': 'Token is invalid'
+    }))
+    def test_dont_refresh_on_identity_procedures(self, mock_post):
+        client = Client(access_token='towkin', refresh_token='reephrush')
+        with self.assertRaises(requests.HTTPError):
+            client.com.atproto.identity.signPlcOperation({'token': 'nope'})
+
+        self.assertEqual({
+            'accessJwt': 'towkin',
+            'refreshJwt': 'reephrush',
+        }, client.session)
+
+        self.assertEqual(1, mock_post.call_count)
+        mock_post.assert_called_with(
+            'https://bsky.social/xrpc/com.atproto.identity.signPlcOperation',
+            json={'token': 'nope'}, data=None, auth=None,
+            headers={**HEADERS, 'Authorization': 'Bearer towkin'})
+
     @patch('requests.get')
     def test_auth_refresh_token(self, mock_get):
         class TokenAuth(AuthBase):

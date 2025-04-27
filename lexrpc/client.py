@@ -227,9 +227,14 @@ class Client(Base):
             if self.session_callback:
                 self.session_callback(output)
 
-        # TODO: this 400s if the PLC code is expired
+        # TODO: this 400s if the PLC code is wrong or expired
+        #
+        # error field is InvalidRequest (missing code), InvalidToken (missing code),
+        # or AuthMissing (if no Authorization header w/token)
         elif not resp.ok:  # token expired, try to refresh it
-            if output and output.get('error') in TOKEN_ERRORS:
+            if (output and output.get('error') in TOKEN_ERRORS
+                    and not (type == 'procedure'
+                             and nsid.startswith('com.atproto.identity'))):
                 self.call(REFRESH_NSID)
                 return self.call(nsid, input=input, headers=headers, **params)  # retry
 

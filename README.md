@@ -227,6 +227,7 @@ Here's how to package, test, and ship a new release.
 
 * `Client`:
   * Handle non-JSON output encodings.
+  * Don't attempt to refresh access token when a `com.atproto.identity` procedure fails, eg when the PLC code is wrong.
 
 ### 1.1 - 2025-03-13
 
