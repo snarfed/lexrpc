@@ -195,8 +195,12 @@ def subscription(xrpc_server, nsid):
 
         for client in subscribers[nsid]:
             if client.ip == ip:
-                logger.debug(f'Rejecting connection, already connected for {nsid}: {ip} {request.user_agent}')
-                raise TooManyRequests()
+                msg = f'Rejecting connection, already connected for {nsid}: {ip} {request.user_agent}'
+                logger.debug(msg)
+                # WebSocket closure code 1008 is for server policy violation
+                # https://www.rfc-editor.org/rfc/rfc6455.html#section-7.4.1
+                ws.close(reason=1008, message=msg)
+                return
 
         logger.debug(f'New websocket client for {nsid}: {ip} {request.user_agent}')
         subscriber = Subscriber(ip=ip,
