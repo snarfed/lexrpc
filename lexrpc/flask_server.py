@@ -36,19 +36,21 @@ subscribers = defaultdict(list)
 Subscriber = namedtuple('Subscriber', ('ip', 'user_agent', 'args', 'start'))
 
 
-def init_flask(xrpc_server, app):
+def init_flask(xrpc_server, app, limit_ips=False):
     """Connects a :class:`lexrpc.Server` to serve ``/xrpc/...`` on a Flask app.
 
     Args:
       xrpc_server (lexrpc.Server)
       app (flask.Flask)
+      limit_ips (bool): whether to only allow one connection to event stream
+        subscription methods per client IP. Defaults to ``False``.
     """
-    logger.info(f'Registering {xrpc_server} with {app}')
+    logger.info(f'Registering {xrpc_server} with {app} limit_ips={limit_ips}')
 
     sock = Sock(app)
     for nsid, _ in xrpc_server._methods.items():
         if xrpc_server.defs[nsid]['type'] == 'subscription':
-            sock.route(f'/xrpc/{nsid}')(subscription(xrpc_server, nsid))
+            sock.route(f'/xrpc/{nsid}')(subscription(xrpc_server, nsid, limit_ips=limit_ips))
 
     app.add_url_rule('/xrpc/<nsid>',
                      view_func=XrpcEndpoint.as_view('xrpc-endpoint', xrpc_server),
@@ -128,7 +130,7 @@ class XrpcEndpoint(View):
             return output, RESPONSE_HEADERS
 
 
-def subscription(xrpc_server, nsid):
+def subscription(xrpc_server, nsid, limit_ips=False):
     """Generates websocket handlers for inbound XRPC subscription methods.
 
     Note that this calls the XRPC method on a *different thread*, so that it can
@@ -138,6 +140,8 @@ def subscription(xrpc_server, nsid):
     Args:
       xrpc_server (lexrpc.Server)
       nsid (str): XRPC method NSID
+      limit_ips (bool): whether to only allow one connection to event stream
+        subscription methods per client IP. Defaults to ``False``.
     """
     def handle(ws):
         """
@@ -193,14 +197,15 @@ def subscription(xrpc_server, nsid):
         else:
             ip = request.remote_addr
 
-        for client in subscribers[nsid]:
-            if client.ip == ip:
-                msg = f'Rejecting connection, already connected for {nsid}: {ip} {request.user_agent}'
-                logger.debug(msg)
-                # WebSocket closure code 1008 is for server policy violation
-                # https://www.rfc-editor.org/rfc/rfc6455.html#section-7.4.1
-                ws.close(reason=1008, message=msg)
-                return
+        if limit_ips:
+            for client in subscribers[nsid]:
+                if client.ip == ip:
+                    msg = f'Rejecting connection, already connected for {nsid}: {ip} {request.user_agent}'
+                    logger.debug(msg)
+                    # WebSocket closure code 1008 is for server policy violation
+                    # https://www.rfc-editor.org/rfc/rfc6455.html#section-7.4.1
+                    ws.close(reason=1008, message=msg)
+                    return
 
         logger.debug(f'New websocket client for {nsid}: {ip} {request.user_agent}')
         subscriber = Subscriber(ip=ip,
