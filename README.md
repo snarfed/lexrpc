@@ -228,6 +228,7 @@ Here's how to package, test, and ship a new release.
 * `Client`:
   * Handle non-JSON output encodings.
   * Don't attempt to refresh access token when a `com.atproto.identity` procedure fails, eg when the PLC code is wrong.
+  * Accept arbitrary `kwargs` in the `Client` constructor, pass them through to `requests.get`/`post`.
 * `flask_server`:
   * `init_flask`: add `limit_ips` kwarg for whether to allow more than one connection to event stream subscription methods per client IP.
 

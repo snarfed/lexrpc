@@ -70,20 +70,18 @@ class Client(Base):
       address (str): base URL of XRPC server, eg ``https://bsky.social/``
       session (dict): ``createSession`` response with ``accessJwt``,
         `refreshJwt``, ``handle``, and ``did``
-      headers (dict): HTTP headers to include in every request
-      auth (requests.auth.AuthBase): optional, used to authenticate requests
+      requests_kwargs (dict): passed to :func:`requests.get`/:func:`requests.post`
     """
 
     def __init__(self, address=None, access_token=None, refresh_token=None,
-                 headers=None, session_callback=None, auth=None, **kwargs):
+                 session_callback=None, lexicons=None, validate=True, truncate=False,
+                 **requests_kwargs):
         """Constructor.
 
         Args:
           address (str): base URL of XRPC server, eg ``https://bsky.social/``
           access_token (str): optional, will be sent in ``Authorization`` header
           refresh_token (str): optional; used to refresh access token
-          auth (requests.auth.AuthBase): optional, used to authenticate requests
-          headers (dict): optional, HTTP headers to include in every request
           session_callback (callable, dict or requests.auth.AuthBase => None): called
             when a new session is created with new access and refresh tokens, or when
             ``auth.token`` changes, eg it gets refreshed. This callable is passed one
@@ -91,14 +89,23 @@ class Client(Base):
             output from ``com.atproto.server.createSession`` or
             ``com.atproto.server.refreshSession``; or if the client has ``auth``,
             auth itself.
-          kwargs: passed through to :class:`Base`
+          lexicons (sequence of dict): lexicons, optional. If not provided,
+            defaults to the official, built in ``com.atproto`` and ``app.bsky``
+            lexicons.
+          validate (bool): whether to validate schemas, parameters, and input
+            and output bodies
+          truncate (bool): whether to truncate string values that are longer
+            than their ``maxGraphemes`` or ``maxLength`` in their lexicon
+          requests_kwargs: passed to :func:`requests.get`/:func:`requests.post`, eg
+            ``auth`` (:class:`requests.auth.AuthBase`), ``headers`` (dict),
+            ``timeout`` (int, seconds), etc.
 
         Raises:
           ValidationError: if any lexicon schema is invalid
         """
-        super().__init__(**kwargs)
+        super().__init__(lexicons=lexicons, validate=validate, truncate=truncate)
 
-        assert not ((access_token or refresh_token) and auth)
+        assert not ((access_token or refresh_token) and requests_kwargs.get('auth'))
 
         if address:
             assert address.startswith('http://') or address.startswith('https://'), \
@@ -108,8 +115,11 @@ class Client(Base):
             self.address = DEFAULT_PDS
         # logger.debug(f'Using server at {address}')
 
-        self.headers = headers or {}
-        self.auth = auth
+        self.requests_kwargs = copy.copy(requests_kwargs)
+        headers = self.requests_kwargs.setdefault('headers', {})
+        for name, val in DEFAULT_HEADERS.items():
+            headers.setdefault(name, val)
+
         self.session = {}
         if access_token or refresh_token:
             self.session.update({
@@ -161,10 +171,10 @@ class Client(Base):
         if type == 'subscription':
             input = self.validate(nsid, 'input', input)
 
+        requests_kwargs = copy.copy(self.requests_kwargs)
         headers = {
-            **DEFAULT_HEADERS,
             'Content-Type': 'application/json',
-            **self.headers,
+            **requests_kwargs.pop('headers'),
             **headers,
         }
 
@@ -192,21 +202,21 @@ class Client(Base):
         if isinstance(input, IOBase) or hasattr(input, 'read'):
             input = input.read()
 
-        logger.debug(f'requests.{fn} {url} {params_str} {self.loggable(input)} {headers} {self.auth}')
+        logger.debug(f'requests.{fn} {url} {params_str} {self.loggable(input)} {headers} {requests_kwargs}')
 
-        if self.auth:
-            orig_token = getattr(self.auth, 'token', None)
+        if auth := requests_kwargs.get('auth'):
+            orig_token = getattr(auth, 'token', None)
         resp = fn(
           url,
           json=input if input and isinstance(input, dict) else None,
           data=input if input and not isinstance(input, dict) else None,
           headers=headers,
-          auth=self.auth,
+          **requests_kwargs,
         )
 
-        if (self.auth and self.session_callback
-                and getattr(self.auth, 'token', None) != orig_token):
-            self.session_callback(self.auth)
+        if (auth and self.session_callback
+                and getattr(auth, 'token', None) != orig_token):
+            self.session_callback(auth)
 
         output = resp.content
         content_type = resp.headers.get('Content-Type', '').split(';')[0]
@@ -260,7 +270,7 @@ class Client(Base):
         """
         ws = simple_websocket.Client(url, headers={
             **DEFAULT_HEADERS,
-            **self.headers,
+            **self.requests_kwargs.get('headers', {}),
         })
 
         try:
