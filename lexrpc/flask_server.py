@@ -159,7 +159,7 @@ def subscription(xrpc_server, nsid, limit_ips=False):
                                timeout=SUBSCRIPTION_ITERATOR_TIMEOUT.total_seconds())
         for result in iter:
             if not ws.connected:
-                logger.debug(f'Websocket client disconnected from {nsid}')
+                logger.info(f'Websocket client disconnected from {nsid}')
                 iter.interrupt()
                 return
             elif result == iter.get_sentinel():
@@ -184,7 +184,7 @@ def subscription(xrpc_server, nsid, limit_ips=False):
             try:
                 ws.send(dag_cbor.encode(header) + dag_cbor.encode(payload))
             except (ConnectionError, ConnectionClosed, OSError, ProtocolError) as err:
-                logger.debug(f'Websocket client disconnected from {nsid}: {err}')
+                logger.info(f'Websocket client disconnected from {nsid}: {err}')
                 iter.interrupt()
                 return
 
@@ -201,13 +201,13 @@ def subscription(xrpc_server, nsid, limit_ips=False):
             for client in subscribers[nsid]:
                 if client.ip == ip:
                     msg = f'Rejecting connection, already connected for {nsid}: {ip} {request.user_agent}'
-                    logger.debug(msg)
+                    logger.info(msg)
                     # WebSocket closure code 1008 is for server policy violation
                     # https://www.rfc-editor.org/rfc/rfc6455.html#section-7.4.1
                     ws.close(reason=1008, message=msg)
                     return
 
-        logger.debug(f'New websocket client for {nsid}: {ip} {request.user_agent}')
+        logger.info(f'New websocket client for {nsid}: {ip} {request.user_agent}')
         subscriber = Subscriber(ip=ip,
                                 user_agent=str(request.user_agent),
                                 args=request.args.to_dict(),
