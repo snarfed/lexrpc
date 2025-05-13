@@ -218,6 +218,15 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None, data=None, headers=FULL_HEADERS)
 
+    @patch('requests.get', return_value=response(status=400, body=b'asdf'))
+    def test_error_not_json(self, mock_get):
+        with self.assertRaises(requests.HTTPError):
+            self.client.call('io.example.query', {}, x='y')
+
+        mock_get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query?x=y',
+            json=None, data=None, headers=FULL_HEADERS)
+
     def test_missing_params(self):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({})

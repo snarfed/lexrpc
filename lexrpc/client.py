@@ -238,7 +238,7 @@ class Client(Base):
                 self.session_callback(output)
 
         elif not resp.ok:  # token expired, try to refresh it
-            if (output and output.get('error') in TOKEN_ERRORS
+            if (output and isinstance(output, dict) and output.get('error') in TOKEN_ERRORS
                     # for these, error field is InvalidRequest (missing PLC code),
                     # InvalidToken (bad code), or AuthMissing (no Authorization header)
                     and not (type == 'procedure'
