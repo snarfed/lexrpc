@@ -181,7 +181,8 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query',
             json=None, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.post', return_value=response())
+    @patch('requests.post', return_value=response(
+        headers={'Content-Type': 'application/json'}))
     def test_no_params_input_output(self, mock_post):
         self.assertIsNone(self.client.io.example.noParamsInputOutput({}))
 
@@ -189,7 +190,8 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.noParamsInputOutput',
             json=None, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.post', return_value=response())
+    @patch('requests.post', return_value=response(
+        headers={'Content-Type': 'application/json'}))
     def test_dashed_name(self, mock_post):
         self.assertIsNone(self.client.io.exa_mple.dashedName({}))
 
@@ -553,7 +555,8 @@ class ClientTest(TestCase):
         resp = self.client.io.example.encodings(b'foo bar', headers={
             'Content-Type': 'foo/bar',
         })
-        self.assertEqual(b'baz biff', resp)
+        self.assertIsInstance(resp, requests.Response)
+        self.assertEqual(b'baz biff', resp.content)
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.encodings',
@@ -569,7 +572,26 @@ class ClientTest(TestCase):
         resp = self.client.io.example.encodings(stream, headers={
             'Content-Type': 'foo/bar',
         })
-        self.assertEqual(b'baz biff', resp)
+        self.assertIsInstance(resp, requests.Response)
+        self.assertEqual(b'baz biff', resp.content)
+
+        mock_post.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.encodings',
+            json=None, data=b'foo bar', headers={
+                **client.DEFAULT_HEADERS,
+                'Content-Type': 'foo/bar',
+                'foo': 'ey',
+            })
+
+    @patch("requests.post", return_value=response(
+        b'image data', headers={'Content-Type': 'image/png'}))
+    def test_binary_output_with_content_type(self, mock_post):
+        resp = self.client.io.example.encodings(b'foo bar', headers={
+            'Content-Type': 'foo/bar',
+        })
+        self.assertIsInstance(resp, requests.Response)
+        self.assertEqual(b'image data', resp.content)
+        self.assertEqual('image/png', resp.headers['Content-Type'])
 
         mock_post.assert_called_once_with(
             'http://ser.ver/xrpc/io.example.encodings',

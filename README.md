@@ -218,7 +218,13 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 1.2 - unreleased
+### 2.0 - unreleased
+
+_Breaking changes:_
+
+* For queries with non-JSON outputs, `Client.call` now returns `requests.Response` instead of the raw output bytes. This gives callers access to the HTTP response headers, including `Content-Type`.
+
+Non-breaking changes:
 
 * `Client`:
   * Handle non-JSON output encodings.

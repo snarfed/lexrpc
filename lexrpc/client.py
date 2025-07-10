@@ -147,10 +147,11 @@ class Client(Base):
           params: optional method parameters
 
         Returns:
-          dict or generator iterator: for queries and procedures, decoded JSON
-          object, or None if the method has no output. For subscriptions,
-          generator of messages from server, as (dict header, dict payload) tuple
-          if ``decode`` is True, bytes otherwise.
+          dict, requests.Response, or generator iterator: for queries and
+          procedures with JSON output, decoded JSON object or None if the method
+          has no output. For non-JSON output, the full requests.Response object.
+          For subscriptions, generator of messages from server, as (dict header,
+          dict payload) tuple if ``decode`` is True, bytes otherwise.
 
         Raises:
           NotImplementedError: if the given NSID is not found in any of the
@@ -238,7 +239,8 @@ class Client(Base):
                 self.session_callback(output)
 
         elif not resp.ok:  # token expired, try to refresh it
-            if (output and isinstance(output, dict) and output.get('error') in TOKEN_ERRORS
+            if (output and isinstance(output, dict)
+                    and output.get('error') in TOKEN_ERRORS
                     # for these, error field is InvalidRequest (missing PLC code),
                     # InvalidToken (bad code), or AuthMissing (no Authorization header)
                     and not (type == 'procedure'
@@ -250,6 +252,11 @@ class Client(Base):
 
         # logger.debug(json.dumps(output, indent=2))
         output = self.validate(nsid, 'output', output)
+
+        # Return full Response object for non-JSON outputs
+        if content_type != 'application/json':
+            return resp
+
         return output
 
     def _subscribe(self, url, nsid, decode=True):
