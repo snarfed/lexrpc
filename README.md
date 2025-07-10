@@ -139,8 +139,12 @@ Release instructions
 ---
 Here's how to package, test, and ship a new release.
 
+1. Pull from remote to make sure we're at head.
+    ```sh
+    git checkout main
+    git pull
+    ```
 1. Run the unit tests.
-
     ```sh
     source local/bin/activate.csh
     python -m unittest discover
@@ -149,14 +153,12 @@ Here's how to package, test, and ship a new release.
 1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`. Check that the generated HTML looks fine by opening `docs/_build/html/index.html` and looking around.
 1. `git commit -am 'release vX.Y'`
 1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
-
     ```sh
     python -m build
     setenv ver X.Y
     twine upload -r pypitest dist/lexrpc-$ver*
     ```
 1. Install from test.pypi.org.
-
     ```sh
     cd /tmp
     python -m venv local
@@ -164,18 +166,13 @@ Here's how to package, test, and ship a new release.
     pip uninstall lexrpc # make sure we force pip to use the uploaded version
     pip install --upgrade pip
     pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver
-    deactivate
     ```
 1. Smoke test that the code trivially loads and runs.
-
     ```sh
-    source local/bin/activate.csh
     python
     # run test code below
-    deactivate
     ```
     Test code to paste into the interpreter:
-
     ```py
     from lexrpc import Server
 
@@ -206,14 +203,12 @@ Here's how to package, test, and ship a new release.
     print(server.call('io.example.ping', {}, message='hello world'))
     ```
 1. Tag the release in git. In the tag message editor, delete the generated comments at bottom, leave the first line blank (to omit the release "title" in github), put `### Notable changes` on the second line, then copy and paste this version's changelog contents below it.
-
     ```sh
     git tag -a v$ver --cleanup=verbatim
     git push && git push --tags
     ```
 1. [Click here to draft a new release on GitHub.](https://github.com/snarfed/lexrpc/releases/new) Enter `vX.Y` in the _Tag version_ box. Leave _Release title_ empty. Copy `### Notable changes` and the changelog contents into the description text box.
 1. Upload to [pypi.org](https://pypi.org/)!
-
     ```sh
     twine upload dist/lexrpc-$ver.tar.gz dist/lexrpc-$ver-py3-none-any.whl
     ```
