@@ -203,7 +203,7 @@ class Client(Base):
         if isinstance(input, IOBase) or hasattr(input, 'read'):
             input = input.read()
 
-        logger.debug(f'requests.{fn} {url} {params_str} {self.loggable(input)} {headers} {requests_kwargs}')
+        logger.debug(f'requests.{getattr(fn, "__name__", fn)} {url} {params_str} {self.loggable(input)} {headers} {requests_kwargs}')
 
         if auth := requests_kwargs.get('auth'):
             orig_token = getattr(auth, 'token', None)
