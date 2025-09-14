@@ -194,120 +194,103 @@ Release instructions
 
 Here’s how to package, test, and ship a new release.
 
-1.  Run the unit tests.
+1.  Pull from remote to make sure we’re at head.
+    ``sh  git checkout main  git pull``
 
-    .. code:: sh
+2.  Run the unit tests.
+    ``sh  source local/bin/activate.csh  python -m unittest discover``
 
-       source local/bin/activate.csh
-       python -m unittest discover
-
-2.  Bump the version number in ``pyproject.toml`` and ``docs/conf.py``.
+3.  Bump the version number in ``pyproject.toml`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
     the changelog. Change the current changelog entry in ``README.md``
     for this new version from *unreleased* to the current date.
 
-3.  Build the docs. If you added any new modules, add them to the
+4.  Build the docs. If you added any new modules, add them to the
     appropriate file(s) in ``docs/source/``. Then run
     ``./docs/build.sh``. Check that the generated HTML looks fine by
     opening ``docs/_build/html/index.html`` and looking around.
 
-4.  ``git commit -am 'release vX.Y'``
+5.  ``git commit -am 'release vX.Y'``
 
-5.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
+6.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
+    ``sh  python -m build  setenv ver X.Y  twine upload -r pypitest dist/lexrpc-$ver*``
 
-    .. code:: sh
+7.  Install from test.pypi.org.
+    ``sh  cd /tmp  python -m venv local  source local/bin/activate.csh  pip uninstall lexrpc # make sure we force pip to use the uploaded version  pip install --upgrade pip  pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver``
 
-       python -m build
-       setenv ver X.Y
-       twine upload -r pypitest dist/lexrpc-$ver*
+8.  Smoke test that the code trivially loads and runs.
+    ``sh  python  # run test code below`` Test code to paste into the
+    interpreter: \`py from lexrpc import Server
 
-6.  Install from test.pypi.org.
+    server = Server(lexicons=[{ ‘lexicon’: 1, ‘id’: ‘io.example.ping’,
+    ‘defs’: { ‘main’: { ‘type’: ‘query’, ‘description’: ‘Ping the
+    server’, ‘parameters’: {‘message’: { ‘type’: ‘string’ }}, ‘output’:
+    { ‘encoding’: ‘application/json’, ‘schema’: { ‘type’: ‘object’,
+    ‘required’: [‘message’], ‘properties’: {‘message’: { ‘type’:
+    ‘string’ }}, }, }, }, }, }])
 
-    .. code:: sh
+    @server.method(‘io.example.ping’) def ping(input, message=’‘):
+    return {’message’: message}
 
-       cd /tmp
-       python -m venv local
-       source local/bin/activate.csh
-       pip uninstall lexrpc # make sure we force pip to use the uploaded version
-       pip install --upgrade pip
-       pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver
-       deactivate
+    print(server.call(‘io.example.ping’, {}, message=‘hello world’))
+    \``\`
 
-7.  Smoke test that the code trivially loads and runs.
-
-    .. code:: sh
-
-       source local/bin/activate.csh
-       python
-       # run test code below
-       deactivate
-
-    Test code to paste into the interpreter:
-
-    .. code:: py
-
-       from lexrpc import Server
-
-       server = Server(lexicons=[{
-           'lexicon': 1,
-           'id': 'io.example.ping',
-           'defs': {
-               'main': {
-                   'type': 'query',
-                   'description': 'Ping the server',
-                   'parameters': {'message': { 'type': 'string' }},
-                   'output': {
-                       'encoding': 'application/json',
-                       'schema': {
-                           'type': 'object',
-                           'required': ['message'],
-                           'properties': {'message': { 'type': 'string' }},
-                       },
-                   },
-               },
-           },
-       }])
-
-       @server.method('io.example.ping')
-       def ping(input, message=''):
-           return {'message': message}
-
-       print(server.call('io.example.ping', {}, message='hello world'))
-
-8.  Tag the release in git. In the tag message editor, delete the
+9.  Tag the release in git. In the tag message editor, delete the
     generated comments at bottom, leave the first line blank (to omit
     the release “title” in github), put ``### Notable changes`` on the
     second line, then copy and paste this version’s changelog contents
     below it.
+    ``sh  git tag -a v$ver --cleanup=verbatim  git push && git push --tags``
 
-    .. code:: sh
-
-       git tag -a v$ver --cleanup=verbatim
-       git push && git push --tags
-
-9.  `Click here to draft a new release on
+10. `Click here to draft a new release on
     GitHub. <https://github.com/snarfed/lexrpc/releases/new>`__ Enter
     ``vX.Y`` in the *Tag version* box. Leave *Release title* empty. Copy
     ``### Notable changes`` and the changelog contents into the
     description text box.
 
-10. Upload to `pypi.org <https://pypi.org/>`__!
+11. Upload to `pypi.org <https://pypi.org/>`__!
+    ``sh  twine upload dist/lexrpc-$ver.tar.gz dist/lexrpc-$ver-py3-none-any.whl``
 
-    .. code:: sh
-
-       twine upload dist/lexrpc-$ver.tar.gz dist/lexrpc-$ver-py3-none-any.whl
-
-11. `Wait for the docs to build on Read the
+12. `Wait for the docs to build on Read the
     Docs <https://readthedocs.org/projects/lexrpc/builds/>`__, then
     check that they look ok.
 
-12. On the `Versions
+13. On the `Versions
     page <https://readthedocs.org/projects/lexrpc/versions/>`__, check
     that the new version is active, If it’s not, activate it in the
     *Activate a Version* section.
 
 Changelog
 ---------
+
+2.0 - 2025-09-13
+~~~~~~~~~~~~~~~~
+
+*Breaking changes:*
+
+- For queries with non-JSON outputs, ``Client.call`` now returns
+  ``requests.Response`` instead of the raw output bytes. This gives
+  callers access to the HTTP response headers, including
+  ``Content-Type``.
+
+Non-breaking changes:
+
+- ``Client``:
+
+  - Handle non-JSON output encodings.
+  - Don’t attempt to refresh access token when a
+    ``com.atproto.identity`` procedure fails, eg when the PLC code is
+    wrong.
+  - Accept arbitrary ``kwargs`` in the ``Client`` constructor, pass them
+    through to ``requests.get``/``post``.
+
+- ``flask_server``:
+
+  - ``init_flask``: add ``limit_ips`` kwarg for whether to allow more
+    than one connection to event stream subscription methods per client
+    IP.
+
+.. _section-1:
 
 1.1 - 2025-03-13
 ~~~~~~~~~~~~~~~~
@@ -343,7 +326,7 @@ Changelog
     ``ValidationError``, ie ``err.args[1]``, as a dict of additional
     HTTP headers to return with the HTTP 400 response.
 
-.. _section-1:
+.. _section-2:
 
 1.0 - 2024-10-14
 ~~~~~~~~~~~~~~~~
@@ -367,7 +350,7 @@ Changelog
 
   - Add ``status`` param to ``Redirect``.
 
-.. _section-2:
+.. _section-3:
 
 0.7 - 2024-06-24
 ~~~~~~~~~~~~~~~~
@@ -398,7 +381,7 @@ Changelog
 - Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
   `bluesky-social/atproto@15cc6ff37c326d5c186385037c4bfe8b60ea41b1 <https://github.com/bluesky-social/atproto/commit/15cc6ff37c326d5c186385037c4bfe8b60ea41b1>`__.
 
-.. _section-3:
+.. _section-4:
 
 0.6 - 2024-03-16
 ~~~~~~~~~~~~~~~~
@@ -409,7 +392,7 @@ Changelog
 - Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
   `bluesky-social/atproto@f45eef3 <https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282>`__.
 
-.. _section-4:
+.. _section-5:
 
 0.5 - 2023-12-10
 ~~~~~~~~~~~~~~~~
@@ -424,7 +407,7 @@ Changelog
   - Bug fix: don’t infinite loop if ``refreshSession`` fails.
   - Other minor authentication bug fixes.
 
-.. _section-5:
+.. _section-6:
 
 0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
@@ -464,7 +447,7 @@ Changelog
   - Add the ``error`` field to the JSON response bodies for most error
     responses.
 
-.. _section-6:
+.. _section-7:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
@@ -476,7 +459,7 @@ Changelog
 - Add new ``Server.register`` method for manually registering handlers.
 - Bug fix for server ``@method`` decorator.
 
-.. _section-7:
+.. _section-8:
 
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
@@ -493,7 +476,7 @@ put more effort into matching and fully implementing them. Stay tuned!
   format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
   Original format is no longer supported.
 
-.. _section-8:
+.. _section-9:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~

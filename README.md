@@ -218,7 +218,7 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 2.0 - unreleased
+### 2.0 - 2025-09-13
 
 _Breaking changes:_
 
