@@ -123,13 +123,12 @@ class XrpcError(ValueError):
 
 
 def load_lexicons(traversable):
-    if traversable.is_file():
-        lexicons = [json.loads(traversable.read_text())]
+    if traversable.is_file() and traversable.suffix == '.json':
+        return [json.loads(traversable.read_text())]
     elif traversable.is_dir():
-        lexicons = sum((load_lexicons(item) for item in traversable.iterdir()),
-                       start=[])
+        return sum((load_lexicons(item) for item in traversable.iterdir()), start=[])
 
-    return lexicons
+    return []
 
 _bundled_lexicons = load_lexicons(files('lexrpc').joinpath('lexicons'))
 logger.info(f'{len(_bundled_lexicons)} lexicons loaded')
