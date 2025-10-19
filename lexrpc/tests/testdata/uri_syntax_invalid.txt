@@ -11,6 +11,7 @@ http:
 https://example.com/path gap
   https://example.com/path
 https://example.com/trailing-whitespace  
+https://example.com]
 
 # too long (max 8 kbytes)
 # python: "https://example.com/" + 8200 *"x"

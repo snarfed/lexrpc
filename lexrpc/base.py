@@ -527,7 +527,10 @@ class Base():
         elif format == 'uri':
             check(len(val) < 8 * 1024)
             check(' ' not in val)
-            parsed = urlparse(val)
+            try:
+                parsed = urlparse(val)
+            except ValueError as e:
+                raise ValidationError(f"Couldn't parse URI {val}")
             check(parsed.scheme
                   and parsed.scheme[0].lower() in string.ascii_lowercase
                   and (parsed.netloc or parsed.path or parsed.query

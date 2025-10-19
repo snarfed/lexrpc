@@ -222,6 +222,7 @@ Here's how to package, test, and ship a new release.
 
 * Bundle [lexicon.community](https://lexicon.community/) lexicons, as of [2bf2cbb](https://github.com/lexicon-community/lexicon/commit/2bf2cbbfd3058d710f8c468307ef7e003bc22383).
 * `base.load_lexicons`: ignore non-lexicon files.
+* Schema validation: for the `uri` string format, handle URLs with brackets (eg `]`) in the hostname, eg `https://example.com]`.
 
 
 ### 2.0 - 2025-09-13
