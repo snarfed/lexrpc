@@ -3,7 +3,7 @@ from datetime import datetime
 from unittest import skip, TestCase
 
 from .lexicons import LEXICONS
-from ..base import Base, ValidationError
+from ..base import AT_URI_RE, Base, ValidationError
 
 # set as the base.now return value in mocks in tests
 NOW = datetime(2022, 2, 3)
@@ -317,3 +317,23 @@ class BaseTest(TestCase):
                 },
             }],
         })
+
+    def test_at_uri_re(self):
+        for input, expected in [
+            ('', False),
+            ('foo', False),
+            ('http://bar', False),
+            ('at://', False),
+            ('at:////', False),
+            ('at://a.bc/x.yz.yZ/w', True),
+            ('at://a.bc / x.yz.yZ/w', False),
+            (' at://a.bc/x.yz.yZ/w ', False),
+            ('at://did:plc:foo/a.bc.dE/123', True),
+            # TODO: allow this? eg at://did:bo:b/chat.bsky.convo.defs#messageView/xyz
+            # I don't think these actually happen in the wild yet. would need to
+            # revise granary.bluesky.at_uri_to_web_url to handle it.
+            # https://atproto.com/specs/nsid#nsid-syntax-variations
+            ('at://did:plc:foo/a.bc.dE#c/123', False),
+        ]:
+            with self.subTest(input=input):
+                self.assertEqual(expected, AT_URI_RE.match(input) is not None)

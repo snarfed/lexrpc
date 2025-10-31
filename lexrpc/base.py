@@ -98,6 +98,8 @@ DID_RE = re.compile(f'^{DID_PATTERN}$')
 # https://atproto.com/specs/at-uri-scheme
 # NOTE: duplicated in granary.bluesky!
 # also see arroba.util.parse_at_uri
+# TODO: add query and fragment? they're currently unused in the protocol
+# https://atproto.com/specs/at-uri-scheme#structure
 _CHARS = 'a-zA-Z0-9-.'
 AT_URI_RE = re.compile(rf"""
     ^at://
