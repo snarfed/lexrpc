@@ -336,4 +336,4 @@ class BaseTest(TestCase):
             ('at://did:plc:foo/a.bc.dE#c/123', False),
         ]:
             with self.subTest(input=input):
-                self.assertEqual(expected, AT_URI_RE.match(input) is not None)
+                self.assertEqual(expected, AT_URI_RE.fullmatch(input) is not None)

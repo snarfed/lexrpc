@@ -67,7 +67,7 @@ class XrpcEndpoint(View):
         self.server = server
 
     def dispatch_request(self, nsid):
-        if not NSID_RE.match(nsid):
+        if not NSID_RE.fullmatch(nsid):
             return {
                 'error': 'InvalidRequest',
                 'message': f'{nsid} is not a valid NSID',

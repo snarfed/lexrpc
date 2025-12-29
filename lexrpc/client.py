@@ -48,7 +48,7 @@ class _NsidClient():
 
     def __getattr__(self, attr):
         segment = attr.replace('_', '-')
-        if NSID_SEGMENT_RE.match(segment):
+        if NSID_SEGMENT_RE.fullmatch(segment):
             return _NsidClient(self.client, f'{self.nsid}.{segment}')
 
         return getattr(super(), attr)
@@ -129,7 +129,7 @@ class Client(Base):
         self.session_callback = session_callback
 
     def __getattr__(self, attr):
-        if NSID_SEGMENT_RE.match(attr):
+        if NSID_SEGMENT_RE.fullmatch(attr):
             return _NsidClient(self, attr)
 
         return getattr(super(), attr)
@@ -158,6 +158,7 @@ class Client(Base):
             loaded lexicons
           ValidationError: if the parameters, input, or returned output don't
             validate against the method's schemas
+          requests.HTTPError: if the remote server returned an error
           requests.RequestException: if the connection or HTTP request to the
             remote server failed
         """

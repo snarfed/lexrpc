@@ -68,32 +68,28 @@ BLOB_DEF = {
     },
 }
 
-# duplicated in bridgy-fed/common.py
-DOMAIN_PATTERN = r'([a-z0-9][a-z0-9-]{0,62}(?<!-)\.){1,}[a-z][a-z0-9-]*(?<!-)'
-DOMAIN_RE = re.compile(f'^{DOMAIN_PATTERN}$')
+# duplicated in bridgy-fed/domains.py
+DOMAIN_RE = re.compile(r'([a-z0-9][a-z0-9-]{0,62}(?<!-)\.){1,}[a-z][a-z0-9-]*(?<!-)')
 
 # https://atproto.com/specs/nsid
-NSID_SEGMENT = '[a-zA-Z0-9-]+'
-NSID_SEGMENT_RE = re.compile(f'^{NSID_SEGMENT}$')
-NSID_PATTERN = r'(?![0-9])((?!-)[a-z0-9-]{1,63}(?<!-)\.){2,}[a-zA-Z][a-zA-Z0-9]{0,62}'
-NSID_RE = re.compile(f'^{NSID_PATTERN}$')
+NSID_SEGMENT_RE = re.compile('[a-zA-Z0-9-]+')
+NSID_RE = re.compile(r'(?![0-9])((?!-)[a-z0-9-]{1,63}(?<!-)\.){2,}[a-zA-Z][a-zA-Z0-9]{0,62}')
 
 # https://atproto.com/specs/lexicon#string-formats
 # https://datatracker.ietf.org/doc/html/rfc5646#section-2.1
-LANG_RE = re.compile(r'^(i|[a-z]{2,3})(-[A-Za-z0-9-]+)?$')
+LANG_RE = re.compile(r'(i|[a-z]{2,3})(-[A-Za-z0-9-]+)?')
 
 # https://atproto.com/specs/record-key
-RKEY_RE = re.compile(r'^[A-Za-z0-9._:~-]{1,512}$')
+RKEY_RE = re.compile(r'[A-Za-z0-9._:~-]{1,512}')
 
 # https://atproto.com/specs/record-key#record-key-type-tid
 BASE32_CHARS = string.ascii_lowercase + "234567"
-TID_RE = re.compile(rf'^[{BASE32_CHARS}]{{13}}$')
+TID_RE = re.compile(rf'[{BASE32_CHARS}]{{13}}')
 
-CID_RE = re.compile(r'^[A-Za-z0-9+]{8,}$')
+CID_RE = re.compile(r'[A-Za-z0-9+]{8,}')
 
 # https://www.w3.org/TR/did-core/#did-syntax
-DID_PATTERN = r'did:[a-z]+:[A-Za-z0-9._%:-]{1,2048}(?<!:)'
-DID_RE = re.compile(f'^{DID_PATTERN}$')
+DID_RE = re.compile(r'did:[a-z]+:[A-Za-z0-9._%:-]{1,2048}(?<!:)')
 
 # https://atproto.com/specs/at-uri-scheme
 # NOTE: duplicated in granary.bluesky!
@@ -102,11 +98,11 @@ DID_RE = re.compile(f'^{DID_PATTERN}$')
 # https://atproto.com/specs/at-uri-scheme#structure
 _CHARS = 'a-zA-Z0-9-.'
 AT_URI_RE = re.compile(rf"""
-    ^at://
-     (?P<repo>{DID_PATTERN}|{DOMAIN_PATTERN})
-      (?:/(?P<collection>{NSID_PATTERN})
+    at://
+     (?P<repo>{DID_RE.pattern}|{DOMAIN_RE.pattern})
+      (?:/(?P<collection>{NSID_RE.pattern})
        (?:/(?P<rkey>[{_CHARS}:~_]+))?)?
-    $""", re.VERBOSE)
+    """, re.VERBOSE)
 
 # wrapper for datetime.now, lets us mock it out in tests
 now = lambda tz=timezone.utc, **kwargs: datetime.now(tz=tz, **kwargs)
@@ -476,11 +472,11 @@ class Base():
 
         # TODO: switch to match once we require Python 3.10+
         if format == 'at-identifier':
-            check(DID_RE.match(val) or DOMAIN_RE.match(val.lower()))
+            check(DID_RE.fullmatch(val) or DOMAIN_RE.fullmatch(val.lower()))
 
         elif format == 'at-uri':
             check(len(val) < 8 * 1024)
-            check(AT_URI_RE.match(val))
+            check(AT_URI_RE.fullmatch(val))
             check('/./' not in val
                   and '/../' not in val
                   and not val.endswith('/.')
@@ -489,7 +485,7 @@ class Base():
         elif format == 'cid':
             # ideally I'd use CID.decode here, but it doesn't support CIDv5,
             # it's too strict about padding, etc.
-            check(CID_RE.match(val))
+            check(CID_RE.fullmatch(val))
 
         elif format == 'datetime':
             check('T' in val)
@@ -508,23 +504,23 @@ class Base():
                 check(False)
 
         elif format == 'did':
-            check(DID_RE.match(val))
+            check(DID_RE.fullmatch(val))
 
         elif format == 'nsid':
             check(len(val) <= 317)
-            check(NSID_RE.match(val) and '.' in val)
+            check(NSID_RE.fullmatch(val) and '.' in val)
 
         elif format in 'handle':
             check(len(val) <= 253)
-            check(DOMAIN_RE.match(val.lower()))
+            check(DOMAIN_RE.fullmatch(val.lower()))
 
         elif format == 'tid':
-            check(TID_RE.match(val))
+            check(TID_RE.fullmatch(val))
             # high bit, big-endian, can't be 1
             check(not ord(val[0]) & 0x40)
 
         elif format == 'record-key':
-            check(val not in ('.', '..') and RKEY_RE.match(val))
+            check(val not in ('.', '..') and RKEY_RE.fullmatch(val))
 
         elif format == 'uri':
             check(len(val) < 8 * 1024)
@@ -539,7 +535,7 @@ class Base():
                        or parsed.fragment))
 
         elif format == 'language':
-            check(LANG_RE.match(val))
+            check(LANG_RE.fullmatch(val))
 
         else:
             raise ValidationError(f'unknown format {format}')

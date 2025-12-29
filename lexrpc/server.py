@@ -64,7 +64,7 @@ class Server(Base):
           nsid (str)
           fn (callable)
         """
-        assert NSID_RE.match(nsid)
+        assert NSID_RE.fullmatch(nsid)
 
         existing = self._methods.get(nsid)
         if existing:
