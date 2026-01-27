@@ -153,6 +153,10 @@ def subscription(xrpc_server, nsid, limit_ips=False):
         # while we block waiting for results from the XRPC server method, and
         # we'll eventually exhaust the WSGI worker thread pool. background:
         # https://github.com/miguelgrinberg/flask-sock/issues/78
+        #
+        # TODO: put the client IP and maybe user agent into the thread name. (can
+        # assign to Thread.name directly.) would need to modify TimeoutIterator to
+        # support that.
         iter = TimeoutIterator(xrpc_server.call(nsid, **params),
                                timeout=SUBSCRIPTION_ITERATOR_TIMEOUT.total_seconds())
         for result in iter:

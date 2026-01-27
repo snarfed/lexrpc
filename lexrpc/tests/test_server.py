@@ -41,7 +41,7 @@ def params(input, **params):
 @server.method('io.example.array')
 def array(input, foo=None):
     assert isinstance(foo, list)
-    return {'items': foo + ['z']}
+    return foo + ['z']
 
 
 @server.method('io.example.defs')
@@ -126,7 +126,7 @@ class ServerTest(TestCase):
             server.call('io.example.params', {}, bar='c')
 
     def test_array(self):
-        self.assertEqual({'items': ['a', 'b', 'z']},
+        self.assertEqual(['a', 'b', 'z'],
                          server.call('io.example.array', {}, foo=['a', 'b']))
 
     def test_subscription(self):
@@ -152,6 +152,21 @@ class ServerTest(TestCase):
 
             with self.assertRaises(ValidationError):
                 next(gen)
+
+    def test_subscription_output_union_nullable_validate_fails(self):
+        def subscribe_union():
+            yield {'op': 1}, {
+                '$type': '#foo',
+                'x': 1,
+                'z': None,
+            }
+
+        with patch.dict(server._methods, values={
+                'io.example.subscribeUnion': subscribe_union,
+        }), self.assertRaises(ValidationError) as cm:
+            next(server.call('io.example.subscribeUnion'))
+
+        self.assertIn('property z is not nullable', str(cm.exception))
 
     def test_unknown_methods(self):
         with self.assertRaises(NotImplementedError):

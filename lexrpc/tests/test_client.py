@@ -240,9 +240,9 @@ class ClientTest(TestCase):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({}, bar='c')
 
-    @patch('requests.post', return_value=response({'items': ['z']}))
+    @patch('requests.post', return_value=response(['z']))
     def test_array(self, mock_post):
-        self.assertEqual({'items': ['z']},
+        self.assertEqual(['z'],
                          self.client.io.example.array({}, foo=['a', 'b']))
 
         mock_post.assert_called_once_with(

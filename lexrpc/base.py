@@ -264,12 +264,12 @@ class Base():
             # we'd fail if a query with no params gets requested with any query
             # params at all, eg utm_* tracking params
 
-        self._validate_schema(name=type, val=obj, type_=nsid, lexicon=nsid,
+        self._validate_schema(name=type, val=obj, type_name=nsid, lexicon=nsid,
                               schema=schema)
 
         return obj
 
-    def _validate_schema(self, *, name, val, type_, lexicon, schema):
+    def _validate_schema(self, *, name, val, type_name, lexicon, schema):
         """Validates an ATProto value against a lexicon schema.
 
         Returns ``None`` if the value validates, otherwise raises an exception.
@@ -279,7 +279,7 @@ class Base():
         Args:
           name (str): field name
           val: value
-          type_ (str): name of type, eg ``integer`` or ``app.bsky.feed.post#replyRef``
+          type_name (str): name of type, eg ``integer`` or ``app.bsky.feed.post#replyRef``
           lexicon (str): fully qualified lexicon name that contains this schema,
             eg ``app.bsky.feed.post`` or ``app.bsky.feed.post#replyRef``
           schema (dict): schema to validate against if this is a compound
@@ -288,7 +288,7 @@ class Base():
         Raises:
           ValidationError: if the value is invalid
         """
-        # logger.debug(f'@ {name} {type_} {lexicon} {str(val)[:100]} {str(schema)[:100]}')
+        # logger.debug(f'@ {name} {type_name} {lexicon} {str(val)[:100]} {str(schema)[:100]}')
 
         def get_schema(lex_name):
             """Returns (fully qualified lexicon name, lexicon) tuple."""
@@ -305,9 +305,11 @@ class Base():
                 val_str = repr(val)
                 if len(val_str) > 50:
                     val_str = val_str[:50] + '…'
-                prefix = f'in {lexicon}, ' if lexicon != type_ else ''
+                prefix = f'in {lexicon}, ' if lexicon != type_name else ''
                 raise ValidationError(
-                    f'{prefix}{type_} {name} with value `{val_str}`: {msg}')
+                    f'{prefix}{type_name} {name} with value `{val_str}`: {msg}')
+
+        type_ = schema.get('type') or type_name
 
         if const := schema.get('const'):
             if val != const:
@@ -412,7 +414,7 @@ class Base():
         if type_ == 'array':
             for item in val:
                 self._validate_schema(
-                    name=name, val=item, type_=schema['items']['type'],
+                    name=name, val=item, type_name=schema['items']['type'],
                     lexicon=lexicon, schema=schema['items'])
 
         props = schema.get('properties', {})
@@ -444,7 +446,7 @@ class Base():
                 prop_lexicon, prop_schema = get_schema(prop_schema['ref'])
                 prop_type = prop_schema['type']
 
-            self._validate_schema(name=prop_name, val=prop_val, type_=prop_type,
+            self._validate_schema(name=prop_name, val=prop_val, type_name=prop_type,
                                   lexicon=prop_lexicon, schema=prop_schema)
 
         # unknown parameters aren't allowed

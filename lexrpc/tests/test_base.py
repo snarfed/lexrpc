@@ -337,3 +337,27 @@ class BaseTest(TestCase):
         ]:
             with self.subTest(input=input):
                 self.assertEqual(expected, AT_URI_RE.fullmatch(input) is not None)
+
+    def test_validate_union_nullable(self):
+        with self.assertRaises(ValidationError) as cm:
+            self.base.validate('io.example.subscribeUnion', 'message', {
+                '$type': '#foo',
+                'x': 1,
+                'z': None,
+            })
+
+        self.assertIn('property z is not nullable', str(cm.exception))
+
+    def test_validate_array_output_wrong_type(self):
+        with self.assertRaises(ValidationError) as cm:
+            self.base.validate('io.example.array', 'output', {'not': 'an array'})
+
+        print(cm.exception)
+        self.assertIn('has unexpected type dict', str(cm.exception))
+
+    def test_validate_array_output_item_wrong_type(self):
+        with self.assertRaises(ValidationError) as cm:
+            self.base.validate('io.example.array', 'output',
+                               ['valid', 123, 'also valid'])
+
+        self.assertIn('has unexpected type int', str(cm.exception))

@@ -349,6 +349,38 @@ LEXICONS = [
 
     {
         'lexicon': 1,
+        'id': 'io.example.subscribeUnion',
+        'defs': {
+            'main': {
+                'type': 'subscription',
+                'message': {
+                    'schema': {
+                        'type': 'union',
+                        'refs': ['#foo', '#bar']
+                    }
+                }
+            },
+            'foo': {
+                'type': 'object',
+                'required': ['x'],
+                'nullable': ['y'],
+                'properties': {
+                    'x': {'type': 'integer'},
+                    'y': {'type': 'string'},
+                    'z': {'type': 'string'},
+                }
+            },
+            'bar': {
+                'type': 'object',
+                'properties': {
+                    'a': {'type': 'string'},
+                }
+            }
+        },
+    },
+
+    {
+        'lexicon': 1,
         'id': 'io.example.redirect',
         'defs': {
             'main': {
