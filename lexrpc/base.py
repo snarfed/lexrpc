@@ -379,7 +379,9 @@ class Base():
         if type_ == 'union':
             if isinstance(val, dict):
                 inner_type = val.get('$type')
-                if not inner_type:
+                if not inner_type and name != 'message':
+                    # event stream subscription messages (payloads) don't require
+                    # $type, it's in the header
                     fail('missing $type')
             elif isinstance(val, str):
                 inner_type = val

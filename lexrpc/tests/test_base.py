@@ -361,3 +361,10 @@ class BaseTest(TestCase):
                                ['valid', 123, 'also valid'])
 
         self.assertIn('has unexpected type int', str(cm.exception))
+
+    def test_validate_subscription_message_without_type(self):
+        # subscription messages shouldn't require $type since it's in the header
+        self.base.validate('io.example.subscribeUnion', 'message', {
+            'x': 1,
+            'y': 'foo',
+        })

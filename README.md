@@ -224,6 +224,7 @@ Here's how to package, test, and ship a new release.
 * `base.load_lexicons`: ignore non-lexicon files.
 * Schema validation:
   * For the `uri` string format, handle URLs with brackets (eg `]`) in the hostname, eg `https://example.com]`.
+  * Don't require `$type` in event stream subscription payloads.
   * Bug fixes for unions and arrays.
 
 
