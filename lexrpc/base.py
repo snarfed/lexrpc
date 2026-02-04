@@ -439,7 +439,8 @@ class Base():
                     fail(f'property {prop_name} is not nullable')
                 continue
 
-            elif self._truncate and (max_graphemes := prop_schema.get('maxGraphemes')):
+            elif (self._truncate and prop_type == 'string'
+                  and (max_graphemes := prop_schema.get('maxGraphemes'))):
                 if grapheme.length(prop_val) > max_graphemes:
                     prop_val = val[prop_name] = grapheme.slice(
                         prop_val, end=max_graphemes - 1) + '…'
