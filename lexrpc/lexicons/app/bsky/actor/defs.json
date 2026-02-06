@@ -13,6 +13,7 @@
           "maxGraphemes": 64,
           "maxLength": 640
         },
+        "pronouns": { "type": "string" },
         "avatar": { "type": "string", "format": "uri" },
         "associated": {
           "type": "ref",
@@ -31,6 +32,10 @@
         "status": {
           "type": "ref",
           "ref": "#statusView"
+        },
+        "debug": {
+          "type": "unknown",
+          "description": "Debug information for internal development"
         }
       }
     },
@@ -45,6 +50,7 @@
           "maxGraphemes": 64,
           "maxLength": 640
         },
+        "pronouns": { "type": "string" },
         "description": {
           "type": "string",
           "maxGraphemes": 256,
@@ -69,6 +75,10 @@
         "status": {
           "type": "ref",
           "ref": "#statusView"
+        },
+        "debug": {
+          "type": "unknown",
+          "description": "Debug information for internal development"
         }
       }
     },
@@ -88,6 +98,8 @@
           "maxGraphemes": 256,
           "maxLength": 2560
         },
+        "pronouns": { "type": "string" },
+        "website": { "type": "string", "format": "uri" },
         "avatar": { "type": "string", "format": "uri" },
         "banner": { "type": "string", "format": "uri" },
         "followersCount": { "type": "integer" },
@@ -119,6 +131,10 @@
         "status": {
           "type": "ref",
           "ref": "#statusView"
+        },
+        "debug": {
+          "type": "unknown",
+          "description": "Debug information for internal development"
         }
       }
     },
@@ -133,7 +149,8 @@
         "activitySubscription": {
           "type": "ref",
           "ref": "#profileAssociatedActivitySubscription"
-        }
+        },
+        "germ": { "type": "ref", "ref": "#profileAssociatedGerm" }
       }
     },
     "profileAssociatedChat": {
@@ -143,6 +160,20 @@
         "allowIncoming": {
           "type": "string",
           "knownValues": ["all", "none", "following"]
+        }
+      }
+    },
+    "profileAssociatedGerm": {
+      "type": "object",
+      "required": ["showButtonTo", "messageMeUrl"],
+      "properties": {
+        "messageMeUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "showButtonTo": {
+          "type": "string",
+          "knownValues": ["usersIFollow", "everyone"]
         }
       }
     },
@@ -260,6 +291,7 @@
           "#savedFeedsPref",
           "#savedFeedsPrefV2",
           "#personalDetailsPref",
+          "#declaredAgePref",
           "#feedViewPref",
           "#threadViewPref",
           "#interestsPref",
@@ -268,7 +300,8 @@
           "#bskyAppStatePref",
           "#labelersPref",
           "#postInteractionSettingsPref",
-          "#verificationPrefs"
+          "#verificationPrefs",
+          "#liveEventPreferences"
         ]
       }
     },
@@ -360,6 +393,24 @@
         }
       }
     },
+    "declaredAgePref": {
+      "type": "object",
+      "description": "Read-only preference containing value(s) inferred from the user's declared birthdate. Absence of this preference object in the response indicates that the user has not made a declaration.",
+      "properties": {
+        "isOverAge13": {
+          "type": "boolean",
+          "description": "Indicates if the user has declared that they are over 13 years of age."
+        },
+        "isOverAge16": {
+          "type": "boolean",
+          "description": "Indicates if the user has declared that they are over 16 years of age."
+        },
+        "isOverAge18": {
+          "type": "boolean",
+          "description": "Indicates if the user has declared that they are over 18 years of age."
+        }
+      }
+    },
     "feedViewPref": {
       "type": "object",
       "required": ["feed"],
@@ -398,10 +449,6 @@
           "type": "string",
           "description": "Sorting mode for threads.",
           "knownValues": ["oldest", "newest", "most-likes", "random", "hotness"]
-        },
-        "prioritizeFollowedUsers": {
-          "type": "boolean",
-          "description": "Show followed users at the top of all replies."
         }
       }
     },
@@ -575,6 +622,22 @@
         }
       }
     },
+    "liveEventPreferences": {
+      "type": "object",
+      "description": "Preferences for live events.",
+      "properties": {
+        "hiddenFeedIds": {
+          "description": "A list of feed IDs that the user has hidden from live events.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "hideAllFeeds": {
+          "description": "Whether to hide all feeds from live events.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
     "postInteractionSettingsPref": {
       "type": "object",
       "description": "Default post interaction settings for the account. These values should be applied as default values when creating new posts. These refs should mirror the threadgate and postgate records exactly.",
@@ -609,6 +672,8 @@
       "type": "object",
       "required": ["status", "record"],
       "properties": {
+        "uri": { "type": "string", "format": "at-uri" },
+        "cid": { "type": "string", "format": "cid" },
         "status": {
           "type": "string",
           "description": "The status for the account.",
@@ -628,6 +693,10 @@
         "isActive": {
           "type": "boolean",
           "description": "True if the status is not expired, false if it is expired. Only present if expiration was set."
+        },
+        "isDisabled": {
+          "type": "boolean",
+          "description": "True if the user's go-live access has been disabled by a moderator, false otherwise."
         }
       }
     }
