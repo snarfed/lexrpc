@@ -276,7 +276,7 @@ class Client(Base):
           ValidationError: if ``decode`` is True and an output payload doesn't
             validate gainst the subscription method's lexicon
         """
-        ws = simple_websocket.Client(url, headers={
+        ws = simple_websocket.Client.connect(url, headers={
             **DEFAULT_HEADERS,
             **self.requests_kwargs.get('headers', {}),
         })
@@ -292,3 +292,6 @@ class Client(Base):
                     yield msg
         except simple_websocket.ConnectionClosed as cc:
             logger.debug(cc)
+        finally:
+            if ws.connected:
+                ws.close()

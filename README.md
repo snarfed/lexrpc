@@ -218,6 +218,12 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
+### 2.2 - unreleased
+
+* `client`:
+  * For websocket event streams, close the websocket connection when a non-`ConnectionClosed` exception is raised.
+
+
 ### 2.1 - 2026-02-06
 
 * Bundle new lexicons:

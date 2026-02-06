@@ -47,12 +47,18 @@ class FakeWebsocketClient:
     """Fake of :class:`simple_websocket.Client`."""
     url = None
     headers = None
+    connected = None
     sent = []
     to_receive = []
 
     def __init__(self, url, headers=None, **kwargs):
         FakeWebsocketClient.url = url
+        FakeWebsocketClient.connected = True
         FakeWebsocketClient.headers = headers
+
+    @classmethod
+    def connect(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
 
     def send(self, msg):
         self.sent.append(json.loads(msg))
@@ -63,6 +69,9 @@ class FakeWebsocketClient:
 
         return (dag_cbor.encode({'op': 1, 't': '#foo'}) +
                 dag_cbor.encode(self.to_receive.pop(0)))
+
+    def close(self):
+        FakeWebsocketClient.connected = False
 
 
 class ClientTest(TestCase):
