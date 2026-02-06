@@ -263,6 +263,32 @@ Here’s how to package, test, and ship a new release.
 Changelog
 ---------
 
+2.1 - 2026-02-06
+~~~~~~~~~~~~~~~~
+
+- Bundle new lexicons:
+
+  - `lexicon.community.* <https://lexicon.community/>`__, as of
+    `2bf2cbb <https://github.com/lexicon-community/lexicon/commit/2bf2cbbfd3058d710f8c468307ef7e003bc22383>`__.
+  - `site.standard.* <https://standard.site/>`__, `from
+    lexicon.garden <https://lexicon.garden/identity/did:plc:re3ebnp5v7ffagz6rb6xfei4>`__,
+    as of 2026-02-03.
+
+- Update bundled Bluesky PBC lexicons (``app.bsky``, ``com.atproto``,
+  etc.) as of
+  `19ecf5f <https://github.com/bluesky-social/atproto/commit/19ecf5f76ae0d88c1963211a76920e00eecdd965>`__.
+- ``base.load_lexicons``: ignore non-lexicon files.
+- Schema validation:
+
+  - For the ``uri`` string format, handle URLs with brackets (eg ``]``)
+    in the hostname, eg ``https://example.com]``.
+  - Don’t require ``$type`` in event stream subscription payloads.
+  - Bug fixes for unions and arrays.
+  - Ignore ``maxGraphemes`` on non-string fields.
+  - Allow ``type: permission-set``.
+
+.. _section-1:
+
 2.0 - 2025-09-13
 ~~~~~~~~~~~~~~~~
 
@@ -290,7 +316,7 @@ Non-breaking changes:
     than one connection to event stream subscription methods per client
     IP.
 
-.. _section-1:
+.. _section-2:
 
 1.1 - 2025-03-13
 ~~~~~~~~~~~~~~~~
@@ -326,7 +352,7 @@ Non-breaking changes:
     ``ValidationError``, ie ``err.args[1]``, as a dict of additional
     HTTP headers to return with the HTTP 400 response.
 
-.. _section-2:
+.. _section-3:
 
 1.0 - 2024-10-14
 ~~~~~~~~~~~~~~~~
@@ -350,7 +376,7 @@ Non-breaking changes:
 
   - Add ``status`` param to ``Redirect``.
 
-.. _section-3:
+.. _section-4:
 
 0.7 - 2024-06-24
 ~~~~~~~~~~~~~~~~
@@ -381,7 +407,7 @@ Non-breaking changes:
 - Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
   `bluesky-social/atproto@15cc6ff37c326d5c186385037c4bfe8b60ea41b1 <https://github.com/bluesky-social/atproto/commit/15cc6ff37c326d5c186385037c4bfe8b60ea41b1>`__.
 
-.. _section-4:
+.. _section-5:
 
 0.6 - 2024-03-16
 ~~~~~~~~~~~~~~~~
@@ -392,7 +418,7 @@ Non-breaking changes:
 - Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
   `bluesky-social/atproto@f45eef3 <https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282>`__.
 
-.. _section-5:
+.. _section-6:
 
 0.5 - 2023-12-10
 ~~~~~~~~~~~~~~~~
@@ -407,7 +433,7 @@ Non-breaking changes:
   - Bug fix: don’t infinite loop if ``refreshSession`` fails.
   - Other minor authentication bug fixes.
 
-.. _section-6:
+.. _section-7:
 
 0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
@@ -447,7 +473,7 @@ Non-breaking changes:
   - Add the ``error`` field to the JSON response bodies for most error
     responses.
 
-.. _section-7:
+.. _section-8:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
@@ -459,7 +485,7 @@ Non-breaking changes:
 - Add new ``Server.register`` method for manually registering handlers.
 - Bug fix for server ``@method`` decorator.
 
-.. _section-8:
+.. _section-9:
 
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
@@ -476,7 +502,7 @@ put more effort into matching and fully implementing them. Stay tuned!
   format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
   Original format is no longer supported.
 
-.. _section-9:
+.. _section-10:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~

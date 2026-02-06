@@ -218,18 +218,19 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 2.1 - unreleased
+### 2.1 - 2026-02-06
 
 * Bundle new lexicons:
-  * `[lexicon.community.*]`(https://lexicon.community/), as of [2bf2cbb](https://github.com/lexicon-community/lexicon/commit/2bf2cbbfd3058d710f8c468307ef7e003bc22383).
-  * [`site.standard.document` and `site.standard.publication`](https://standard.site/), [from lexicon.garden](https://lexicon.garden/identity/did:plc:re3ebnp5v7ffagz6rb6xfei4), as of 2026-02-03.
-* Update bundled Bluesky PBC lexicons (`app.bsky`, `com.atproto`, etc.) as of [bluesky-social/atproto@19ecf5f](https://github.com/bluesky-social/atproto/commit/19ecf5f76ae0d88c1963211a76920e00eecdd965).
+  * [`lexicon.community.*`](https://lexicon.community/), as of [2bf2cbb](https://github.com/lexicon-community/lexicon/commit/2bf2cbbfd3058d710f8c468307ef7e003bc22383).
+  * [`site.standard.*`](https://standard.site/), [from lexicon.garden](https://lexicon.garden/identity/did:plc:re3ebnp5v7ffagz6rb6xfei4), as of 2026-02-03.
+* Update bundled Bluesky PBC lexicons (`app.bsky`, `com.atproto`, etc.) as of [19ecf5f](https://github.com/bluesky-social/atproto/commit/19ecf5f76ae0d88c1963211a76920e00eecdd965).
 * `base.load_lexicons`: ignore non-lexicon files.
 * Schema validation:
   * For the `uri` string format, handle URLs with brackets (eg `]`) in the hostname, eg `https://example.com]`.
   * Don't require `$type` in event stream subscription payloads.
   * Bug fixes for unions and arrays.
   * Ignore `maxGraphemes` on non-string fields.
+  * Allow `type: permission-set`.
 
 
 ### 2.0 - 2025-09-13
