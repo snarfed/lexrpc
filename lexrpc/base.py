@@ -20,6 +20,7 @@ METHOD_TYPES = frozenset((
 ))
 LEXICON_TYPES = METHOD_TYPES | frozenset((
     'object',
+    'permission-set',
     'record',
     'ref',
     'token',
