@@ -168,7 +168,7 @@ def subscription(xrpc_server, nsid, limit_ips=False):
                 continue
 
             header, payload = result
-            # TODO: validate header, payload?
+            # payload was validated in Server.call; header has no schema
 
             # log
             seq = payload.get('seq')
