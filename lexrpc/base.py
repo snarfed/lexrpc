@@ -6,7 +6,7 @@ import json
 import logging
 import re
 import string
-from urllib.parse import urlencode, urljoin, urlparse
+from urllib.parse import urlencode, urlparse
 
 import grapheme
 from multiformats import CID
@@ -293,7 +293,10 @@ class Base():
 
         def get_schema(lex_name):
             """Returns (fully qualified lexicon name, lexicon) tuple."""
-            schema_name = urljoin(lexicon, lex_name)
+            if lex_name.startswith('#'):
+                schema_name = lexicon.split('#')[0] + lex_name
+            else:
+                schema_name = lex_name
             schema = self._get_def(schema_name)
             if schema.get('type') == 'record':
                 schema = schema.get('record')
@@ -379,10 +382,11 @@ class Base():
 
         if type_ == 'union':
             if isinstance(val, dict):
-                inner_type = val.get('$type')
-                if not inner_type and name != 'message':
-                    # event stream subscription messages (payloads) don't require
-                    # $type, it's in the header
+                if not (inner_type := val.get('$type')):
+                    if name == 'message':
+                        # event stream subscription messages (payloads) don't
+                        # require $type, it's in the header
+                        return
                     fail('missing $type')
             elif isinstance(val, str):
                 inner_type = val
@@ -390,7 +394,7 @@ class Base():
                 fail("is invalid")
 
             if schema.get('closed'):
-                refs = [urljoin(lexicon, ref) for ref in schema['refs']]
+                refs = [get_schema(ref)[0] for ref in schema['refs']]
                 if inner_type not in refs:
                     fail(f"{inner_type} isn't one of {refs}")
 
