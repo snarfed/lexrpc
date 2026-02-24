@@ -169,13 +169,15 @@ class Client(Base):
         params = self.validate(nsid, 'parameters', params)
         params_str = self.encode_params(params)
 
-        type = self._get_def(nsid)['type']
+        lexicon = self._get_def(nsid)
+        type = lexicon['type']
         if type == 'subscription':
             input = self.validate(nsid, 'input', input)
 
         requests_kwargs = copy.copy(self.requests_kwargs)
+        content_type = lexicon.get('input', {}).get('encoding', 'application/json')
         headers = {
-            'Content-Type': 'application/json',
+            'Content-Type': content_type,
             **requests_kwargs.pop('headers'),
             **headers,
         }

@@ -352,7 +352,6 @@ class BaseTest(TestCase):
         with self.assertRaises(ValidationError) as cm:
             self.base.validate('io.example.array', 'output', {'not': 'an array'})
 
-        print(cm.exception)
         self.assertIn('has unexpected type dict', str(cm.exception))
 
     def test_validate_array_output_item_wrong_type(self):

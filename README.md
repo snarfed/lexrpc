@@ -222,6 +222,7 @@ Here's how to package, test, and ship a new release.
 
 * `client`:
   * For websocket event streams, close the websocket connection when a non-`ConnectionClosed` exception is raised.
+  * Use the lexicon method's `input.encoding` as the `Content-Type` request header.
 
 
 ### 2.1 - 2026-02-06

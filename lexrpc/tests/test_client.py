@@ -560,6 +560,19 @@ class ClientTest(TestCase):
         self.assertEqual(output, got)
 
     @patch('requests.post', return_value=response(b'baz biff'))
+    def test_content_type_from_lexicon(self, mock_post):
+        resp = self.client.io.example.encodings(b'foo bar')
+        self.assertIsInstance(resp, requests.Response)
+
+        mock_post.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.encodings',
+            json=None, data=b'foo bar', headers={
+                **client.DEFAULT_HEADERS,
+                'Content-Type': 'number/int',
+                'foo': 'ey',
+            })
+
+    @patch('requests.post', return_value=response(b'baz biff'))
     def test_binary_output_input_data(self, mock_post):
         resp = self.client.io.example.encodings(b'foo bar', headers={
             'Content-Type': 'foo/bar',
