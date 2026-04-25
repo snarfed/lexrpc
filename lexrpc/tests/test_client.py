@@ -87,7 +87,7 @@ class ClientTest(TestCase):
         FakeWebsocketClient.sent = []
         FakeWebsocketClient.to_receive = []
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_call(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
@@ -99,7 +99,21 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.get', return_value=response({'foo': 'asdf'}))
+    def test_call_custom_session(self):
+        from unittest.mock import MagicMock
+        output = {'foo': 'asdf', 'bar': 3}
+        mock_session = MagicMock()
+        mock_session.get.return_value = response(output)
+
+        c = Client('http://ser.ver', lexicons=LEXICONS, requests_session=mock_session)
+        got = c.call('io.example.query', {}, x='y')
+        self.assertEqual(output, got)
+
+        mock_session.get.assert_called_once_with(
+            'http://ser.ver/xrpc/io.example.query?x=y',
+            json=None, data=None, headers=HEADERS)
+
+    @patch('requests.Session.get', return_value=response({'foo': 'asdf'}))
     def test_call_address_trailing_slash(self, mock_get):
         client = Client('http://ser.ver/', lexicons=LEXICONS)
         got = client.call('io.example.query', {})
@@ -107,7 +121,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query',
             json=None, data=None, headers=HEADERS)
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_query(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
@@ -119,7 +133,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.post')
+    @patch('requests.Session.post')
     def test_procedure(self, mock_post):
         input = {'foo': 'asdf', 'bar': 3}
         output = {'foo': 'baz', 'bar': 4}
@@ -132,7 +146,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.procedure?x=y',
             json=input, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_boolean_param(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
@@ -144,7 +158,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?z=true',
             json=None, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_omit_None_param(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
@@ -156,7 +170,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query',
             json=None, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_call_headers(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
@@ -168,7 +182,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None, data=None, headers={**FULL_HEADERS, 'foo': 'bar'})
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_call_headers_override_content_type(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
@@ -181,7 +195,7 @@ class ClientTest(TestCase):
             json=None, data=None,
             headers={**FULL_HEADERS, 'Content-Type': 'application/xml'})
 
-    @patch('requests.get', return_value=response())
+    @patch('requests.Session.get', return_value=response())
     def test_no_output_error(self, mock_get):
         with self.assertRaises(ValidationError):
             got = self.client.io.example.query({})
@@ -190,7 +204,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query',
             json=None, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.post', return_value=response(
+    @patch('requests.Session.post', return_value=response(
         headers={'Content-Type': 'application/json'}))
     def test_no_params_input_output(self, mock_post):
         self.assertIsNone(self.client.io.example.noParamsInputOutput({}))
@@ -199,7 +213,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.noParamsInputOutput',
             json=None, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.post', return_value=response(
+    @patch('requests.Session.post', return_value=response(
         headers={'Content-Type': 'application/json'}))
     def test_dashed_name(self, mock_post):
         self.assertIsNone(self.client.io.exa_mple.dashedName({}))
@@ -208,7 +222,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.exa-mple.dashedName',
             json=None, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.get', return_value=response({'out': 'foo'}))
+    @patch('requests.Session.get', return_value=response({'out': 'foo'}))
     def test_defs(self, mock_get):
         self.assertEqual({'out': 'foo'},
                          self.client.io.example.defs({'in': 'bar'}))
@@ -217,7 +231,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.defs',
             json={'in': 'bar'}, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.get', return_value=response(status=400, body={
+    @patch('requests.Session.get', return_value=response(status=400, body={
         'error': 'Something',
         'message': 'too bad'
     }))
@@ -229,7 +243,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None, data=None, headers=FULL_HEADERS)
 
-    @patch('requests.get', return_value=response(status=400, body=b'asdf'))
+    @patch('requests.Session.get', return_value=response(status=400, body=b'asdf'))
     def test_error_not_json(self, mock_get):
         with self.assertRaises(requests.HTTPError):
             self.client.call('io.example.query', {}, x='y')
@@ -249,7 +263,7 @@ class ClientTest(TestCase):
         with self.assertRaises(ValidationError):
             self.client.io.example.params({}, bar='c')
 
-    @patch('requests.post', return_value=response(['z']))
+    @patch('requests.Session.post', return_value=response(['z']))
     def test_array(self, mock_post):
         self.assertEqual(['z'],
                          self.client.io.example.array({}, foo=['a', 'b']))
@@ -313,7 +327,7 @@ class ClientTest(TestCase):
         with self.assertRaises(ValidationError):
             next(gen)
 
-    @patch('requests.post')
+    @patch('requests.Session.post')
     def test_validate_false(self, mock_post):
         client = Client('http://ser.ver', lexicons=LEXICONS, validate=False)
 
@@ -328,7 +342,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.procedure',
             json=input, data=None, headers=HEADERS)
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_client_headers_and_requests_kwargs(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
@@ -346,7 +360,7 @@ class ClientTest(TestCase):
             },
         )
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_client_headers_override_content_type(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
@@ -365,7 +379,7 @@ class ClientTest(TestCase):
             },
         )
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_access_token(self, mock_get):
         output = {'foo': 'asdf', 'bar': 3}
         mock_get.return_value = response(output)
@@ -384,8 +398,8 @@ class ClientTest(TestCase):
             },
         )
 
-    @patch('requests.get')
-    @patch('requests.post')
+    @patch('requests.Session.get')
+    @patch('requests.Session.post')
     def test_refresh_token(self, mock_post, mock_get):
         session = {
             'accessJwt': 'new-towkin',
@@ -431,11 +445,11 @@ class ClientTest(TestCase):
             json=None, data=None,
             headers={**HEADERS, 'Authorization': 'Bearer new-towkin'})
 
-    @patch('requests.get', return_value=response(status=400, body={
+    @patch('requests.Session.get', return_value=response(status=400, body={
         'error': 'ExpiredToken',
         'message': 'Token has expired'
     }))
-    @patch('requests.post', return_value=response(status=400, body={
+    @patch('requests.Session.post', return_value=response(status=400, body={
         'error': 'ExpiredToken',
         'message': 'Token has been revoked'
     }))
@@ -462,7 +476,7 @@ class ClientTest(TestCase):
             json=None, data=None,
             headers={**HEADERS, 'Authorization': 'Bearer reephrush'})
 
-    @patch('requests.post', return_value=response(status=400, body={
+    @patch('requests.Session.post', return_value=response(status=400, body={
         'error': 'InvalidToken',
         'message': 'Token is invalid'
     }))
@@ -482,7 +496,7 @@ class ClientTest(TestCase):
             json={'token': 'nope'}, data=None,
             headers={**HEADERS, 'Authorization': 'Bearer towkin'})
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_auth_refresh_token(self, mock_get):
         class TokenAuth(AuthBase):
             token = 'before'
@@ -508,7 +522,7 @@ class ClientTest(TestCase):
         self.assertEqual(output, got)
         self.assertEqual([auth], callback_got)
 
-    @patch('requests.post')
+    @patch('requests.Session.post')
     def test_createSession_sets_session(self, mock_post):
         session = {
             'accessJwt': 'towkin',
@@ -536,7 +550,7 @@ class ClientTest(TestCase):
             Client('http://ser.ver', access_token='x',
                    auth=HTTPBasicAuth('user', 'pwd'))
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_auth(self, mock_get):
         mock_get.return_value = response({'foo': 'asdf'})
 
@@ -549,7 +563,7 @@ class ClientTest(TestCase):
             'http://ser.ver/xrpc/io.example.query?x=y',
             json=None, data=None, auth=auth, headers=HEADERS)
 
-    @patch('requests.get')
+    @patch('requests.Session.get')
     def test_bundled_lexicons(self, mock_get):
         client = Client('http://ser.ver')
 
@@ -559,7 +573,7 @@ class ClientTest(TestCase):
         got = client.call('com.atproto.server.getSession', {})
         self.assertEqual(output, got)
 
-    @patch('requests.post', return_value=response(b'baz biff'))
+    @patch('requests.Session.post', return_value=response(b'baz biff'))
     def test_content_type_from_lexicon(self, mock_post):
         resp = self.client.io.example.encodings(b'foo bar')
         self.assertIsInstance(resp, requests.Response)
@@ -572,7 +586,7 @@ class ClientTest(TestCase):
                 'foo': 'ey',
             })
 
-    @patch('requests.post', return_value=response(b'baz biff'))
+    @patch('requests.Session.post', return_value=response(b'baz biff'))
     def test_binary_output_input_data(self, mock_post):
         resp = self.client.io.example.encodings(b'foo bar', headers={
             'Content-Type': 'foo/bar',
@@ -588,7 +602,7 @@ class ClientTest(TestCase):
                 'foo': 'ey',
             })
 
-    @patch('requests.post', return_value=response(b'baz biff'))
+    @patch('requests.Session.post', return_value=response(b'baz biff'))
     def test_binary_output_input_stream(self, mock_post):
         stream = BytesIO(b'foo bar')
         resp = self.client.io.example.encodings(stream, headers={
@@ -605,7 +619,7 @@ class ClientTest(TestCase):
                 'foo': 'ey',
             })
 
-    @patch("requests.post", return_value=response(
+    @patch('requests.Session.post', return_value=response(
         b'image data', headers={'Content-Type': 'image/png'}))
     def test_binary_output_with_content_type(self, mock_post):
         resp = self.client.io.example.encodings(b'foo bar', headers={

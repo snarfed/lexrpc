@@ -70,12 +70,14 @@ class Client(Base):
       address (str): base URL of XRPC server, eg ``https://bsky.social/``
       session (dict): ``createSession`` response with ``accessJwt``,
         `refreshJwt``, ``handle``, and ``did``
-      requests_kwargs (dict): passed to :func:`requests.get`/:func:`requests.post`
+      requests_kwargs (dict): passed to :func:`requests.Session.get` /
+        :func:`requests.Session.post`
+      requests_session (requests.Session): HTTP session to use for requests
     """
 
     def __init__(self, address=None, access_token=None, refresh_token=None,
                  session_callback=None, lexicons=None, validate=True, truncate=False,
-                 **requests_kwargs):
+                 requests_session=None, **requests_kwargs):
         """Constructor.
 
         Args:
@@ -96,9 +98,12 @@ class Client(Base):
             and output bodies
           truncate (bool): whether to truncate string values that are longer
             than their ``maxGraphemes`` or ``maxLength`` in their lexicon
-          requests_kwargs: passed to :func:`requests.get`/:func:`requests.post`, eg
-            ``auth`` (:class:`requests.auth.AuthBase`), ``headers`` (dict),
-            ``timeout`` (int, seconds), etc.
+          requests_session (requests.Session): optional HTTP session to use for
+            requests. Defaults to a new :class:`requests.Session`.
+          requests_kwargs: passed to :func:`requests.Session.get` /
+            :func:`requests.Session.post`, eg ``auth``
+            (:class:`requests.auth.AuthBase`), ``headers`` (dict), ``timeout``
+            (int seconds), etc.
 
         Raises:
           ValidationError: if any lexicon schema is invalid
@@ -115,6 +120,7 @@ class Client(Base):
             self.address = DEFAULT_PDS
         # logger.debug(f'Using server at {address}')
 
+        self.requests_session = requests_session or requests.Session()
         self.requests_kwargs = copy.copy(requests_kwargs)
         headers = self.requests_kwargs.setdefault('headers', {})
         for name, val in DEFAULT_HEADERS.items():
@@ -198,7 +204,8 @@ class Client(Base):
             return self._subscribe(url, nsid, decode=decode)
 
         # query or procedure
-        fn = requests.get if type == 'query' else requests.post
+        fn = (self.requests_session.get if type == 'query'
+              else self.requests_session.post)
 
         # buffer binary inputs in memory. ideally we'd stream instead, but if we
         # have to refresh our token below, we need to seek the stream back to the
@@ -206,7 +213,7 @@ class Client(Base):
         if isinstance(input, IOBase) or hasattr(input, 'read'):
             input = input.read()
 
-        logger.debug(f'requests.{getattr(fn, "__name__", fn)} {url} {params_str} {self.loggable(input)} {headers} {requests_kwargs}')
+        logger.debug(f'requests.{"get" if type == "query" else "post"} {url} {params_str} {self.loggable(input)} {headers} {requests_kwargs}')
 
         if auth := requests_kwargs.get('auth'):
             orig_token = getattr(auth, 'token', None)
