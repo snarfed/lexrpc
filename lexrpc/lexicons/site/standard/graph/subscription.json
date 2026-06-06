@@ -1,0 +1,28 @@
+{
+	"lexicon": 1,
+	"id": "site.standard.graph.subscription",
+	"defs": {
+		"main": {
+			"type": "record",
+			"key": "tid",
+			"record": {
+				"type": "object",
+				"properties": {
+					"publication": {
+						"type": "string",
+						"format": "at-uri",
+						"description": "AT-URI reference to the publication record being subscribed to (ex: at://did:plc:abc123/site.standard.publication/xyz789)."
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "datetime"
+					}
+				},
+				"required": [
+					"publication"
+				]
+			},
+			"description": "Record declaring a subscription to a publication."
+		}
+	}
+}

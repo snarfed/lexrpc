@@ -1,0 +1,29 @@
+{
+	"lexicon": 1,
+	"id": "site.standard.graph.recommend",
+	"defs": {
+		"main": {
+			"type": "record",
+			"key": "tid",
+			"record": {
+				"type": "object",
+				"properties": {
+					"document": {
+						"type": "string",
+						"format": "at-uri",
+						"description": "AT-URI reference to the document record being recommended (ex: at://did:plc:abc123/site.standard.document/xyz789)."
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "datetime"
+					}
+				},
+				"required": [
+					"document",
+					"createdAt"
+				]
+			},
+			"description": "Record declaring a recommendation of a document."
+		}
+	}
+}

@@ -220,6 +220,10 @@ Here's how to package, test, and ship a new release.
 
 ### 2.2 - unreleased
 
+* Update bundled lexicons:
+  * Bluesky PBC's (`app.bsky.*` etc) at [cf4843c](https://github.com/bluesky-social/atproto/commit/cf4843c339396e98fc0191b5c7ccf8db2e48da5b)
+  * [`site.standard.*`](https://standard.site/) at [549453e](https://tangled.org/standard.site/lexicons/commit/549453e37a4e15e8318f5b7655b230d0925b9e02)
+  * [`lexicon.community.*`](https://lexicon.community/) at [91c50cb](https://github.com/lexicon-community/lexicon/commit/91c50cbd84a9da8014332a6e37812c276889c8ac)
 * `client`:
   * For websocket event streams, close the websocket connection when a non-`ConnectionClosed` exception is raised.
   * Use the lexicon method's `input.encoding` as the `Content-Type` request header.
