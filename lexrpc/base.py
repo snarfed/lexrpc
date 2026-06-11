@@ -55,7 +55,7 @@ BLOB_DEF = {
         'required': ['ref', 'mimeType', 'size'],
         'properties': {
             'ref': {
-                'type': 'ref',
+                'type': 'cid-link',
             },
             'mimeType': {
                 'type': 'string',

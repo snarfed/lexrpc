@@ -2,6 +2,8 @@
 from datetime import datetime
 from unittest import skip, TestCase
 
+from multiformats import CID
+
 from .lexicons import LEXICONS
 from ..base import AT_URI_RE, Base, ValidationError
 
@@ -258,6 +260,48 @@ class BaseTest(TestCase):
             '$type': 'un.known',
             'foo': 'bar',
         }})
+
+    def test_validate_blob_in_open_union(self):
+        cid = CID.decode('bafyreiclp443lavogvhj3d2ob2cxbfuscni2k5jk7bebjzg7khl3esabwq')
+        self.base.validate('io.example.union', 'record', {'unionOpen': {
+            '$type': 'blob',
+            'ref': cid,
+            'mimeType': 'text/markdown',
+            'size': 53,
+        }})
+
+        with self.assertRaises(ValidationError):
+            self.base.validate('io.example.union', 'record', {'unionOpen': {
+                '$type': 'blob',
+                'ref': 'not-a-cid',
+                'mimeType': 'text/markdown',
+                'size': 53,
+            }})
+
+    def test_validate_site_standard_document_blob_in_union(self):
+        # regression: blob value in open union field crashed with KeyError
+        base = Base(validate=True)
+        cid = CID.decode('bafyreiclp443lavogvhj3d2ob2cxbfuscni2k5jk7bebjzg7khl3esabwq')
+        base.validate('site.standard.document', 'record', {
+            '$type': 'site.standard.document',
+            'path': '2026/06/11/test-01',
+            'site': 'at://did:plc:erqwpimsmwnzohwoiojsy22z/site.standard.publication/3mn4tlpcnd42y',
+            'links': {
+                '$type': 'blob',
+                'ref': cid,
+                'size': 53,
+                'mimeType': 'text/markdown',
+            },
+            'title': 'Test 01',
+            'content': {
+                '$type': 'ing.dasl.masl',
+                'src': cid,
+                'content-type': 'text/markdown',
+                'content-length': 53,
+            },
+            'description': 'Ignore this :)',
+            'publishedAt': '2026-06-11T12:00:00.000Z',
+        })
 
     def test_validate_record_union_array_fail_bad_type(self):
         for bad in [
