@@ -218,6 +218,11 @@ def subscription(xrpc_server, nsid, limit_ips=False):
 
         try:
             handle(ws)
+        except NotImplementedError as e:
+            msg = str(e)
+            logger.info(msg)
+            # WebSocket closure code 1011 is for "unexpected conditions"
+            ws.close(reason=1011, message=msg)
         finally:
             # ideally I'd use Flask's after_this_request instead, but it doesn't
             # guarantee that it'll run if the request raises an uncaught

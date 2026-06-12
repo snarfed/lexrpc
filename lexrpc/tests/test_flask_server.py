@@ -1,4 +1,5 @@
 """Unit tests for flask_server.py."""
+from collections import defaultdict
 from datetime import datetime, timedelta
 from threading import Barrier, Condition, Thread
 import time
@@ -12,7 +13,9 @@ from simple_websocket import ConnectionClosed
 
 from .. import base
 from ..base import XrpcError
-from ..flask_server import init_flask, subscribers, Subscriber, subscription
+
+from .. import flask_server
+from ..flask_server import init_flask, Subscriber, subscription
 from ..server import Redirect
 from .lexicons import LEXICONS
 from .test_base import NOW
@@ -24,12 +27,17 @@ class FakeConnection:
     exc = None
     sent = []
     connected = True
+    closed = None
 
     @classmethod
     def send(cls, msg):
         if cls.exc:
             raise cls.exc
         cls.sent.append(msg)
+
+    @classmethod
+    def close(cls, reason=None, message=None):
+        cls.closed = (reason, message)
 
 
 class XrpcEndpointTest(TestCase):
@@ -46,6 +54,9 @@ class XrpcEndpointTest(TestCase):
         FakeConnection.exc = None
         FakeConnection.sent = []
         FakeConnection.connected = True
+        FakeConnection.closed = None
+
+        flask_server.subscribers = defaultdict(list)
 
     def tearDown(self):
         server._methods.pop('io.example.delayedSubscribe', None)
@@ -202,6 +213,21 @@ class XrpcEndpointTest(TestCase):
         self.assertEqual(405, resp.status_code)
         self.assertIn('Use websocket', resp.json['message'])
 
+    def test_unknown_subscription(self):
+        with self.app.test_request_context():
+            subscription(server, 'io.un.known')(FakeConnection)
+
+        self.assertEqual([], FakeConnection.sent)
+        self.assertEqual((1011, 'io.un.known not found'), FakeConnection.closed)
+
+    def test_not_implemented_subscription(self):
+        with self.app.test_request_context():
+            subscription(server, 'io.example.delayedSubscribe')(FakeConnection)
+
+        self.assertEqual([], FakeConnection.sent)
+        self.assertEqual((1011, 'io.example.delayedSubscribe not implemented'),
+                         FakeConnection.closed)
+
     def test_subscribers(self):
         start = Barrier(2)
         cont = Barrier(3)
@@ -218,7 +244,7 @@ class XrpcEndpointTest(TestCase):
             with self.app.test_request_context(**kwargs):
                 handler(FakeConnection)
 
-        self.assertEqual({}, subscribers)
+        self.assertEqual({}, flask_server.subscribers)
 
         first = Thread(target=subscribe, kwargs={
             'query_string': {'foo': 'bar'},
@@ -230,7 +256,7 @@ class XrpcEndpointTest(TestCase):
 
         self.assertEqual([
             Subscriber('1.2.3.4', 'first', {'foo': 'bar'}, NOW),
-        ], subscribers['io.example.delayedSubscribe'])
+        ], flask_server.subscribers['io.example.delayedSubscribe'])
 
         start.reset()
         second = Thread(target=subscribe, kwargs={
@@ -247,12 +273,12 @@ class XrpcEndpointTest(TestCase):
         self.assertEqual([
             Subscriber('1.2.3.4', 'first', {'foo': 'bar'}, NOW),
             Subscriber('5.6.7.8', 'second', {'foo': 'baz'}, NOW),
-        ], subscribers['io.example.delayedSubscribe'])
+        ], flask_server.subscribers['io.example.delayedSubscribe'])
 
         cont.wait()
         first.join()
         second.join()
-        self.assertEqual(0, len(subscribers['io.example.delayedSubscribe']))
+        self.assertEqual(0, len(flask_server.subscribers['io.example.delayedSubscribe']))
 
     def test_procedure_missing_input(self):
         resp = self.client.post('/xrpc/io.example.procedure')
@@ -338,12 +364,12 @@ class XrpcEndpointTest(TestCase):
         resp = self.client.post('/xrpc/io.example.params?bar=5')
         self.assertEqual(200, resp.status_code, resp.json)
 
-    def test_unknown_methods(self):
-        resp = self.client.get('/xrpc/io.un.known')
+    def test_not_implemented_method(self):
+        resp = self.client.get('/xrpc/io.example.xrpcError')
         self.assertEqual(501, resp.status_code)
         self.assertEqual({
             'error': 'MethodNotImplemented',
-            'message': 'io.un.known not found',
+            'message': 'io.example.xrpcError not implemented',
         }, resp.json)
 
     def test_undefined_method(self):

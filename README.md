@@ -220,11 +220,14 @@ Here's how to package, test, and ship a new release.
 
 ### 2.2 - unreleased
 
+* Schema validation:
+  * Fix crash (`KeyError`) when validating a `blob` value inside an open union; now raises `ValidationError` for invalid blob refs.
 * `client`:
   * For websocket event streams, close the websocket connection when a non-`ConnectionClosed` exception is raised.
   * Use the lexicon method's `input.encoding` as the `Content-Type` request header.
   * `Client.__init__`: new `requests_session` kwarg, an optional :class:`requests.Session` to use for HTTP requests.
-* `base`: fix crash (`KeyError`) when validating a `blob` value inside an open union; now raises `ValidationError` for invalid blob refs.
+* `flask_server`:
+  * Close websocket connections with reason 1011 for unknown/not implemented endpoint NSIDs.
 * Update bundled lexicons:
   * Bluesky PBC's (`app.bsky.*` etc) at [cf4843c](https://github.com/bluesky-social/atproto/commit/cf4843c339396e98fc0191b5c7ccf8db2e48da5b)
   * [`site.standard.*`](https://standard.site/) at [549453e](https://tangled.org/standard.site/lexicons/commit/549453e37a4e15e8318f5b7655b230d0925b9e02)
