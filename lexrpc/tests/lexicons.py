@@ -385,6 +385,13 @@ LEXICONS = [
         'defs': {
             'main': {
                 'type': 'query',
+                'parameters': {
+                    'type': 'params',
+                    'properties': {
+                        'status': {'type': 'integer'},
+                        'x': {'type': 'string'},
+                    },
+                },
             },
         },
     },

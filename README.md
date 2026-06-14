@@ -226,6 +226,8 @@ Here's how to package, test, and ship a new release.
   * For websocket event streams, close the websocket connection when a non-`ConnectionClosed` exception is raised.
   * Use the lexicon method's `input.encoding` as the `Content-Type` request header.
   * `Client.__init__`: new `requests_session` kwarg, an optional :class:`requests.Session` to use for HTTP requests.
+* `server`:
+  * `Server.call`: unknown parameters not in the lexicon are now silently ignored instead of raising `ValidationError`. [Background.](https://github.com/bluesky-social/atproto/discussions/5094)
 * `flask_server`:
   * Close websocket connections with reason 1011 for unknown/not implemented endpoint NSIDs.
 * Update bundled lexicons:

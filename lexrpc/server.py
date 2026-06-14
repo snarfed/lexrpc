@@ -97,7 +97,15 @@ class Server(Base):
         if not fn:
             fail(f'{nsid} not implemented', NotImplementedError)
 
-        subscription = self.defs[nsid]['type'] == 'subscription'
+        defn = self.defs[nsid]
+        subscription = defn['type'] == 'subscription'
+
+        # ignore unknown params. open question whether this is the right thing to do,
+        # but we suspect yes.
+        # https://github.com/bluesky-social/atproto/discussions/5094
+        # https://atproto.com/specs/xrpc#lexicon-http-endpoints
+        known = defn.get('parameters', {}).get('properties', {}).keys()
+        params = {k: v for k, v in params.items() if k in known}
 
         # validate params and input, then encode params
         params = self.validate(nsid, 'parameters', params)

@@ -117,9 +117,15 @@ class ServerTest(TestCase):
         with self.assertRaises(ValidationError):
             server.call('io.example.params', {}, foo='a')
 
-    def test_unknown_param(self):
-        with self.assertRaises(ValidationError) as e:
-            server.call('io.example.params', {}, bar=3, nope='x')
+    def test_unknown_param_ignored(self):
+        # unknown params are silently dropped for all method types
+        output = server.call('io.example.query', {}, x='y', utm_source='google')
+        self.assertEqual({'foo': 'y', 'bar': 5}, output)
+
+        server.call('io.example.params', {}, bar=3, nope='x')
+
+        gen = server.call('io.example.subscribe', start=3, end=4, nope='x')
+        self.assertEqual([({'hea': 'der'}, {'num': 3})], list(gen))
 
     def test_invalid_params(self):
         with self.assertRaises(ValidationError):
