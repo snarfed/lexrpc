@@ -55,6 +55,10 @@ flask = [
     'werkzeug>=2.0',
     'wsproto>=1.0',
 ]
+docs = [
+    'sphinx>=7.0.0',
+    'sphinx-rtd-theme>=3.0.0',
+]
 
 [tool.uv.sources]
 arroba =            { editable = true, path = "../arroba" }
@@ -72,3 +76,10 @@ secp256k1 =         { editable = true, path = "../secp256k1-py" }
 
 [tool.deptry]
 extend_exclude = ['build', 'dist', 'docs', 'examples']
+
+[tool.deptry.per_rule_ignores]
+# docs-only build tools, not imported in the codebase
+DEP002 = [
+    'sphinx',
+    'sphinx-rtd-theme',
+]
