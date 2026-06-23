@@ -12,7 +12,11 @@ build-backend = 'setuptools.build_meta'
 '*' = ['*.json']
 
 [tool.setuptools.packages.find]
-where = ['.']
+include = ['lexrpc*']
+
+[project.urls]
+'Homepage' = 'https://github.com/snarfed/lexrpc'
+'Documentation' = 'https://lexrpc.readthedocs.io/'
 
 [project]
 name = 'lexrpc'
@@ -22,18 +26,8 @@ authors = [
 ]
 description = "Python implementation of AT Protocol's XRPC + Lexicon"
 readme = 'README.md'
-requires-python = '>=3.7'
+requires-python = '>=3.9'
 keywords = ['XRPC', 'Lexicon', 'AT Protocol', 'ATP']
-dependencies = [
-    'dag-cbor',
-    'dag-json>=0.3',
-    'grapheme',
-    'iterators',
-    'libipld<4.0.0',
-    'multiformats>=0.3.1.post4',
-    'requests>=2.0',
-    'simple-websocket',
-]
 classifiers = [
     'Programming Language :: Python :: 3',
     'License :: Public Domain',
@@ -43,12 +37,38 @@ classifiers = [
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
-[project.urls]
-'Homepage' = 'https://github.com/snarfed/lexrpc'
-'Documentation' = 'https://lexrpc.readthedocs.io/'
+dependencies = [
+    'dag-cbor>=0.3',
+    'dag-json>=0.3',
+    'grapheme>=0.6.0',
+    'iterators>=0.2.0',
+    'libipld>=3.0.0,<4.0.0',
+    'multiformats>=0.3.1.post4',
+    'requests>=2.0',
+    'simple-websocket>=0.10.0',
+]
 
 [project.optional-dependencies]
 flask = [
     'Flask>=2.0',
-    'flask-sock',
+    'flask-sock>=0.6.0',
+    'werkzeug>=2.0',
+    'wsproto>=1.0',
 ]
+
+[tool.uv.sources]
+arroba =            { editable = true, path = "../arroba" }
+brevity =           { editable = true, path = "../brevity" }
+flask-gae-static =  { editable = true, path = "../flask-gae-static" }
+lexrpc =            { editable = true, path = "../lexrpc" }
+mf2util =           { editable = true, path = "../mf2util" }
+mox3 =              { editable = true, path = "../mox3" }
+oauth-dropins =     { editable = true, path = "../oauth-dropins" }
+pywebutil =         { editable = true, path = "../webutil" }
+secp256k1 =         { editable = true, path = "../secp256k1-py" }
+
+[tool.uv.pip]
+# this is in ~/.config/uv/uv.toml
+
+[tool.deptry]
+extend_exclude = ['build', 'dist', 'docs', 'examples']
