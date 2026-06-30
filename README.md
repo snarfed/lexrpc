@@ -146,25 +146,26 @@ Here's how to package, test, and ship a new release.
     ```
 1. Run the unit tests.
     ```sh
-    source local/bin/activate.csh
+    source .venv/bin/activate.csh
     python -m unittest discover
     ```
 1. Bump the version number in `pyproject.toml` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
 1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`. Check that the generated HTML looks fine by opening `docs/_build/html/index.html` and looking around.
-1. `git commit -am 'release vX.Y'`
+1. ```sh
+   setenv ver X.Y
+   git commit -am "release v$ver"
+   ```
 1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
     ```sh
     uv build
-    setenv ver X.Y
-    twine upload -r pypitest dist/lexrpc-$ver*
+    twine upload -r pypitest dist/lexrpc-$ver.tar.gz dist/lexrpc-$ver-py3-none-any.whl
     ```
 1. Install from test.pypi.org.
     ```sh
     cd /tmp
-    python -m venv local
-    source local/bin/activate.csh
+    python -m venv .venv
+    source .venv/bin/activate.csh
     pip uninstall lexrpc # make sure we force pip to use the uploaded version
-    pip install --upgrade pip
     pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver
     ```
 1. Smoke test that the code trivially loads and runs.
@@ -218,7 +219,7 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 2.2 - unreleased
+### 2.2 - 2026-06-29
 
 * Schema validation:
   * Fix crash (`KeyError`) when validating a `blob` value inside an open union; now raises `ValidationError` for invalid blob refs.

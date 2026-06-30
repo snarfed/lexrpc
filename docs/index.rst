@@ -198,7 +198,7 @@ Here’s how to package, test, and ship a new release.
     ``sh  git checkout main  git pull``
 
 2.  Run the unit tests.
-    ``sh  source local/bin/activate.csh  python -m unittest discover``
+    ``sh  source .venv/bin/activate.csh  python -m unittest discover``
 
 3.  Bump the version number in ``pyproject.toml`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
@@ -210,13 +210,18 @@ Here’s how to package, test, and ship a new release.
     ``./docs/build.sh``. Check that the generated HTML looks fine by
     opening ``docs/_build/html/index.html`` and looking around.
 
-5.  ``git commit -am 'release vX.Y'``
+5.  
+
+    .. code:: sh
+
+       setenv ver X.Y
+       git commit -am "release v$ver"
 
 6.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
-    ``sh  python -m build  setenv ver X.Y  twine upload -r pypitest dist/lexrpc-$ver*``
+    ``sh  uv build  twine upload -r pypitest dist/lexrpc-$ver.tar.gz dist/lexrpc-$ver-py3-none-any.whl``
 
 7.  Install from test.pypi.org.
-    ``sh  cd /tmp  python -m venv local  source local/bin/activate.csh  pip uninstall lexrpc # make sure we force pip to use the uploaded version  pip install --upgrade pip  pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver``
+    ``sh  cd /tmp  python -m venv .venv  source .venv/bin/activate.csh  pip uninstall lexrpc # make sure we force pip to use the uploaded version  pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver``
 
 8.  Smoke test that the code trivially loads and runs.
     ``sh  python  # run test code below`` Test code to paste into the
@@ -263,6 +268,45 @@ Here’s how to package, test, and ship a new release.
 Changelog
 ---------
 
+2.2 - 2026-06-29
+~~~~~~~~~~~~~~~~
+
+- Schema validation:
+
+  - Fix crash (``KeyError``) when validating a ``blob`` value inside an
+    open union; now raises ``ValidationError`` for invalid blob refs.
+
+- ``client``:
+
+  - For websocket event streams, close the websocket connection when a
+    non-``ConnectionClosed`` exception is raised.
+  - Use the lexicon method’s ``input.encoding`` as the ``Content-Type``
+    request header.
+  - ``Client.__init__``: new ``requests_session`` kwarg, an optional
+    :class:``requests.Session`` to use for HTTP requests.
+
+- ``server``:
+
+  - ``Server.call``: unknown parameters not in the lexicon are now
+    silently ignored instead of raising ``ValidationError``.
+    `Background. <https://github.com/bluesky-social/atproto/discussions/5094>`__
+
+- ``flask_server``:
+
+  - Close websocket connections with reason 1011 for unknown/not
+    implemented endpoint NSIDs.
+
+- Update bundled lexicons:
+
+  - Bluesky PBC’s (``app.bsky.*`` etc) at
+    `cf4843c <https://github.com/bluesky-social/atproto/commit/cf4843c339396e98fc0191b5c7ccf8db2e48da5b>`__
+  - `site.standard.* <https://standard.site/>`__ at
+    `549453e <https://tangled.org/standard.site/lexicons/commit/549453e37a4e15e8318f5b7655b230d0925b9e02>`__
+  - `lexicon.community.* <https://lexicon.community/>`__ at
+    `91c50cb <https://github.com/lexicon-community/lexicon/commit/91c50cbd84a9da8014332a6e37812c276889c8ac>`__
+
+.. _section-1:
+
 2.1 - 2026-02-06
 ~~~~~~~~~~~~~~~~
 
@@ -287,7 +331,7 @@ Changelog
   - Ignore ``maxGraphemes`` on non-string fields.
   - Allow ``type: permission-set``.
 
-.. _section-1:
+.. _section-2:
 
 2.0 - 2025-09-13
 ~~~~~~~~~~~~~~~~
@@ -316,7 +360,7 @@ Non-breaking changes:
     than one connection to event stream subscription methods per client
     IP.
 
-.. _section-2:
+.. _section-3:
 
 1.1 - 2025-03-13
 ~~~~~~~~~~~~~~~~
@@ -352,7 +396,7 @@ Non-breaking changes:
     ``ValidationError``, ie ``err.args[1]``, as a dict of additional
     HTTP headers to return with the HTTP 400 response.
 
-.. _section-3:
+.. _section-4:
 
 1.0 - 2024-10-14
 ~~~~~~~~~~~~~~~~
@@ -376,7 +420,7 @@ Non-breaking changes:
 
   - Add ``status`` param to ``Redirect``.
 
-.. _section-4:
+.. _section-5:
 
 0.7 - 2024-06-24
 ~~~~~~~~~~~~~~~~
@@ -407,7 +451,7 @@ Non-breaking changes:
 - Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
   `bluesky-social/atproto@15cc6ff37c326d5c186385037c4bfe8b60ea41b1 <https://github.com/bluesky-social/atproto/commit/15cc6ff37c326d5c186385037c4bfe8b60ea41b1>`__.
 
-.. _section-5:
+.. _section-6:
 
 0.6 - 2024-03-16
 ~~~~~~~~~~~~~~~~
@@ -418,7 +462,7 @@ Non-breaking changes:
 - Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
   `bluesky-social/atproto@f45eef3 <https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282>`__.
 
-.. _section-6:
+.. _section-7:
 
 0.5 - 2023-12-10
 ~~~~~~~~~~~~~~~~
@@ -433,7 +477,7 @@ Non-breaking changes:
   - Bug fix: don’t infinite loop if ``refreshSession`` fails.
   - Other minor authentication bug fixes.
 
-.. _section-7:
+.. _section-8:
 
 0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
@@ -473,7 +517,7 @@ Non-breaking changes:
   - Add the ``error`` field to the JSON response bodies for most error
     responses.
 
-.. _section-8:
+.. _section-9:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
@@ -485,7 +529,7 @@ Non-breaking changes:
 - Add new ``Server.register`` method for manually registering handlers.
 - Bug fix for server ``@method`` decorator.
 
-.. _section-9:
+.. _section-10:
 
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
@@ -502,7 +546,7 @@ put more effort into matching and fully implementing them. Stay tuned!
   format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
   Original format is no longer supported.
 
-.. _section-10:
+.. _section-11:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~
