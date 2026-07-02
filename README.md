@@ -184,7 +184,10 @@ Here's how to package, test, and ship a new release.
             'main': {
                 'type': 'query',
                 'description': 'Ping the server',
-                'parameters': {'message': { 'type': 'string' }},
+                'parameters': {
+                    'type': 'params',
+                    'properties': {'message': {'type': 'string'}},
+                },
                 'output': {
                     'encoding': 'application/json',
                     'schema': {
