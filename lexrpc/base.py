@@ -613,34 +613,40 @@ class Base():
         lexicon = self._get_def(method_nsid)
         params_schema = lexicon.get('parameters', {}).get('properties', {})
 
-        decoded = {}
-        for name, val in params:
-            type = params_schema.get(name, {}).get('type') or 'string'
-            assert type in PARAMETER_TYPES, type
-
+        def decode(val, type, name):
             if type == 'boolean':
                 if val == 'true':
-                    decoded[name] = True
+                    return True
                 elif val == 'false':
-                    decoded[name] = False
+                    return False
                 else:
                     raise ValueError(
                         f'Got {val!r} for boolean parameter {name}, expected true or false')
 
             try:
                 if type == 'number':
-                    decoded[name] = float(val)
+                    return float(val)
                 elif type in ('int', 'integer'):
-                    decoded[name] = int(val)
+                    return int(val)
             except ValueError as e:
                 e.args = [f'{e.args[0]} for {type} parameter {name}']
                 raise e
 
             if type == 'string':
-                decoded[name] = val
+                return val
+
+        decoded = {}
+        for name, val in params:
+            schema = params_schema.get(name, {})
+            type = schema.get('type') or 'string'
+            assert type in PARAMETER_TYPES, type
 
             if type == 'array':
-                decoded.setdefault(name, []).append(val)
+                item_type = schema.get('items', {}).get('type') or 'string'
+                assert item_type in PARAMETER_TYPES, item_type
+                decoded.setdefault(name, []).append(decode(val, item_type, name))
+            else:
+                decoded[name] = decode(val, type, name)
 
         return decoded
 

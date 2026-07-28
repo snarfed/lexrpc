@@ -227,6 +227,7 @@ Here's how to package, test, and ship a new release.
 * Schema validation:
   * Fix `ref` type validation to accept string values that match their `ref`, eg token refs inside arrays or unions.
   * Fix `minimum`/`maximum` schema constraint of `0`.
+* `Base.decode_params`: decode array values using their `items` type.
 
 
 ### 2.2 - 2026-06-29

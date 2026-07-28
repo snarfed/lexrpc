@@ -358,6 +358,25 @@ class BaseTest(TestCase):
         base = Base(LEXICONS, validate=False, truncate=False)
         base.validate(None, None, {'x': 'y'})
 
+    def test_decode_params_array_integer(self):
+        outer = {
+            'lexicon': 1,
+            'id': 'io.example.intArray',
+            'defs': {'main': {
+                'type': 'query',
+                'parameters': {
+                    'type': 'params',
+                    'properties': {
+                        'nums': {'type': 'array', 'items': {'type': 'integer'}},
+                    },
+                },
+            }},
+        }
+
+        base = Base(LEXICONS + [outer], validate=True)
+        self.assertEqual({'nums': [1, 2]}, base.decode_params(
+            'io.example.intArray', [('nums', '1'), ('nums', '2')]))
+
     def test_validate_minimum_zero(self):
         outer = {
             'lexicon': 1,
