@@ -358,6 +358,26 @@ class BaseTest(TestCase):
         base = Base(LEXICONS, validate=False, truncate=False)
         base.validate(None, None, {'x': 'y'})
 
+    def test_validate_minimum_zero(self):
+        outer = {
+            'lexicon': 1,
+            'id': 'io.example.minZero',
+            'defs': {'main': {
+                'type': 'record',
+                'record': {
+                    'properties': {
+                        'count': {'type': 'integer', 'minimum': 0},
+                    },
+                },
+            }},
+        }
+
+        base = Base(LEXICONS + [outer], validate=True)
+        base.validate('io.example.minZero', 'record', {'count': 0})
+
+        with self.assertRaises(ValidationError):
+            base.validate('io.example.minZero', 'record', {'count': -1})
+
     def test_validate_ref_property_lexicon(self):
         Base(validate=True).validate('app.bsky.feed.getTimeline', 'output', {
             'feed': [{

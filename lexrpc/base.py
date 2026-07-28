@@ -359,10 +359,10 @@ class Base():
                 if max_graphemes and length > max_graphemes:
                     fail(f'is longer than maxGraphemes {max_graphemes}')
 
-        if minimum := schema.get('minimum'):
+        if (minimum := schema.get('minimum')) is not None:
             if val < minimum:
                 fail(f'is lower than minimum {minimum}')
-        if maximum := schema.get('maximum'):
+        if (maximum := schema.get('maximum')) is not None:
             if val > maximum:
                 fail(f'is higher than maximum {maximum}')
 
