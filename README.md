@@ -222,6 +222,12 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
+### 2.3 - unreleased
+
+* Schema validation:
+  * Fix `ref` type validation to accept string values that match their `ref`, eg token refs inside arrays or unions.
+
+
 ### 2.2 - 2026-06-29
 
 * Schema validation:

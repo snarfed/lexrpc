@@ -217,6 +217,31 @@ class BaseTest(TestCase):
                 }],
             })
 
+    def test_validate_record_ref_array_token_pass(self):
+        outer = {
+            'lexicon': 1,
+            'id': 'io.example.tokenRefArray',
+            'defs': {'main': {
+                'type': 'record',
+                'record': {
+                    'properties': {
+                        'foo': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'ref',
+                                'ref': 'io.example.token',
+                            },
+                        },
+                    },
+                },
+            }},
+        }
+
+        base = Base(LEXICONS + [outer], validate=True)
+        base.validate('io.example.tokenRefArray', 'record', {
+            'foo': ['io.example.token'],
+        })
+
     def test_validate_record_ref_array_fail_item_not_nullable(self):
         with self.assertRaises(ValidationError):
             self.base.validate('io.example.refArray', 'record', {

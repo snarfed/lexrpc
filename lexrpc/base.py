@@ -374,8 +374,9 @@ class Base():
 
         if type_ == 'ref':
             ref = schema['ref']
-            if isinstance(val, str) and val != ref:
-                fail(f'is not {ref}')
+            if isinstance(val, str):
+                if val != ref:
+                    fail(f'is not {ref}')
             elif not isinstance(val, dict):
                 fail('is not object')
             lexicon, schema = get_schema(ref)
