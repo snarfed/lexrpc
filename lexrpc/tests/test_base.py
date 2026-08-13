@@ -190,6 +190,32 @@ class BaseTest(TestCase):
                 },
             })
 
+    def test_validate_unknown_lexicon(self):
+        with self.assertRaises(NotImplementedError):
+            self.base.validate('io.example.nope', 'record', {'foo': 'bar'})
+
+        with self.assertRaises(NotImplementedError):
+            self.base.validate('io.example.unknown', 'record', {
+                'unknown': {
+                    '$type': 'io.example.nope',
+                    'foo': 'bar',
+                },
+            })
+
+    def test_validate_unknown_lexicon_not_required(self):
+        base = Base(LEXICONS, validate=True, require_lexicons=False)
+
+        obj = {'foo': 'bar'}
+        self.assertEqual(obj, base.validate('io.example.nope', 'record', obj))
+
+        obj = {
+            'unknown': {
+                '$type': 'io.example.nope',
+                'foo': 'bar',
+            },
+        }
+        self.assertEqual(obj, base.validate('io.example.unknown', 'record', obj))
+
     # TODO: bring back once the Bluesky appview validates this too
     # https://github.com/bluesky-social/atproto/discussions/1968#discussioncomment-11195092
     @skip

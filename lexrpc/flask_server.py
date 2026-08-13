@@ -73,14 +73,14 @@ class XrpcEndpoint(View):
                 'message': f'{nsid} is not a valid NSID',
             }, 400, RESPONSE_HEADERS
         try:
-            lexicon = self.server._get_def(nsid)
+            lexicon = self.server._get_def(nsid) or {}
         except NotImplementedError as e:
             return {
                 'error': 'MethodNotImplemented',
                 'message': str(e),
             }, 501, RESPONSE_HEADERS
 
-        if lexicon['type'] == 'subscription':
+        if lexicon.get('type') == 'subscription':
             return {'message': f'Use websocket for {nsid}, not HTTP'}, 405
 
         if request.method == 'OPTIONS':

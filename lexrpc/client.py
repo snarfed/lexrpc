@@ -77,7 +77,7 @@ class Client(Base):
 
     def __init__(self, address=None, access_token=None, refresh_token=None,
                  session_callback=None, lexicons=None, validate=True, truncate=False,
-                 requests_session=None, **requests_kwargs):
+                 require_lexicons=True, requests_session=None, **requests_kwargs):
         """Constructor.
 
         Args:
@@ -98,6 +98,10 @@ class Client(Base):
             and output bodies
           truncate (bool): whether to truncate string values that are longer
             than their ``maxGraphemes`` or ``maxLength`` in their lexicon
+          require_lexicons (bool): whether to require that a lexicon exists for
+            every value we validate. If False, values with missing or unknown
+            lexicons are skipped instead of raising
+            :class:`NotImplementedError`.
           requests_session (requests.Session): optional HTTP session to use for
             requests. Defaults to a new :class:`requests.Session`.
           requests_kwargs: passed to :func:`requests.Session.get` /
@@ -108,7 +112,8 @@ class Client(Base):
         Raises:
           ValidationError: if any lexicon schema is invalid
         """
-        super().__init__(lexicons=lexicons, validate=validate, truncate=truncate)
+        super().__init__(lexicons=lexicons, validate=validate, truncate=truncate,
+                         require_lexicons=require_lexicons)
 
         assert not ((access_token or refresh_token) and requests_kwargs.get('auth'))
 
@@ -175,8 +180,8 @@ class Client(Base):
         params = self.validate(nsid, 'parameters', params)
         params_str = self.encode_params(params)
 
-        lexicon = self._get_def(nsid)
-        type = lexicon['type']
+        lexicon = self._get_def(nsid) or {}
+        type = lexicon.get('type')
         if type == 'subscription':
             input = self.validate(nsid, 'input', input)
 

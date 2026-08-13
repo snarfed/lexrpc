@@ -90,6 +90,7 @@ TID_RE = re.compile(rf'[{BASE32_CHARS}]{{13}}')
 CID_RE = re.compile(r'[A-Za-z0-9+]{8,}')
 
 # https://www.w3.org/TR/did-core/#did-syntax
+# https://atproto.com/specs/did
 DID_RE = re.compile(r'did:[a-z]+:[A-Za-z0-9._%:-]{1,2048}(?<!:)')
 
 # https://atproto.com/specs/at-uri-scheme
@@ -150,8 +151,10 @@ class Base():
     defs = None  # dict mapping id to lexicon def
     _validate = None
     _truncate = None
+    _require_lexicons = None
 
-    def __init__(self, lexicons=None, validate=True, truncate=False):
+    def __init__(self, lexicons=None, validate=True, truncate=False,
+                 require_lexicons=True):
         """Constructor.
 
         Args:
@@ -162,12 +165,17 @@ class Base():
             and output bodies
           truncate (bool): whether to truncate string values that are longer
             than their ``maxGraphemes`` or ``maxLength`` in their lexicon
+          require_lexicons (bool): whether to require that a lexicon exists for
+            every value we validate. If False, values with missing or unknown
+            lexicons are skipped instead of raising
+            :class:`NotImplementedError`.
 
         Raises:
           ValidationError: if any schema is invalid
         """
         self._validate = validate
         self._truncate = truncate
+        self._require_lexicons = require_lexicons
         self.defs = {}
 
         if lexicons is None:
@@ -208,8 +216,13 @@ class Base():
     def _get_def(self, id):
         """Returns the given lexicon def.
 
+        Returns:
+          dict: the def, or None if it doesn't exist and this object was
+            initialized with ``require_lexicons=False``
+
         Raises:
-          NotImplementedError: if no def exists for the given id
+          NotImplementedError: if no def exists for the given id and this object
+            was initialized with ``require_lexicons=True``
         """
         # TODO: bring back once the Bluesky appview validates this too
         # https://github.com/bluesky-social/atproto/discussions/1968#discussioncomment-11195092
@@ -218,7 +231,7 @@ class Base():
         #     raise ValidationError(f'#main suffix not allowed on $type: {id}')
 
         lexicon = self.defs.get(id)
-        if not lexicon:
+        if not lexicon and self._require_lexicons:
             fail(f'{id} not found')
 
         return lexicon
@@ -241,7 +254,8 @@ class Base():
 
         Raises:
           NotImplementedError: if no lexicon exists for the given NSID, or the
-            lexicon does not define a schema for the given type
+            lexicon does not define a schema for the given type, and this object
+            was initialized with ``require_lexicons=True``
           ValidationError: if the object is invalid
         """
         if not self._validate and not self._truncate:
@@ -249,7 +263,11 @@ class Base():
 
         assert type in ('input', 'output', 'message', 'parameters', 'record'), type
 
-        base = self._get_def(nsid).get(type, {})
+        if not (defn := self._get_def(nsid)):
+            logger.debug(f'No lexicon for {nsid}, skipping validation')
+            return obj
+
+        base = defn.get(type, {})
         encoding = base.get('encoding')
         if encoding and encoding != 'application/json':
             # binary or other non-JSON data, pass through
@@ -292,12 +310,16 @@ class Base():
         # logger.debug(f'@ {name} {type_name} {lexicon} {str(val)[:100]} {str(schema)[:100]}')
 
         def get_schema(lex_name):
-            """Returns (fully qualified lexicon name, lexicon) tuple."""
+            """Returns (fully qualified lexicon name, lexicon) tuple.
+
+            The lexicon is None if it's not found and ``require_lexicons`` is off.
+            """
             if lex_name.startswith('#'):
                 schema_name = lexicon.split('#')[0] + lex_name
             else:
                 schema_name = lex_name
-            schema = self._get_def(schema_name)
+            if not (schema := self._get_def(schema_name)):
+                return schema_name, None
             if schema.get('type') == 'record':
                 schema = schema.get('record')
             if not schema:
@@ -326,6 +348,8 @@ class Base():
         if type_ == 'unknown':
             if isinstance(val, dict) and val.get('$type'):
                 lexicon, schema = get_schema(val['$type'])
+                if not schema:
+                    return
                 # pass through and validate with this schema
             else:
                 return
@@ -380,6 +404,8 @@ class Base():
             elif not isinstance(val, dict):
                 fail('is not object')
             lexicon, schema = get_schema(ref)
+            if not schema:
+                return
 
         if type_ == 'union':
             if isinstance(val, dict):
@@ -405,6 +431,9 @@ class Base():
                 # https://github.com/bluesky-social/atproto/discussions/2940
                 # https://github.com/snarfed/lexrpc/issues/16
                 logger.debug(f'Skipping unknown type {inner_type}')
+                return
+
+            if not schema:
                 return
 
         # TODO: maybe bring back once we figure out why the AppView isn't
@@ -453,6 +482,8 @@ class Base():
 
             elif prop_type == 'ref':
                 prop_lexicon, prop_schema = get_schema(prop_schema['ref'])
+                if not prop_schema:
+                    continue
                 prop_type = prop_schema['type']
 
             self._validate_schema(name=prop_name, val=prop_val, type_name=prop_type,
@@ -610,7 +641,9 @@ class Base():
           ValueError: if a parameter value can't be decoded
           NotImplementedError: if no method lexicon is registered for the given NSID
         """
-        lexicon = self._get_def(method_nsid)
+        if not (lexicon := self._get_def(method_nsid)):
+            fail(f'{method_nsid} not found')
+
         params_schema = lexicon.get('parameters', {}).get('properties', {})
 
         def decode(val, type, name):

@@ -224,6 +224,7 @@ Here's how to package, test, and ship a new release.
 
 ### 2.3 - unreleased
 
+* `Client`, `Server`: new `require_lexicons` kwarg, defaults to `True`. If `False`, records with missing or unknown lexicons are skipped during validation instead of raising `NotImplementedError`.
 * Schema validation:
   * Fix `ref` type validation to accept string values that match their `ref`, eg token refs inside arrays or unions.
   * Fix `minimum`/`maximum` schema constraint of `0`.
