@@ -431,6 +431,14 @@ LEXICONS = [
                             'maxLength': 20,
                             'maxGraphemes': 10,
                         },
+                        'strings': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'string',
+                                'maxLength': 20,
+                                'maxGraphemes': 10,
+                            },
+                        },
                     },
                 },
             },

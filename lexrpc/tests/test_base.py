@@ -67,6 +67,13 @@ class BaseTest(TestCase):
                                  base.validate('io.example.outer', 'record',
                                                {'str': {'string': input}}))
 
+    def test_validate_truncate_array_items(self):
+        base = Base(LEXICONS, truncate=True)
+        self.assertEqual(
+            {'strings': ['short', 'too many …']},
+            base.validate('io.example.stringLength', 'record',
+                          {'strings': ['short', 'too many graphemes']}))
+
     def test_validate_truncate_ref(self):
         base = Base(LEXICONS, truncate=True)
 

@@ -449,10 +449,16 @@ class Base():
         #     self.validate_mime_type(val['mimeType'], schema.get('accept'), name=name)
 
         if type_ == 'array':
-            for item in val:
-                self._validate_schema(
-                    name=name, val=item, type_name=schema['items']['type'],
-                    lexicon=lexicon, schema=schema['items'])
+            items = schema['items']
+            for i, item in enumerate(val):
+                if (self._truncate and items['type'] == 'string'
+                        and (max_graphemes := items.get('maxGraphemes'))
+                        and grapheme.length(item) > max_graphemes):
+                    item = val[i] = grapheme.slice(item, end=max_graphemes - 1) + '…'
+
+                self._validate_schema(name=name, val=item,
+                                      type_name=items['type'],
+                                      lexicon=lexicon, schema=items)
 
         props = schema.get('properties', {})
         if props and not isinstance(val, dict):
