@@ -164,7 +164,8 @@ class Base():
           validate (bool): whether to validate schemas, parameters, and input
             and output bodies
           truncate (bool): whether to truncate string values that are longer
-            than their ``maxGraphemes`` or ``maxLength`` in their lexicon
+            than their ``maxGraphemes`` in their lexicon.
+            (TODO: support ``maxLength`` too. Deceptively difficult!)
           require_lexicons (bool): whether to require that a lexicon exists for
             every value we validate. If False, values with missing or unknown
             lexicons are skipped instead of raising
