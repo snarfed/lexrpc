@@ -358,6 +358,9 @@ class Base():
         if expected := FIELD_TYPES.get(type_):
             if type(val) != expected:
                 fail(f'has unexpected type {type(val).__name__}')
+                # if we're only truncating, fail is a noop, but the checks
+                # below all assume this type, so stop here
+                return
 
         if type_ in ('array', 'bytes', 'string'):
             min_length = schema.get('minLength')
@@ -453,6 +456,7 @@ class Base():
             items = schema['items']
             for i, item in enumerate(val):
                 if (self._truncate and items['type'] == 'string'
+                        and isinstance(item, str)
                         and (max_graphemes := items.get('maxGraphemes'))
                         and grapheme.length(item) > max_graphemes):
                     item = val[i] = grapheme.slice(item, end=max_graphemes - 1) + '…'
@@ -462,8 +466,10 @@ class Base():
                                       lexicon=lexicon, schema=items)
 
         props = schema.get('properties', {})
-        if props and not isinstance(val, dict):
+        is_params = schema.get('type') == 'params'
+        if (props or is_params) and not isinstance(val, dict):
             fail('should be object')
+            return
 
         required = schema.get('required', [])
         nullable = schema.get('nullable', [])
@@ -482,6 +488,7 @@ class Base():
                 continue
 
             elif (self._truncate and prop_type == 'string'
+                  and isinstance(prop_val, str)
                   and (max_graphemes := prop_schema.get('maxGraphemes'))):
                 if grapheme.length(prop_val) > max_graphemes:
                     prop_val = val[prop_name] = grapheme.slice(
@@ -497,7 +504,7 @@ class Base():
                                   lexicon=prop_lexicon, schema=prop_schema)
 
         # unknown parameters aren't allowed
-        if schema.get('type') == 'params':
+        if is_params:
             if unknown := val.keys() - props.keys():
                 fail(f'unknown parameters: {unknown}')
 

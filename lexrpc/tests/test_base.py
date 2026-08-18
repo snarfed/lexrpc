@@ -89,6 +89,31 @@ class BaseTest(TestCase):
                     base.validate('io.example.stringLength', 'record',
                                   {'string': input}))
 
+    def test_validate_truncate_bad_type(self):
+        # we're only truncating, not validating, so bad types should pass through
+        base = Base(LEXICONS, validate=False, truncate=True)
+
+        for val in None, 3, 'str', ['list'], {'string': 3}, {'strings': [3]}:
+            with self.subTest(val=val):
+                self.assertEqual(val, base.validate('io.example.stringLength',
+                                                    'record', val))
+
+    def test_validate_params_bad_type(self):
+        no_props = {
+            'lexicon': 1,
+            'id': 'io.example.noParamsProperties',
+            'defs': {'main': {
+                'type': 'query',
+                'parameters': {'type': 'params'},
+            }},
+        }
+        base = Base(LEXICONS + [no_props], validate=True)
+
+        for nsid in 'io.example.params', 'io.example.noParamsProperties':
+            with self.subTest(nsid=nsid):
+                with self.assertRaises(ValidationError):
+                    base.validate(nsid, 'parameters', 'not a dict')
+
     def test_validate_record_pass_nested_optional_field_missing(self):
         self.base.validate('io.example.record', 'record', {
             'baz': 3,

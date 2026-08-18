@@ -229,6 +229,7 @@ Here's how to package, test, and ship a new release.
   * Fix `ref` type validation to accept string values that match their `ref`, eg token refs inside arrays or unions.
   * Fix `minimum`/`maximum` schema constraint of `0`.
   * `truncate`: truncate string values inside arrays.
+  * Fix crash on values with unexpected types when `truncate` is on but `validate` is off, and on non-object `parameters` values.
 * `Base.decode_params`: decode array values using their `items` type.
 
 
