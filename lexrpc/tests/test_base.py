@@ -206,6 +206,17 @@ class BaseTest(TestCase):
     def test_validate_unknown_primitive(self):
         self.base.validate('io.example.unknown', 'record', {'unknown': 3})
 
+    def test_validate_float_fails(self):
+        for record in {'baz': 1.5}, {'baz': 3.0}:
+            with self.subTest(record=record):
+                with self.assertRaises(ValidationError):
+                    self.base.validate('io.example.record', 'record', record)
+
+        # unknown and undeclared fields aren't type checked, so floats pass
+        self.base.validate('io.example.unknown', 'record', {'unknown': 1.5})
+        self.base.validate('io.example.record', 'record',
+                           {'baz': 3, 'undeclared': 1.5})
+
     def test_validate_unknown_with_type(self):
         self.base.validate('io.example.unknown', 'record', {
             'unknown': {

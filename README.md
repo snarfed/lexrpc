@@ -230,6 +230,7 @@ Here's how to package, test, and ship a new release.
   * Fix `minimum`/`maximum` schema constraint of `0`.
   * `truncate`: truncate string values inside arrays.
   * Fix crash on values with unexpected types when `truncate` is on but `validate` is off, and on non-object `parameters` values.
+  * Fail on float values, which aren't in the [data model](https://atproto.com/specs/data-model)
 * `Base.decode_params`: decode array values using their `items` type.
 
 

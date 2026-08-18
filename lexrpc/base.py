@@ -29,7 +29,6 @@ PARAMETER_TYPES = frozenset((
     'array',
     'boolean',
     'integer',
-    'number',
     'string',
 ))
 # https://atproto.com/specs/lexicon#overview-of-types
@@ -627,7 +626,7 @@ class Base():
         Based on https://atproto.com/specs/xrpc#lexicon-http-endpoints
 
         Args:
-          params (dict): maps str names to boolean, number, str, or list values
+          params (dict): maps str names to boolean, integer, str, or list values
 
         Returns:
           bytes: URL-encoded query parameter string
@@ -649,7 +648,7 @@ class Base():
           params (sequence of (str, str) tuple): name/value mappings
 
         Returns:
-          dict: maps str names to decoded boolean, number, str, and array values
+          dict: maps str names to decoded boolean, integer, str, and array values
 
         Raises:
           ValueError: if a parameter value can't be decoded
@@ -671,9 +670,7 @@ class Base():
                         f'Got {val!r} for boolean parameter {name}, expected true or false')
 
             try:
-                if type == 'number':
-                    return float(val)
-                elif type in ('int', 'integer'):
+                if type in ('int', 'integer'):
                     return int(val)
             except ValueError as e:
                 e.args = [f'{e.args[0]} for {type} parameter {name}']
