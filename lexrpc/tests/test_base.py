@@ -427,6 +427,37 @@ class BaseTest(TestCase):
         base = Base(LEXICONS, validate=False, truncate=False)
         base.validate(None, None, {'x': 'y'})
 
+    def test_decode_params(self):
+        for nsid, params, expected in (
+            ('io.example.params', [('bar', '3')], {'bar': 3}),
+            ('io.example.params', [('bar', '-1')], {'bar': -1}),
+            ('io.example.params', [('bar', '9' * 30)], {'bar': 10 ** 30 - 1}),
+            ('io.example.params', [('bar', ' 3 ')], {'bar': 3}),
+            ('io.example.query', [('z', 'true')], {'z': True}),
+            ('io.example.query', [('z', 'false')], {'z': False}),
+            # unknown parameters are left as strings; validate rejects them
+            ('io.example.query', [('nope', 'x')], {'nope': 'x'}),
+            # last value wins for non-array parameters
+            ('io.example.query', [('x', 'a'), ('x', 'b')], {'x': 'b'}),
+            ('io.example.array', [('foo', 'a'), ('foo', 'a')],
+             {'foo': ['a', 'a']}),
+            ('io.example.array', [('foo', '')], {'foo': ['']}),
+        ):
+            with self.subTest(nsid=nsid, params=params):
+                self.assertEqual(expected, self.base.decode_params(nsid, params))
+
+    def test_decode_params_bad_value(self):
+        for nsid, params in (
+            ('io.example.params', [('bar', '')]),
+            ('io.example.params', [('bar', '1.5')]),
+            ('io.example.params', [('bar', 'x')]),
+            ('io.example.query', [('z', 'True')]),
+            ('io.example.query', [('z', '1')]),
+        ):
+            with self.subTest(nsid=nsid, params=params):
+                with self.assertRaises(ValueError):
+                    self.base.decode_params(nsid, params)
+
     def test_decode_params_array_integer(self):
         outer = {
             'lexicon': 1,
