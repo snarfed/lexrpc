@@ -21,13 +21,14 @@ jobs:
           command: |
             pip install -U pip flake8
             pip -V
-            pip install -U .[flask]
+            pip install -U .[flask,tests]
             pip install coverage coveralls
 
       - run:
           name: Python tests
           command: |
             python -m coverage run --source=. --omit=lexrpc/tests/\* -m unittest discover -v
+            python -m unittest lexrpc/tests/hypothesis/*.py
             python -m coverage html -d /tmp/coverage_html
             if [ "$COVERALLS_REPO_TOKEN" != "" ]; then python -m coveralls || true; fi
 
