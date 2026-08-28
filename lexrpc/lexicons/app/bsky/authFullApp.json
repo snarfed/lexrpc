@@ -48,6 +48,7 @@
             "app.bsky.feed.getSuggestedFeeds",
             "app.bsky.feed.getTimeline",
             "app.bsky.feed.searchPosts",
+            "app.bsky.feed.searchPostsV2",
             "app.bsky.feed.sendInteractions",
             "app.bsky.graph.getActorStarterPacks",
             "app.bsky.graph.getBlocks",
@@ -69,6 +70,7 @@
             "app.bsky.graph.muteActorList",
             "app.bsky.graph.muteThread",
             "app.bsky.graph.searchStarterPacks",
+            "app.bsky.graph.searchStarterPacksV2",
             "app.bsky.graph.unmuteActor",
             "app.bsky.graph.unmuteActorList",
             "app.bsky.graph.unmuteThread",
@@ -106,7 +108,12 @@
             "app.bsky.unspecced.searchStarterPacksSkeleton",
             "app.bsky.video.getJobStatus",
             "app.bsky.video.getUploadLimits",
-            "app.bsky.video.uploadVideo"
+            "app.bsky.video.uploadVideo",
+            "app.bsky.video.startUpload",
+            "app.bsky.video.uploadPart",
+            "app.bsky.video.finishUpload",
+            "app.bsky.video.abortUpload",
+            "app.bsky.video.getUploadStatus"
           ]
         },
         {
