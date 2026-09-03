@@ -16,7 +16,7 @@ from ..base import XrpcError
 
 from .. import flask_server
 from ..flask_server import init_flask, Subscriber, subscription
-from ..server import Redirect
+from ..server import Redirect, Server
 from .lexicons import LEXICONS
 from .test_base import NOW
 from .test_server import server
@@ -405,3 +405,57 @@ class XrpcEndpointTest(TestCase):
         self.assertEqual(302, resp.status_code)
         self.assertEqual('http://to/here', resp.headers['Location'])
         self.assertEqual('y', resp.headers['x'])
+
+
+class FallbackTest(TestCase):
+    maxDiff = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.server = Server(lexicons=LEXICONS, require_lexicons=False)
+
+        @cls.server.method('io.example.procedure')
+        def procedure(input, **params):
+            return input
+
+        cls.app = Flask(__name__)
+        init_flask(cls.server, cls.app, fallback=lambda nsid: ({'fell': nsid}, 299))
+
+    def setUp(self):
+        self.client = self.app.test_client()
+
+    def test_undefined_method(self):
+        resp = self.client.post('/xrpc/not.de.fined')
+        self.assertEqual(299, resp.status_code)
+        self.assertEqual({'fell': 'not.de.fined'}, resp.json)
+
+    def test_defined_but_unregistered_method(self):
+        resp = self.client.get('/xrpc/io.example.query?x=y')
+        self.assertEqual(299, resp.status_code)
+        self.assertEqual({'fell': 'io.example.query'}, resp.json)
+
+    def test_undecodable_params_still_fall_back(self):
+        resp = self.client.get('/xrpc/io.example.params?bar=not-an-int')
+        self.assertEqual(299, resp.status_code)
+        self.assertEqual({'fell': 'io.example.params'}, resp.json)
+
+    def test_registered_method_not_fallen_back(self):
+        input = {'foo': 'xyz', 'bar': 3}
+        resp = self.client.post('/xrpc/io.example.procedure', json=input)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(input, resp.json)
+
+    def test_cors_preflight_options(self):
+        for nsid in 'io.example.procedure', 'not.de.fined':
+            resp = self.client.options(f'/xrpc/{nsid}')
+            self.assertEqual(200, resp.status_code)
+            self.assertEqual('*', resp.headers['Access-Control-Allow-Origin'])
+            self.assertEqual('', resp.text)
+
+    def test_not_nsid_not_fallen_back(self):
+        resp = self.client.post('/xrpc/not_an*nsid')
+        self.assertEqual(400, resp.status_code)
+        self.assertEqual({
+            'error': 'InvalidRequest',
+            'message': 'not_an*nsid is not a valid NSID',
+        }, resp.json)

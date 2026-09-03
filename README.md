@@ -233,6 +233,9 @@ Here's how to package, test, and ship a new release.
   * Fix crash on values with unexpected types when `truncate` is on but `validate` is off, and on non-object `parameters` values.
   * Fail on float values, which aren't in the [data model](https://atproto.com/specs/data-model)
 * `Base.decode_params`: decode array values using their `items` type.
+* `flask_server`:
+  * `init_flask`: new `fallback` kwarg, a callable that handles methods the `Server` doesn't implement instead of returning `MethodNotImplemented`. Useful for [ATservice proxying](https://atproto.com/specs/xrpc#service-proxying).
+  * Serve `OPTIONS` CORS preflight requests for methods without lexicons, and for subscriptions.
 
 
 ### 2.2 - 2026-06-29

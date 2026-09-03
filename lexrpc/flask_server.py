@@ -34,7 +34,7 @@ subscribers = defaultdict(list)
 Subscriber = namedtuple('Subscriber', ('ip', 'user_agent', 'args', 'start'))
 
 
-def init_flask(xrpc_server, app, limit_ips=False):
+def init_flask(xrpc_server, app, limit_ips=False, fallback=None):
     """Connects a :class:`lexrpc.Server` to serve ``/xrpc/...`` on a Flask app.
 
     Args:
@@ -42,6 +42,9 @@ def init_flask(xrpc_server, app, limit_ips=False):
       app (flask.Flask)
       limit_ips (bool): whether to only allow one connection to event stream
         subscription methods per client IP. Defaults to ``False``.
+      fallback (callable: str NSID => Flask response): handles methods that
+        ``xrpc_server`` doesn't implement, instead of returning
+        ``MethodNotImplemented``. Useful for eg ATProto service proxying.
     """
     logger.info(f'Registering {xrpc_server} with {app} limit_ips={limit_ips}')
 
@@ -51,7 +54,8 @@ def init_flask(xrpc_server, app, limit_ips=False):
             sock.route(f'/xrpc/{nsid}')(subscription(xrpc_server, nsid, limit_ips=limit_ips))
 
     app.add_url_rule('/xrpc/<nsid>',
-                     view_func=XrpcEndpoint.as_view('xrpc-endpoint', xrpc_server),
+                     view_func=XrpcEndpoint.as_view('xrpc-endpoint', xrpc_server,
+                                                    fallback=fallback),
                      methods=['GET', 'POST', 'OPTIONS'])
 
 
@@ -60,11 +64,14 @@ class XrpcEndpoint(View):
 
     Attributes:
       server (lexrpc.Server)
+      fallback (callable: str NSID => Flask response)
     """
     server = None
+    fallback = None
 
-    def __init__(self, server):
+    def __init__(self, server, fallback=None):
         self.server = server
+        self.fallback = fallback
 
     def dispatch_request(self, nsid):
         if not NSID_RE.fullmatch(nsid):
@@ -72,6 +79,17 @@ class XrpcEndpoint(View):
                 'error': 'InvalidRequest',
                 'message': f'{nsid} is not a valid NSID',
             }, 400, RESPONSE_HEADERS
+
+        if request.method == 'OPTIONS':
+            return '', 200, RESPONSE_HEADERS
+
+        # pass to fallback handler here, and not in the except NotImplementedError
+        # blocks below, since we have defs for methods we don't implement, and
+        # because we want to handle lexicon skew and not validate on a lexicon that
+        # may be out of date. (backward compatibility req'ts notwithstanding.)
+        if self.fallback and nsid not in self.server._methods:
+            return self.fallback(nsid)
+
         try:
             lexicon = self.server._get_def(nsid) or {}
         except NotImplementedError as e:
@@ -82,9 +100,6 @@ class XrpcEndpoint(View):
 
         if lexicon.get('type') == 'subscription':
             return {'message': f'Use websocket for {nsid}, not HTTP'}, 405
-
-        if request.method == 'OPTIONS':
-            return '', 200, RESPONSE_HEADERS
 
         # prepare input
         in_encoding = lexicon.get('input', {}).get('encoding')
