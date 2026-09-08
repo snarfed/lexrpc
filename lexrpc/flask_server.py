@@ -24,7 +24,7 @@ SUBSCRIPTION_ITERATOR_TIMEOUT = timedelta(seconds=10)
 
 RESPONSE_HEADERS = {
     # wide open CORS to allow client-side apps like https://bsky.app/
-    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Headers': '*, Authorization',
     'Access-Control-Allow-Methods': '*',
     'Access-Control-Allow-Origin': '*',
 }
