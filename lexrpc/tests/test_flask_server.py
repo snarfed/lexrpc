@@ -61,6 +61,7 @@ class XrpcEndpointTest(TestCase):
     def tearDown(self):
         server._methods.pop('io.example.delayedSubscribe', None)
         server._methods.pop('io.example.valueError', None)
+        server._methods.pop('io.example.xrpcError', None)
 
     def test_procedure(self):
         input = {
@@ -359,6 +360,20 @@ class XrpcEndpointTest(TestCase):
             'error': 'TheName',
             'message': 'the message',
         }, resp.json)
+
+    def test_raises_xrpc_error_status_headers(self):
+        @server.method('io.example.xrpcError')
+        def err(input):
+            raise XrpcError('the message', name='TheName', status=403,
+                            headers={'x': 'y'})
+
+        resp = self.client.post('/xrpc/io.example.xrpcError')
+        self.assertEqual(403, resp.status_code)
+        self.assertEqual({
+            'error': 'TheName',
+            'message': 'the message',
+        }, resp.json)
+        self.assertEqual('y', resp.headers['x'])
 
     def test_integer_param(self):
         resp = self.client.post('/xrpc/io.example.params?bar=5')

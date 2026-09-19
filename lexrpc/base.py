@@ -112,13 +112,18 @@ now = lambda tz=timezone.utc, **kwargs: datetime.now(tz=tz, **kwargs)
 class XrpcError(ValueError):
     """A named error in an XRPC call.
 
-    ``name`` is the error, eg ``RepoNotFound`` in ``com.atproto.sync.getRepo``.
-    ``message`` is the human-readable string error message.
+    Args:
+      name (str) error name eg ``RepoNotFound`` in ``com.atproto.sync.getRepo``
+      message (str): human-readable string error message
+      status (int): HTTP status code to respond with
+      headers (dict, str -> str): HTTP headers to include in the response.
     """
-    def __init__(self, message, name=None, **kwargs):
+    def __init__(self, message, name=None, status=None, headers=None, **kwargs):
         super().__init__(message, **kwargs)
         self.name = name
         self.message = message
+        self.status = status
+        self.headers = headers or {}
 
 
 def load_lexicons(traversable):

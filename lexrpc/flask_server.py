@@ -127,10 +127,14 @@ class XrpcEndpoint(View):
         except (ValidationError, ValueError) as e:
             if isinstance(e, ValueError):
                 logging.debug(f'Method raised', exc_info=True)
+
+            status = getattr(e, 'status', None) or 400
+            headers = {**RESPONSE_HEADERS, **getattr(e, 'headers', {})}
             return {
                 'error': getattr(e, 'name', 'InvalidRequest'),
                 'message': getattr(e, 'message', str(e)),
-            }, 400, {**RESPONSE_HEADERS, **getattr(e, 'headers', {})}
+            }, status, headers
+
 
         # prepare output
         out_encoding = lexicon.get('output', {}).get('encoding')
