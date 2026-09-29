@@ -227,6 +227,7 @@ Here's how to package, test, and ship a new release.
 
 * `Client`, `Server`: new `require_lexicons` kwarg, defaults to `True`. If `False`, records with missing or unknown lexicons are skipped during validation instead of raising `NotImplementedError`.
 * Schema validation:
+  * `Base.validate`: new `ignore` kwarg, a sequence of property names to skip validating or truncating, anywhere in the record.
   * Fix `ref` type validation to accept string values that match their `ref`, eg token refs inside arrays or unions.
   * Fix `minimum`/`maximum` schema constraint of `0`.
   * `truncate`: truncate string values inside arrays.

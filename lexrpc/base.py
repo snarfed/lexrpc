@@ -241,7 +241,7 @@ class Base():
 
         return lexicon
 
-    def validate(self, nsid, type, obj):
+    def validate(self, nsid, type, obj, ignore=()):
         """If configured to do so, validates a ATProto value against its lexicon.
 
         Returns ``None`` if the object validates, otherwise raises an exception.
@@ -252,6 +252,8 @@ class Base():
           nsid (str): method NSID
           type (str): ``input``, ``output``, ``parameters``, or ``record``
           obj (dict): JSON object
+          ignore (sequence of str): property names to ignore and not validate or
+            truncate
 
         Returns:
           dict: obj, either unchanged, or possible a modified copy if
@@ -262,6 +264,7 @@ class Base():
             lexicon does not define a schema for the given type, and this object
             was initialized with ``require_lexicons=True``
           ValidationError: if the object is invalid
+
         """
         if not self._validate and not self._truncate:
             return obj
@@ -289,11 +292,12 @@ class Base():
             # params at all, eg utm_* tracking params
 
         self._validate_schema(name=type, val=obj, type_name=nsid, lexicon=nsid,
-                              schema=schema)
+                              schema=schema, ignore=ignore)
 
         return obj
 
-    def _validate_schema(self, *, name, val, type_name, lexicon, schema):
+    def _validate_schema(self, *, name, val, type_name, lexicon, schema,
+                         ignore=()):
         """Validates an ATProto value against a lexicon schema.
 
         Returns ``None`` if the value validates, otherwise raises an exception.
@@ -308,6 +312,8 @@ class Base():
             eg ``app.bsky.feed.post`` or ``app.bsky.feed.post#replyRef``
           schema (dict): schema to validate against if this is a compound
             object and not a primitive
+          ignore (sequence of str): property names to ignore and not validate or
+            truncate
 
         Raises:
           ValidationError: if the value is invalid
@@ -467,7 +473,7 @@ class Base():
 
                 self._validate_schema(name=name, val=item,
                                       type_name=items['type'],
-                                      lexicon=lexicon, schema=items)
+                                      lexicon=lexicon, schema=items, ignore=ignore)
 
         props = schema.get('properties', {})
         is_params = schema.get('type') == 'params'
@@ -478,7 +484,9 @@ class Base():
         required = schema.get('required', [])
         nullable = schema.get('nullable', [])
         for prop_name, prop_schema in props.items():
-            if prop_name not in val:
+            if prop_name in ignore:
+                continue
+            elif prop_name not in val:
                 if prop_name in required:
                     fail(f'missing required property {prop_name}')
                 continue
@@ -505,7 +513,8 @@ class Base():
                 prop_type = prop_schema['type']
 
             self._validate_schema(name=prop_name, val=prop_val, type_name=prop_type,
-                                  lexicon=prop_lexicon, schema=prop_schema)
+                                  lexicon=prop_lexicon, schema=prop_schema,
+                                  ignore=ignore)
 
         # unknown parameters aren't allowed
         if is_params:

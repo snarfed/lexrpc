@@ -114,6 +114,34 @@ class BaseTest(TestCase):
                 with self.assertRaises(ValidationError):
                     base.validate(nsid, 'parameters', 'not a dict')
 
+    def test_validate_ignore(self):
+        for ignore, record in (
+            # bad type for top level field
+            (['biff'], {'baz': 3, 'biff': {'baj': 4}}),
+            # bad type for nested field
+            (['baj'], {'baz': 3, 'biff': {'baj': 4}}),
+            # missing required field
+            (['baz'], {'biff': {'baj': 'foo'}}),
+        ):
+            with self.subTest(ignore=ignore, record=record):
+                self.assertEqual(record, self.base.validate(
+                    'io.example.record', 'record', record, ignore=ignore))
+
+        with self.assertRaises(ValidationError):
+            self.base.validate('io.example.record', 'record',
+                               {'baz': 3, 'biff': {'baj': 4}}, ignore=['baz'])
+
+    def test_validate_ignore_array(self):
+        record = {'foo': [{'bar': 'x'}, {'baz': 'y'}]}
+        self.assertEqual(record, self.base.validate(
+            'io.example.objectArray', 'record', record, ignore=['foo']))
+
+    def test_validate_ignore_doesnt_truncate(self):
+        base = Base(LEXICONS, truncate=True)
+        record = {'string': 'too many graphemes'}
+        self.assertEqual(record, base.validate(
+            'io.example.stringLength', 'record', record, ignore=['string']))
+
     def test_validate_record_pass_nested_optional_field_missing(self):
         self.base.validate('io.example.record', 'record', {
             'baz': 3,
