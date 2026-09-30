@@ -60,6 +60,7 @@ class XrpcEndpointTest(TestCase):
 
     def tearDown(self):
         server._methods.pop('io.example.cidBytes', None)
+        server._methods.pop('io.example.cidBytesInput', None)
         server._methods.pop('io.example.delayedSubscribe', None)
         server._methods.pop('io.example.valueError', None)
         server._methods.pop('io.example.xrpcError', None)
@@ -108,6 +109,36 @@ class XrpcEndpointTest(TestCase):
             'cid': {'$link': cid.encode('base32')},
             'data': {'$bytes': 'aGk'},
         }, resp.json)
+
+    def test_procedure_input_cid_and_bytes(self):
+        cid = CID.decode('bafyreiblaotetvwobe7cu2uqvnddr6ew2q3cu75qsoweulzku2egca4dxq')
+        got = []
+
+        @server.method('io.example.cidBytesInput')
+        def cid_bytes_input(input):
+            got.append(input)
+
+        resp = self.client.post('/xrpc/io.example.cidBytesInput', json={
+            'blob': {
+                '$type': 'blob',
+                'ref': {'$link': cid.encode('base32')},
+                'mimeType': 'foo/bar',
+                'size': 2,
+            },
+            'cid': {'$link': cid.encode('base32')},
+            'data': {'$bytes': 'aGk'},
+        })
+        self.assertEqual(200, resp.status_code, resp.json)
+        self.assertEqual([{
+            'blob': {
+                '$type': 'blob',
+                'ref': cid,
+                'mimeType': 'foo/bar',
+                'size': 2,
+            },
+            'cid': cid,
+            'data': b'hi',
+        }], got)
 
     def test_options(self):
         resp = self.client.options('/xrpc/io.example.query')

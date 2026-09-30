@@ -104,7 +104,8 @@ class XrpcEndpoint(View):
         # prepare input
         in_encoding = lexicon.get('input', {}).get('encoding')
         if in_encoding in ('application/json', None):
-            input = request.json if request.content_length else {}
+            input = (dag_json.decode(request.get_data(), dialect='atproto')
+                     if request.content_length else {})
         else:
             # binary
             if request.content_type != in_encoding:

@@ -223,7 +223,13 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 2.3 - unreleased
+### 3.0 - unreleased
+
+_Breaking changes:_
+
+* `flask_server`: [ATProto-decode JSON input](https://atproto.com/specs/data-model#relationship-with-dasl-and-ipld), so methods receive native `CID` and `bytes` values instead of `$link` and `$bytes` dicts. (Also encode methods' output the same way, as ATProto JSON, but that's backward compatible. Details below.)
+
+_Non-breaking changes:_
 
 * `Client`, `Server`: new `require_lexicons` kwarg, defaults to `True`. If `False`, records with missing or unknown lexicons are skipped during validation instead of raising `NotImplementedError`.
 * Schema validation:
