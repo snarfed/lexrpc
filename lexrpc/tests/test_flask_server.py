@@ -59,6 +59,7 @@ class XrpcEndpointTest(TestCase):
         flask_server.subscribers = defaultdict(list)
 
     def tearDown(self):
+        server._methods.pop('io.example.cidBytes', None)
         server._methods.pop('io.example.delayedSubscribe', None)
         server._methods.pop('io.example.valueError', None)
         server._methods.pop('io.example.xrpcError', None)
@@ -77,6 +78,36 @@ class XrpcEndpointTest(TestCase):
         self.assertEqual(200, resp.status_code)
         self.assertEqual('application/json', resp.headers['Content-Type'])
         self.assertEqual({'foo': 'y', 'bar': 5}, resp.json)
+
+    def test_query_output_cid_and_bytes(self):
+        cid = CID.decode('bafyreiblaotetvwobe7cu2uqvnddr6ew2q3cu75qsoweulzku2egca4dxq')
+
+        @server.method('io.example.cidBytes')
+        def cid_bytes(input):
+            return {
+                'blob': {
+                    '$type': 'blob',
+                    'ref': cid,
+                    'mimeType': 'foo/bar',
+                    'size': 2,
+                },
+                'cid': cid,
+                'data': b'hi',
+            }
+
+        resp = self.client.get('/xrpc/io.example.cidBytes')
+        self.assertEqual(200, resp.status_code, resp.json)
+        self.assertEqual('application/json', resp.headers['Content-Type'])
+        self.assertEqual({
+            'blob': {
+                '$type': 'blob',
+                'ref': {'$link': cid.encode('base32')},
+                'mimeType': 'foo/bar',
+                'size': 2,
+            },
+            'cid': {'$link': cid.encode('base32')},
+            'data': {'$bytes': 'aGk'},
+        }, resp.json)
 
     def test_options(self):
         resp = self.client.options('/xrpc/io.example.query')

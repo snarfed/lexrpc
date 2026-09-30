@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 import logging
 
 import dag_cbor
+import dag_json
 from flask import after_this_request, make_response, request
-from flask.json import jsonify
 from flask.views import View
 from flask_sock import Sock
 from iterators import TimeoutIterator
@@ -139,7 +139,8 @@ class XrpcEndpoint(View):
         # prepare output
         out_encoding = lexicon.get('output', {}).get('encoding')
         if out_encoding in ('application/json', None):
-            return jsonify(output or ''), RESPONSE_HEADERS
+            return (dag_json.encode(output or '', dialect='atproto'),
+                    {'Content-Type': 'application/json', **RESPONSE_HEADERS})
         else:
             # binary
             if not isinstance(output, (str, bytes)):

@@ -239,6 +239,7 @@ Here's how to package, test, and ship a new release.
 * `flask_server`:
   * `init_flask`: new `fallback` kwarg, a callable that handles methods the `Server` doesn't implement instead of returning `MethodNotImplemented`. Useful for [ATservice proxying](https://atproto.com/specs/xrpc#service-proxying).
   * Serve `OPTIONS` CORS preflight requests for methods without lexicons, and for subscriptions.
+  * [ATProto-encode JSON output](https://atproto.com/specs/data-model#relationship-with-dasl-and-ipld), so methods can return native `CID` and `bytes` values, which are encoded as `$link` and `$bytes`.
 
 
 ### 2.2 - 2026-06-29

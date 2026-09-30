@@ -285,6 +285,27 @@ LEXICONS = [
 
     {
         'lexicon': 1,
+        'id': 'io.example.cidBytes',
+        'defs': {
+            'main': {
+                'type': 'query',
+                'output': {
+                    'encoding': 'application/json',
+                    'schema': {
+                        'type': 'object',
+                        'properties': {
+                            'blob': {'type': 'blob'},
+                            'cid': {'type': 'cid-link'},
+                            'data': {'type': 'bytes'},
+                        },
+                    },
+                },
+            },
+        },
+    },
+
+    {
+        'lexicon': 1,
         'id': 'io.example.encodings',
         'defs': {
             'main': {
