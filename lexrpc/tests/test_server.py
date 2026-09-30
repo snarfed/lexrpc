@@ -229,6 +229,28 @@ class ServerTest(TestCase):
         output = server.call('io.example.query', {}, x='y')
         self.assertEqual({'foo': 'y', 'bar': 5}, output)
 
+    def test_decorator_override(self):
+        with patch.dict(server._methods):
+            @server.method('io.example.query', override=True)
+            def other(input, **params):
+                return {'foo': 'other', 'bar': 6}
+
+            output = server.call('io.example.query', {})
+            self.assertEqual({'foo': 'other', 'bar': 6}, output)
+
+    def test_register_override(self):
+        with patch.dict(server._methods):
+            server.register('io.example.query', lambda input, **params: {
+                'foo': 'other',
+                'bar': 6,
+            }, override=True)
+            output = server.call('io.example.query', {})
+            self.assertEqual({'foo': 'other', 'bar': 6}, output)
+
+    def test_register_already_registered(self):
+        with self.assertRaises(AssertionError):
+            server.register('io.example.query', query)
+
     def test_bundled_lexicons(self):
         server = Server()
 

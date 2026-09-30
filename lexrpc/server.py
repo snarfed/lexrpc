@@ -41,14 +41,17 @@ class Server(Base):
         super().__init__(**kwargs)
         self._methods = {}
 
-    def method(self, nsid):
+    def method(self, nsid, override=False):
         """XRPC method decorator. Use on each function that implements a method.
 
         Args:
           nsid (str)
+          override (bool): whether to replace an existing method registered for
+            ``nsid``. If False and ``nsid`` is already registered, raises
+            ``AssertionError``.
         """
         def decorated(fn):
-            self.register(nsid, fn)
+            self.register(nsid, fn, override=override)
 
             @wraps(fn)
             def wrapped(*args, **kwargs):
@@ -57,17 +60,20 @@ class Server(Base):
 
         return decorated
 
-    def register(self, nsid, fn):
+    def register(self, nsid, fn, override=False):
         """Registers an XRPC method decorator. Alternative to :meth:`method`.
 
         Args:
           nsid (str)
           fn (callable)
+          override (bool): whether to replace an existing method registered for
+            ``nsid``. If False and ``nsid`` is already registered, raises
+            ``AssertionError``.
         """
         assert NSID_RE.fullmatch(nsid)
 
         existing = self._methods.get(nsid)
-        if existing:
+        if existing and not override:
             fail(f'{nsid} already registered with {existing}',  AssertionError)
         self._methods[nsid] = fn
 
