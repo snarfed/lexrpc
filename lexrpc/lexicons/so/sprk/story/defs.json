@@ -1,0 +1,62 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.story.defs",
+  "defs": {
+    "storyView": {
+      "type": "object",
+      "required": ["uri", "cid", "author", "record", "indexedAt"],
+      "properties": {
+        "uri": { "type": "string", "format": "at-uri" },
+        "cid": { "type": "string", "format": "cid" },
+        "author": {
+          "type": "ref",
+          "ref": "so.sprk.actor.defs#profileViewBasic"
+        },
+        "record": { "type": "unknown" },
+        "media": {
+          "type": "union",
+          "refs": ["so.sprk.media.image#view", "so.sprk.media.video#view"]
+        },
+        "sound": { "type": "ref", "ref": "so.sprk.sound.defs#audioView" },
+        "embeds": {
+          "type": "ref",
+          "ref": "so.sprk.embed.defs#views"
+        },
+        "indexedAt": { "type": "string", "format": "datetime" }
+      }
+    },
+    "storiesByAuthor": {
+      "type": "object",
+      "required": ["author", "stories"],
+      "properties": {
+        "author": {
+          "type": "ref",
+          "ref": "so.sprk.actor.defs#profileViewBasic"
+        },
+        "stories": {
+          "type": "array",
+          "items": { "type": "ref", "ref": "#storyView" }
+        }
+      }
+    },
+    "interaction": {
+      "type": "object",
+      "properties": {
+        "item": { "type": "string", "format": "at-uri" },
+        "event": {
+          "type": "string",
+          "knownValues": [
+            "so.sprk.feed.defs#clickthroughItem",
+            "so.sprk.feed.defs#clickthroughAuthor",
+            "so.sprk.feed.defs#clickthroughReposter",
+            "so.sprk.feed.defs#clickthroughEmbed",
+            "so.sprk.feed.defs#interactionSeen",
+            "so.sprk.feed.defs#interactionLike",
+            "so.sprk.feed.defs#interactionRepost",
+            "so.sprk.feed.defs#interactionShare"
+          ]
+        }
+      }
+    }
+  }
+}

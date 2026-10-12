@@ -1,0 +1,37 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.sound.defs",
+  "defs": {
+    "audioView": {
+      "type": "object",
+      "required": ["uri", "cid", "author", "coverArt", "record", "indexedAt"],
+      "properties": {
+        "uri": { "type": "string", "format": "at-uri" },
+        "cid": { "type": "string", "format": "cid" },
+        "author": {
+          "type": "ref",
+          "ref": "so.sprk.actor.defs#profileViewBasic"
+        },
+        "record": { "type": "unknown" },
+        "useCount": { "type": "integer" },
+        "title": { "type": "string" },
+        "coverArt": { "type": "string", "format": "uri" },
+        "details": { "type": "ref", "ref": "#audioDetails" },
+        "indexedAt": { "type": "string", "format": "datetime" },
+        "audio": { "type": "string", "format": "uri" },
+        "labels": {
+          "type": "array",
+          "items": { "type": "ref", "ref": "com.atproto.label.defs#label" }
+        }
+      }
+    },
+    "audioDetails": {
+      "type": "object",
+      "description": "Metadata about the audio content.",
+      "properties": {
+        "artist": { "type": "string" },
+        "title": { "type": "string" }
+      }
+    }
+  }
+}

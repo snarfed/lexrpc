@@ -1,0 +1,35 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.sound.getAudios",
+  "defs": {
+    "main": {
+      "type": "query",
+      "description": "Gets audio views for a specified list of audios (by AT-URI).",
+      "parameters": {
+        "type": "params",
+        "required": ["uris"],
+        "properties": {
+          "uris": {
+            "type": "array",
+            "description": "List of audio AT-URIs to return views for.",
+            "items": { "type": "string", "format": "at-uri" },
+            "maxLength": 25
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["audios"],
+          "properties": {
+            "audios": {
+              "type": "array",
+              "items": { "type": "ref", "ref": "so.sprk.sound.defs#audioView" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

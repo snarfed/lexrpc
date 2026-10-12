@@ -1,0 +1,46 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.sound.audio",
+  "description": "A audio record referencable in a Spark record (e.g, a post)",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["sound", "createdAt"],
+        "properties": {
+          "sound": {
+            "type": "blob",
+            "accept": ["audio/*"],
+            "maxSize": 10485760
+          },
+          "origin": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 1000,
+            "maxGraphemes": 100,
+            "description": "The audio's title."
+          },
+          "details": {
+            "type": "ref",
+            "ref": "so.sprk.sound.defs#audioDetails"
+          },
+          "labels": {
+            "type": "union",
+            "description": "Self-label values for this audio. Effectively content warnings.",
+            "refs": ["com.atproto.label.defs#selfLabels"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Client-declared timestamp when this audio was originally created."
+          }
+        }
+      }
+    }
+  }
+}

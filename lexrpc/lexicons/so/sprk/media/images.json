@@ -1,0 +1,29 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.media.images",
+  "description": "A set of multiple images in a Spark post.",
+  "defs": {
+    "main": {
+      "type": "object",
+      "required": ["images"],
+      "properties": {
+        "images": {
+          "type": "array",
+          "items": { "type": "ref", "ref": "so.sprk.media.image" },
+          "maxLength": 12
+        }
+      }
+    },
+    "view": {
+      "type": "object",
+      "required": ["images"],
+      "properties": {
+        "images": {
+          "type": "array",
+          "items": { "type": "ref", "ref": "so.sprk.media.image#view" },
+          "maxLength": 12
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.feed.post",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "Record containing a Spark post.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["createdAt", "media"],
+        "properties": {
+          "caption": { "type": "ref", "ref": "#captionRef" },
+          "media": {
+            "type": "union",
+            "refs": ["so.sprk.media.images", "so.sprk.media.video"]
+          },
+          "sound": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef"
+          },
+          "langs": {
+            "type": "array",
+            "description": "Indicates human language of post primary text content.",
+            "maxLength": 3,
+            "items": { "type": "string", "format": "language" }
+          },
+          "labels": {
+            "type": "union",
+            "description": "Self-label values for this post. Effectively content warnings.",
+            "refs": ["com.atproto.label.defs#selfLabels"]
+          },
+          "tags": {
+            "type": "array",
+            "description": "Additional hashtags, in addition to any included in post text and facets.",
+            "maxLength": 8,
+            "items": { "type": "string", "maxLength": 640, "maxGraphemes": 64 }
+          },
+          "crossposts": {
+            "type": "array",
+            "description": "Records created for external services for this post",
+            "items": { "type": "ref", "ref": "com.atproto.repo.strongRef" }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Client-declared timestamp when this post was originally created."
+          }
+        }
+      }
+    },
+    "captionRef": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "maxLength": 3000,
+          "maxGraphemes": 300,
+          "description": "The post description."
+        },
+        "facets": {
+          "type": "array",
+          "description": "Annotations of text (mentions, URLs, hashtags, etc)",
+          "items": { "type": "ref", "ref": "so.sprk.richtext.facet" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.authViewAll",
+  "defs": {
+    "main": {
+      "type": "permission-set",
+      "title": "Read-only Access to Spark Content",
+      "title:lang": {},
+      "detail": "View Spark network content from an account perspective, and read notifications and preferences.",
+      "detail:lang": {},
+      "permissions": [
+        {
+          "type": "permission",
+          "resource": "rpc",
+          "inheritAud": true,
+          "lxm": [
+            "so.sprk.actor.getPreferences",
+            "so.sprk.actor.getProfile",
+            "so.sprk.actor.getProfiles",
+            "so.sprk.actor.getSuggestions",
+            "so.sprk.actor.searchActors",
+            "so.sprk.actor.searchActorsTypeahead",
+            "so.sprk.feed.describeFeedGenerator",
+            "so.sprk.feed.getActorFeeds",
+            "so.sprk.feed.getActorLikes",
+            "so.sprk.feed.getActorReposts",
+            "so.sprk.feed.getAuthorFeed",
+            "so.sprk.feed.getCrosspostThread",
+            "so.sprk.feed.getFeed",
+            "so.sprk.feed.getFeedGenerator",
+            "so.sprk.feed.getFeedGenerators",
+            "so.sprk.feed.getFeedSkeleton",
+            "so.sprk.feed.getLikes",
+            "so.sprk.feed.getPostThread",
+            "so.sprk.feed.getPosts",
+            "so.sprk.feed.getRepostedBy",
+            "so.sprk.feed.getSuggestedFeeds",
+            "so.sprk.feed.getTimeline",
+            "so.sprk.feed.searchPosts",
+            "so.sprk.graph.getBlocks",
+            "so.sprk.graph.getFollowers",
+            "so.sprk.graph.getFollows",
+            "so.sprk.graph.getKnownFollowers",
+            "so.sprk.graph.getMutes",
+            "so.sprk.graph.getRelationships",
+            "so.sprk.graph.getSuggestedFollowsByActor",
+            "so.sprk.labeler.getServices",
+            "so.sprk.notification.getUnreadCount",
+            "so.sprk.notification.listNotifications",
+            "so.sprk.notification.updateSeen",
+            "so.sprk.sound.getActorAudios",
+            "so.sprk.sound.getAudioPosts",
+            "so.sprk.sound.getAudios",
+            "so.sprk.sound.searchAudios",
+            "so.sprk.sound.getTrendingAudios",
+            "so.sprk.story.getStories",
+            "so.sprk.story.getTimeline",
+            "so.sprk.video.getUploadLimits"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.feed.getPostThread",
+  "defs": {
+    "main": {
+      "type": "query",
+      "description": "Get posts in a thread. Does not require auth, but additional metadata and filtering will be applied for authed requests.",
+      "parameters": {
+        "type": "params",
+        "required": ["anchor"],
+        "properties": {
+          "anchor": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "Reference (AT-URI) to anchor post record."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          },
+          "cursor": { "type": "string" },
+          "depth": {
+            "type": "integer",
+            "description": "How many levels of reply depth should be included in response.",
+            "default": 6,
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "parentHeight": {
+            "type": "integer",
+            "description": "How many levels of parent (and grandparent, etc) post to include.",
+            "default": 80,
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "sort": {
+            "type": "string",
+            "description": "Sorting for the thread replies.",
+            "knownValues": ["newest", "oldest", "top"],
+            "default": "oldest"
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["thread"],
+          "properties": {
+            "cursor": { "type": "string" },
+            "thread": {
+              "type": "array",
+              "description": "A flat list of thread items. The depth of each item is indicated by the depth property inside the item.",
+              "items": {
+                "type": "ref",
+                "ref": "#threadItem"
+              }
+            },
+            "threadgate": {
+              "type": "ref",
+              "ref": "so.sprk.feed.defs#threadgateView"
+            }
+          }
+        }
+      },
+      "errors": [{ "name": "NotFound" }]
+    },
+    "threadItem": {
+      "type": "object",
+      "required": ["uri", "depth", "value"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "at-uri"
+        },
+        "depth": {
+          "type": "integer",
+          "description": "The nesting level of this item in the thread. Depth 0 means the anchor item."
+        },
+        "value": {
+          "type": "union",
+          "refs": [
+            "so.sprk.feed.defs#threadViewPost",
+            "so.sprk.feed.defs#notFoundPost",
+            "so.sprk.feed.defs#blockedPost"
+          ]
+        }
+      }
+    }
+  }
+}

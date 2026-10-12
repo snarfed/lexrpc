@@ -1,0 +1,39 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.embed.record",
+  "description": "Interactive record embed.",
+  "defs": {
+    "main": {
+      "type": "object",
+      "required": ["placement", "post"],
+      "properties": {
+        "placement": {
+          "type": "ref",
+          "ref": "so.sprk.embed.defs#placement"
+        },
+        "post": {
+          "type": "ref",
+          "ref": "com.atproto.repo.strongRef"
+        }
+      }
+    },
+    "view": {
+      "type": "object",
+      "required": ["placement", "post"],
+      "properties": {
+        "placement": {
+          "type": "ref",
+          "ref": "so.sprk.embed.defs#placement"
+        },
+        "post": {
+          "type": "union",
+          "refs": [
+            "so.sprk.feed.defs#postView",
+            "so.sprk.feed.defs#notFoundPost",
+            "so.sprk.feed.defs#blockedPost"
+          ]
+        }
+      }
+    }
+  }
+}

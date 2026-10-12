@@ -1,0 +1,39 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.embed.mention",
+  "description": "Interactive mention embed.",
+  "defs": {
+    "main": {
+      "type": "object",
+      "required": ["placement", "did"],
+      "properties": {
+        "placement": {
+          "type": "ref",
+          "ref": "so.sprk.embed.defs#placement"
+        },
+        "did": {
+          "type": "string",
+          "format": "did"
+        }
+      }
+    },
+    "view": {
+      "type": "object",
+      "required": ["placement", "did"],
+      "properties": {
+        "placement": {
+          "type": "ref",
+          "ref": "so.sprk.embed.defs#placement"
+        },
+        "did": {
+          "type": "string",
+          "format": "did"
+        },
+        "actor": {
+          "type": "ref",
+          "ref": "so.sprk.actor.defs#profileViewBasic"
+        }
+      }
+    }
+  }
+}

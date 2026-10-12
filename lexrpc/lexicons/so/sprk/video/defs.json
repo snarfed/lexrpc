@@ -1,0 +1,49 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.video.defs",
+  "defs": {
+    "jobStatus": {
+      "type": "object",
+      "required": ["jobId", "did", "state"],
+      "properties": {
+        "jobId": { "type": "string" },
+        "did": { "type": "string", "format": "did" },
+        "state": {
+          "type": "string",
+          "description": "The state of the video processing job. All values not listed as a known value indicate that the job is in process.",
+          "knownValues": [
+            "JOB_STATE_COMPLETED",
+            "JOB_STATE_FAILED",
+            "JOB_STATE_QUEUED",
+            "JOB_STATE_PROCESSING"
+          ]
+        },
+        "progress": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Progress within the current processing state."
+        },
+        "blob": { "type": "blob" },
+        "audio": {
+          "type": "ref",
+          "ref": "so.sprk.video.defs#extractedAudio"
+        },
+        "error": { "type": "string" },
+        "message": { "type": "string" }
+      }
+    },
+    "extractedAudio": {
+      "type": "object",
+      "description": "Audio extracted from the uploaded video for client-side record creation.",
+      "required": ["blob"],
+      "properties": {
+        "details": {
+          "type": "ref",
+          "ref": "so.sprk.sound.defs#audioDetails"
+        },
+        "blob": { "type": "blob" }
+      }
+    }
+  }
+}

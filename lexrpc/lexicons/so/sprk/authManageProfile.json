@@ -1,0 +1,21 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.authManageProfile",
+  "defs": {
+    "main": {
+      "type": "permission-set",
+      "title": "Manage Spark Profile",
+      "title:lang": {},
+      "detail": "Update Spark profile data.",
+      "detail:lang": {},
+      "permissions": [
+        {
+          "type": "permission",
+          "resource": "repo",
+          "action": ["create", "update", "delete"],
+          "collection": ["so.sprk.actor.profile"]
+        }
+      ]
+    }
+  }
+}

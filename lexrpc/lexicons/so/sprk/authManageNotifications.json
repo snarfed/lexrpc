@@ -1,0 +1,28 @@
+{
+  "lexicon": 1,
+  "id": "so.sprk.authManageNotifications",
+  "defs": {
+    "main": {
+      "type": "permission-set",
+      "title": "Manage Spark Notifications",
+      "title:lang": {},
+      "detail": "View and configure notifications for the Spark app.",
+      "detail:lang": {},
+      "permissions": [
+        {
+          "type": "permission",
+          "resource": "rpc",
+          "inheritAud": true,
+          "lxm": [
+            "so.sprk.notification.getUnreadCount",
+            "so.sprk.notification.listNotifications",
+            "so.sprk.notification.putPreferences",
+            "so.sprk.notification.registerPush",
+            "so.sprk.notification.unregisterPush",
+            "so.sprk.notification.updateSeen"
+          ]
+        }
+      ]
+    }
+  }
+}
