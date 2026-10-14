@@ -597,6 +597,38 @@ class BaseTest(TestCase):
             with self.subTest(input=input):
                 self.assertEqual(expected, AT_URI_RE.fullmatch(input) is not None)
 
+    def test_space_ref_format(self):
+        for input, expected in [
+            ('', False),
+            ('foo', False),
+            ('at://did:plc:foo/space/io.example.forum/self', True),
+            ('at://did:plc:foo/space/io.example.forum/3jzfcijpj2z2a', True),
+            # handles aren't allowed, the space authority is a DID
+            ('at://user.bsky.social/space/io.example.forum/self', False),
+            # missing skey
+            ('at://did:plc:foo/space/io.example.forum', False),
+            ('at://did:plc:foo/space/io.example.forum/', False),
+            # record in a space, not a space
+            ('at://did:plc:foo/space/io.example.forum/self/did:plc:bar/io.example.thread/123',
+             False),
+            # missing space marker
+            ('at://did:plc:foo/io.example.forum/self', False),
+            # space type isn't an NSID
+            ('at://did:plc:foo/space/forum/self', False),
+            ('at://did:plc:foo/space/io.example.forum/.', False),
+            ('at://did:plc:foo/space/io.example.forum/..', False),
+            ('at://did:plc:foo/space/io.example.forum/' + 'a' * 512, True),
+            ('at://did:plc:foo/space/io.example.forum/' + 'a' * 513, False),
+            ('http://did:plc:foo/space/io.example.forum/self', False),
+            (' at://did:plc:foo/space/io.example.forum/self ', False),
+        ]:
+            with self.subTest(input=input):
+                if expected:
+                    self.base._validate_string_format(input, 'space-ref')
+                else:
+                    with self.assertRaises(ValidationError):
+                        self.base._validate_string_format(input, 'space-ref')
+
     def test_validate_union_nullable(self):
         with self.assertRaises(ValidationError) as cm:
             self.base.validate('io.example.subscribeUnion', 'message', {

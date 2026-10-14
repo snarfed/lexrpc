@@ -106,6 +106,15 @@ AT_URI_RE = re.compile(rf"""
        (?:/(?P<rkey>[{_CHARS}:~_]+))?)?
     """, re.VERBOSE)
 
+# https://github.com/bluesky-social/proposals/tree/main/0016-permissioned-data#addressing
+SPACE_REF_RE = re.compile(rf"""
+    at://
+     (?P<authority>{DID_RE.pattern})
+      /space
+       /(?P<type>{NSID_RE.pattern})
+        /(?P<skey>{RKEY_RE.pattern})
+    """, re.VERBOSE)
+
 # wrapper for datetime.now, lets us mock it out in tests
 now = lambda tz=timezone.utc, **kwargs: datetime.now(tz=tz, **kwargs)
 
@@ -591,6 +600,10 @@ class Base():
 
         elif format == 'record-key':
             check(val not in ('.', '..') and RKEY_RE.fullmatch(val))
+
+        elif format == 'space-ref':
+            match = SPACE_REF_RE.fullmatch(val)
+            check(match and match['skey'] not in ('.', '..'))
 
         elif format == 'uri':
             check(len(val) < 8 * 1024)
