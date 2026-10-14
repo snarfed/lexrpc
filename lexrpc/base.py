@@ -93,9 +93,12 @@ CID_RE = re.compile(r'[A-Za-z0-9+]{8,}')
 # https://atproto.com/specs/did
 DID_RE = re.compile(r'did:[a-z]+:[A-Za-z0-9._%:-]{1,2048}(?<!:)')
 
+# public at:// URI regexp. excludes space URIs; those have a separate regexp below.
 # https://atproto.com/specs/at-uri-scheme
+#
 # NOTE: duplicated in granary.bluesky!
 # also see arroba.util.parse_at_uri
+#
 # TODO: add query and fragment? they're currently unused in the protocol
 # https://atproto.com/specs/at-uri-scheme#structure
 _CHARS = 'a-zA-Z0-9-.'
@@ -113,6 +116,13 @@ SPACE_REF_RE = re.compile(rf"""
       /space
        /(?P<type>{NSID_RE.pattern})
         /(?P<skey>{RKEY_RE.pattern})
+    """, re.VERBOSE)
+
+SPACE_URI_RE = re.compile(rf"""
+    {SPACE_REF_RE.pattern}
+     (?:/(?P<author>{DID_RE.pattern})
+      /(?P<collection>{NSID_RE.pattern})
+       /(?P<rkey>{RKEY_RE.pattern}))?
     """, re.VERBOSE)
 
 # wrapper for datetime.now, lets us mock it out in tests
@@ -555,7 +565,7 @@ class Base():
 
         elif format == 'at-uri':
             check(len(val) < 8 * 1024)
-            check(AT_URI_RE.fullmatch(val))
+            check(AT_URI_RE.fullmatch(val) or SPACE_URI_RE.fullmatch(val))
             check('/./' not in val
                   and '/../' not in val
                   and not val.endswith('/.')

@@ -629,6 +629,36 @@ class BaseTest(TestCase):
                     with self.assertRaises(ValidationError):
                         self.base._validate_string_format(input, 'space-ref')
 
+    def test_at_uri_format_space(self):
+        for input, expected in [
+            # space
+            ('at://did:plc:foo/space/io.example.forum/self', True),
+            # record in a space
+            ('at://did:plc:foo/space/io.example.forum/self/did:plc:bar/io.example.thread/3jzfcijpj2z2a',
+             True),
+            # public URIs still work
+            ('at://did:plc:foo/io.example.thread/3jzfcijpj2z2a', True),
+            # space authority isn't a DID
+            ('at://user.bsky.social/space/io.example.forum/self', False),
+            # missing skey
+            ('at://did:plc:foo/space/io.example.forum', False),
+            # incomplete record in a space
+            ('at://did:plc:foo/space/io.example.forum/self/did:plc:bar', False),
+            ('at://did:plc:foo/space/io.example.forum/self/did:plc:bar/io.example.thread',
+             False),
+            # record author isn't a DID
+            ('at://did:plc:foo/space/io.example.forum/self/user.bsky.social/io.example.thread/3jzfcijpj2z2a',
+             False),
+            ('at://did:plc:foo/space/io.example.forum/./did:plc:bar/io.example.thread/3jzfcijpj2z2a',
+             False),
+        ]:
+            with self.subTest(input=input):
+                if expected:
+                    self.base._validate_string_format(input, 'at-uri')
+                else:
+                    with self.assertRaises(ValidationError):
+                        self.base._validate_string_format(input, 'at-uri')
+
     def test_validate_union_nullable(self):
         with self.assertRaises(ValidationError) as cm:
             self.base.validate('io.example.subscribeUnion', 'message', {
