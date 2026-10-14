@@ -239,6 +239,7 @@ _Non-breaking changes:_
   * `truncate`: truncate string values inside arrays.
   * Fix crash on values with unexpected types when `truncate` is on but `validate` is off, and on non-object `parameters` values.
   * Fail on float values, which aren't in the [data model](https://atproto.com/specs/data-model)
+  * Support the new [`space` lexicon type](https://github.com/bluesky-social/proposals/tree/main/0016-permissioned-data#space-type-declarations).
 * `Base.decode_params`: decode array values using their `items` type.
 * `XrpcError`: new `status` and `headers` kwargs. `flask_server` uses them in the HTTP response.
 * `Server.method`, `Server.register`: new `override` kwarg that allows replace an existing method.

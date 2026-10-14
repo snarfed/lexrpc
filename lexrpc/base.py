@@ -23,6 +23,7 @@ LEXICON_TYPES = METHOD_TYPES | frozenset((
     'permission-set',
     'record',
     'ref',
+    'space',
     'token',
 ))
 PARAMETER_TYPES = frozenset((

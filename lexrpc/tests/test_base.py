@@ -114,6 +114,29 @@ class BaseTest(TestCase):
                 with self.assertRaises(ValidationError):
                     base.validate(nsid, 'parameters', 'not a dict')
 
+    def test_space_type_lexicon(self):
+        space = {
+            'lexicon': 1,
+            'id': 'io.example.forum',
+            'defs': {'main': {
+                'type': 'space',
+                'description': 'A discussion forum',
+                'key': 'any',
+                'name': 'Example Forum',
+                'collections': ['io.example.thread', 'io.example.reply'],
+            }},
+        }
+        base = Base(LEXICONS + [space], validate=True)
+        self.assertEqual(space['defs']['main'], base.defs['io.example.forum'])
+
+    def test_bad_type_lexicon(self):
+        with self.assertRaises(ValidationError):
+            Base(LEXICONS + [{
+                'lexicon': 1,
+                'id': 'io.example.badType',
+                'defs': {'main': {'type': 'unknown'}},
+            }], validate=True)
+
     def test_validate_ignore(self):
         for ignore, record in (
             # bad type for top level field
