@@ -1,0 +1,32 @@
+{
+  "lexicon": 1,
+  "id": "community.blacksky.assembly.vote",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A vote on a statement in a deliberation conversation.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "value", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Reference to the statement being voted on."
+          },
+          "value": {
+            "type": "integer",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Vote value: -1 = agree, 0 = pass, 1 = disagree."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

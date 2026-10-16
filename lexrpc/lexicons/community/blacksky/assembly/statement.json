@@ -1,0 +1,37 @@
+{
+  "lexicon": 1,
+  "id": "community.blacksky.assembly.statement",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A statement submitted to a deliberation conversation.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["conversation", "text", "createdAt"],
+        "properties": {
+          "conversation": {
+            "type": "ref",
+            "ref": "com.atproto.repo.strongRef",
+            "description": "Reference to the conversation this statement belongs to."
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 2000,
+            "maxGraphemes": 400,
+            "description": "The statement text."
+          },
+          "anonymous": {
+            "type": "boolean",
+            "description": "Whether this statement was submitted anonymously (e.g., seed statements). Anonymous statements are written to a designated service DID, not the author's personal repo.",
+            "default": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

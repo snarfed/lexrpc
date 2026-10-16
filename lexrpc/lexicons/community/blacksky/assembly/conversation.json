@@ -1,0 +1,38 @@
+{
+  "lexicon": 1,
+  "id": "community.blacksky.assembly.conversation",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A deliberation conversation for collective decision-making.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["topic", "createdAt"],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "maxLength": 1000,
+            "maxGraphemes": 200,
+            "description": "The conversation topic or question."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 5000,
+            "maxGraphemes": 1000,
+            "description": "Extended description or context."
+          },
+          "authRequired": {
+            "type": "boolean",
+            "description": "Whether authentication is required to participate.",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

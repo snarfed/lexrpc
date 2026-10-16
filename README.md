@@ -247,7 +247,11 @@ _Non-breaking changes:_
   * `init_flask`: new `fallback` kwarg, a callable that handles methods the `Server` doesn't implement instead of returning `MethodNotImplemented`. Useful for [ATservice proxying](https://atproto.com/specs/xrpc#service-proxying).
   * Serve `OPTIONS` CORS preflight requests for methods without lexicons, and for subscriptions.
   * [ATProto-encode JSON output](https://atproto.com/specs/data-model#relationship-with-dasl-and-ipld), so methods can return native `CID` and `bytes` values, which are encoded as `$link` and `$bytes`.
-* Add [Spark Social](https://sprk.so/) (`so.sprk`) lexicons, from [sprksocial/server@3f4728d](https://github.com/sprksocial/server@3f4728db308b82ffa63a30cb28224af5beb406f6).
+* Bundle new lexicons:
+  * [Blacksky](https://blacksky.community/) (`community.blacksky.assembly`), from [blacksky-algorithms/assembly.blacksky.community@e95bd1f](https://github.com/blacksky-algorithms/assembly.blacksky.community/commit/e95bd1f4039e004115cd31f14d928ce5708fe83f).
+  * [Grain](https://grain.social/) (`social.grain`), from [grain.social/grain@319af78](https://tangled.org/grain.social/grain@319af78544239cdb0217d032e89c52dcd8595f0e).
+  * [Spark Social](https://sprk.so/) (`so.sprk`), from [sprksocial/server@3f4728d](https://github.com/sprksocial/server@3f4728db308b82ffa63a30cb28224af5beb406f6).
+
 
 ### 2.2 - 2026-06-29
 
