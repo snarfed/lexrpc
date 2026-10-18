@@ -20,7 +20,7 @@ include = ['lexrpc*']
 
 [project]
 name = 'lexrpc'
-version = '2.2'
+version = '3.0'
 authors = [
     { name='Ryan Barrett', email='lexrpc@ryanb.org' },
 ]

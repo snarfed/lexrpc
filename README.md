@@ -223,7 +223,7 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
-### 3.0 - unreleased
+### 3.0 - 2026-10-18
 
 _Breaking changes:_
 

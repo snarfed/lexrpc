@@ -198,7 +198,7 @@ Here’s how to package, test, and ship a new release.
     ``sh  git checkout main  git pull``
 
 2.  Run the unit tests.
-    ``sh  source .venv/bin/activate.csh  python -m unittest discover``
+    ``sh  source .venv/bin/activate.csh  python -m unittest discover  python -m unittest lexrpc/tests/hypothesis/*.py``
 
 3.  Bump the version number in ``pyproject.toml`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
@@ -229,10 +229,10 @@ Here’s how to package, test, and ship a new release.
 
     server = Server(lexicons=[{ ‘lexicon’: 1, ‘id’: ‘io.example.ping’,
     ‘defs’: { ‘main’: { ‘type’: ‘query’, ‘description’: ‘Ping the
-    server’, ‘parameters’: {‘message’: { ‘type’: ‘string’ }}, ‘output’:
-    { ‘encoding’: ‘application/json’, ‘schema’: { ‘type’: ‘object’,
-    ‘required’: [‘message’], ‘properties’: {‘message’: { ‘type’:
-    ‘string’ }}, }, }, }, }, }])
+    server’, ‘parameters’: { ‘type’: ‘params’, ‘properties’: {‘message’:
+    {‘type’: ‘string’}}, }, ‘output’: { ‘encoding’: ‘application/json’,
+    ‘schema’: { ‘type’: ‘object’, ‘required’: [‘message’], ‘properties’:
+    {‘message’: { ‘type’: ‘string’ }}, }, }, }, }, }])
 
     @server.method(‘io.example.ping’) def ping(input, message=’‘):
     return {’message’: message}
@@ -267,6 +267,71 @@ Here’s how to package, test, and ship a new release.
 
 Changelog
 ---------
+
+3.0 - 2026-10-18
+~~~~~~~~~~~~~~~~
+
+*Breaking changes:*
+
+- ``flask_server``: `ATProto-decode JSON
+  input <https://atproto.com/specs/data-model#relationship-with-dasl-and-ipld>`__,
+  so methods receive native ``CID`` and ``bytes`` values instead of
+  ``$link`` and ``$bytes`` dicts. (Also encode methods’ output the same
+  way, as ATProto JSON, but that’s backward compatible. Details below.)
+
+*Non-breaking changes:*
+
+- ``Client``, ``Server``: new ``require_lexicons`` kwarg, defaults to
+  ``True``. If ``False``, records with missing or unknown lexicons are
+  skipped during validation instead of raising ``NotImplementedError``.
+- Schema validation:
+
+  - ``Base.validate``: new ``ignore`` kwarg, a sequence of property
+    names to skip validating or truncating, anywhere in the record.
+  - Fix ``ref`` type validation to accept string values that match their
+    ``ref``, eg token refs inside arrays or unions.
+  - Fix ``minimum``/``maximum`` schema constraint of ``0``.
+  - ``truncate``: truncate string values inside arrays.
+  - Fix crash on values with unexpected types when ``truncate`` is on
+    but ``validate`` is off, and on non-object ``parameters`` values.
+  - Fail on float values, which aren’t in the `data
+    model <https://atproto.com/specs/data-model>`__
+  - Support the new `space`` lexicon
+    type <https://github.com/bluesky-social/proposals/tree/main/0016-permissioned-data#space-type-declarations>`__
+    and `space-ref`` string
+    format <https://github.com/bluesky-social/proposals/tree/main/0016-permissioned-data#addressing>`__,
+    and allow space ``at://`` URIs in the ``at-uri`` format.
+
+- ``Base.decode_params``: decode array values using their ``items``
+  type.
+- ``XrpcError``: new ``status`` and ``headers`` kwargs. ``flask_server``
+  uses them in the HTTP response.
+- ``Server.method``, ``Server.register``: new ``override`` kwarg that
+  allows replace an existing method.
+- ``flask_server``:
+
+  - ``init_flask``: new ``fallback`` kwarg, a callable that handles
+    methods the ``Server`` doesn’t implement instead of returning
+    ``MethodNotImplemented``. Useful for `ATservice
+    proxying <https://atproto.com/specs/xrpc#service-proxying>`__.
+  - Serve ``OPTIONS`` CORS preflight requests for methods without
+    lexicons, and for subscriptions.
+  - `ATProto-encode JSON
+    output <https://atproto.com/specs/data-model#relationship-with-dasl-and-ipld>`__,
+    so methods can return native ``CID`` and ``bytes`` values, which are
+    encoded as ``$link`` and ``$bytes``.
+
+- Bundle new lexicons:
+
+  - `Blacksky <https://blacksky.community/>`__
+    (``community.blacksky.assembly``), from
+    `blacksky-algorithms/assembly.blacksky.community@e95bd1f <https://github.com/blacksky-algorithms/assembly.blacksky.community/commit/e95bd1f4039e004115cd31f14d928ce5708fe83f>`__.
+  - `Grain <https://grain.social/>`__ (``social.grain``), from
+    `grain.social/grain@319af78 <https://tangled.org/grain.social/grain@319af78544239cdb0217d032e89c52dcd8595f0e>`__.
+  - `Spark Social <https://sprk.so/>`__ (``so.sprk``), from
+    `sprksocial/server@3f4728d <https://github.com/sprksocial/server@3f4728db308b82ffa63a30cb28224af5beb406f6>`__.
+
+.. _section-1:
 
 2.2 - 2026-06-29
 ~~~~~~~~~~~~~~~~
@@ -305,7 +370,7 @@ Changelog
   - `lexicon.community.* <https://lexicon.community/>`__ at
     `91c50cb <https://github.com/lexicon-community/lexicon/commit/91c50cbd84a9da8014332a6e37812c276889c8ac>`__
 
-.. _section-1:
+.. _section-2:
 
 2.1 - 2026-02-06
 ~~~~~~~~~~~~~~~~
@@ -331,7 +396,7 @@ Changelog
   - Ignore ``maxGraphemes`` on non-string fields.
   - Allow ``type: permission-set``.
 
-.. _section-2:
+.. _section-3:
 
 2.0 - 2025-09-13
 ~~~~~~~~~~~~~~~~
@@ -360,7 +425,7 @@ Non-breaking changes:
     than one connection to event stream subscription methods per client
     IP.
 
-.. _section-3:
+.. _section-4:
 
 1.1 - 2025-03-13
 ~~~~~~~~~~~~~~~~
@@ -396,7 +461,7 @@ Non-breaking changes:
     ``ValidationError``, ie ``err.args[1]``, as a dict of additional
     HTTP headers to return with the HTTP 400 response.
 
-.. _section-4:
+.. _section-5:
 
 1.0 - 2024-10-14
 ~~~~~~~~~~~~~~~~
@@ -420,7 +485,7 @@ Non-breaking changes:
 
   - Add ``status`` param to ``Redirect``.
 
-.. _section-5:
+.. _section-6:
 
 0.7 - 2024-06-24
 ~~~~~~~~~~~~~~~~
@@ -451,7 +516,7 @@ Non-breaking changes:
 - Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
   `bluesky-social/atproto@15cc6ff37c326d5c186385037c4bfe8b60ea41b1 <https://github.com/bluesky-social/atproto/commit/15cc6ff37c326d5c186385037c4bfe8b60ea41b1>`__.
 
-.. _section-6:
+.. _section-7:
 
 0.6 - 2024-03-16
 ~~~~~~~~~~~~~~~~
@@ -462,7 +527,7 @@ Non-breaking changes:
 - Update bundled ``app.bsky`` and ``com.atproto`` lexicons, as of
   `bluesky-social/atproto@f45eef3 <https://github.com/bluesky-social/atproto/commit/f45eef3414f8827ba3a6958a7040c7e38bfd6282>`__.
 
-.. _section-7:
+.. _section-8:
 
 0.5 - 2023-12-10
 ~~~~~~~~~~~~~~~~
@@ -477,7 +542,7 @@ Non-breaking changes:
   - Bug fix: don’t infinite loop if ``refreshSession`` fails.
   - Other minor authentication bug fixes.
 
-.. _section-8:
+.. _section-9:
 
 0.4 - 2023-10-28
 ~~~~~~~~~~~~~~~~
@@ -517,7 +582,7 @@ Non-breaking changes:
   - Add the ``error`` field to the JSON response bodies for most error
     responses.
 
-.. _section-9:
+.. _section-10:
 
 0.3 - 2023-08-29
 ~~~~~~~~~~~~~~~~
@@ -529,7 +594,7 @@ Non-breaking changes:
 - Add new ``Server.register`` method for manually registering handlers.
 - Bug fix for server ``@method`` decorator.
 
-.. _section-10:
+.. _section-11:
 
 0.2 - 2023-03-13
 ~~~~~~~~~~~~~~~~
@@ -546,7 +611,7 @@ put more effort into matching and fully implementing them. Stay tuned!
   format <https://github.com/snarfed/atproto/commit/63b9873bb1699b6bce54e7a8d3db2fcbd2cfc5ab>`__.
   Original format is no longer supported.
 
-.. _section-11:
+.. _section-12:
 
 0.1 - 2022-12-13
 ~~~~~~~~~~~~~~~~
