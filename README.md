@@ -49,6 +49,8 @@ client = Client('my.server.com', lexicons=lexicons)
 output = client.com.example.my_procedure({'foo': 'bar'}, baz=5)
 ```
 
+Note that `lexrpc` does not resolve handles or DID documents to find a user's PDS. You can use [`arroba`](https://github.com/snarfed/arroba) to do that, eg [`arroba.did.resolve`](https://arroba.readthedocs.io/en/stable/source/arroba.html#arroba.did.resolve) and [`resolve_handle`](https://arroba.readthedocs.io/en/stable/source/arroba.html#arroba.did.resolve_handle).
+
 Note that `-` characters in method NSIDs are converted to `_`s, eg the call above is for the method `com.example.my-procedure`.
 
 To call a method with non-JSON (eg binary) input, pass `bytes` to the call instead of a `dict`, and pass the content type with `headers={'Content-Type': '...'}`.
@@ -167,7 +169,7 @@ Here's how to package, test, and ship a new release.
     python -m venv .venv
     source .venv/bin/activate.csh
     pip uninstall lexrpc # make sure we force pip to use the uploaded version
-    pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver
+    'pip' install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple lexrpc==$ver
     ```
 1. Smoke test that the code trivially loads and runs.
     ```sh
