@@ -1,5 +1,4 @@
 """Base code shared by both server and client."""
-import copy
 from datetime import datetime, timezone
 from importlib.resources import files
 import json
@@ -157,6 +156,13 @@ def load_lexicons(traversable):
 _bundled_lexicons = load_lexicons(files('lexrpc').joinpath('lexicons'))
 logger.info(f'{len(_bundled_lexicons)} lexicons loaded')
 
+# not validated here since that's slow; test_base validates them instead
+_bundled_defs = {
+    lexicon['id'] if name == 'main' else f'{lexicon["id"]}#{name}': defn
+    for lexicon in _bundled_lexicons
+    for name, defn in lexicon.get('defs', {}).items()
+}
+
 
 def fail(msg, exc=NotImplementedError):
     """Logs an error and raises an exception with the given message."""
@@ -201,12 +207,26 @@ class Base():
         self._validate = validate
         self._truncate = truncate
         self._require_lexicons = require_lexicons
-        self.defs = {}
 
         if lexicons is None:
-            lexicons = _bundled_lexicons
+            self.defs = dict(_bundled_defs)
+        else:
+            self._build_defs(lexicons)
 
-        for i, lexicon in enumerate(copy.deepcopy(lexicons)):
+        self.defs['blob'] = BLOB_DEF
+
+        if not self.defs:
+            logger.error('No lexicons loaded!')
+
+    def _build_defs(self, lexicons):
+        """Generates :attr:`defs` based on a given set of lexicons.
+
+        Args:
+          lexicons (sequence of dict) lexicon definitions
+        """
+        self.defs = {}
+
+        for i, lexicon in enumerate(lexicons):
             nsid = lexicon.get('id')
             if not nsid or not isinstance(nsid, str):
                 raise ValidationError(f'Lexicon {i} missing or invalid id field')
@@ -222,7 +242,7 @@ class Base():
                 if type not in LEXICON_TYPES | PARAMETER_TYPES:
                     raise ValidationError(f'Bad type for lexicon {id}: {type}')
 
-                if validate:
+                if self._validate:
                     for field in ('input', 'output', 'message', 'parameters',
                                   'record'):
                         if schema := defn.get('field'):
@@ -232,11 +252,6 @@ class Base():
                                 raise ValidationError(f'{nsid} {field} properties is invalid')
 
                 self.defs[id] = defn
-
-        self.defs['blob'] = BLOB_DEF
-
-        if not self.defs:
-            logger.error('No lexicons loaded!')
 
     def _get_def(self, id):
         """Returns the given lexicon def.

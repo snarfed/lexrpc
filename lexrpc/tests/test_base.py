@@ -5,7 +5,7 @@ from unittest import skip, TestCase
 from multiformats import CID
 
 from .lexicons import LEXICONS
-from ..base import AT_URI_RE, Base, ValidationError
+from ..base import _bundled_lexicons, AT_URI_RE, Base, ValidationError
 
 # set as the base.now return value in mocks in tests
 NOW = datetime(2022, 2, 3)
@@ -136,6 +136,10 @@ class BaseTest(TestCase):
                 'id': 'io.example.badType',
                 'defs': {'main': {'type': 'unknown'}},
             }], validate=True)
+
+    def test_bundled_lexicons_valid(self):
+        base = Base(_bundled_lexicons, validate=True)
+        self.assertEqual(Base().defs, base.defs)
 
     def test_validate_ignore(self):
         for ignore, record in (

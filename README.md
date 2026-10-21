@@ -225,6 +225,12 @@ Here's how to package, test, and ship a new release.
 
 ## Changelog
 
+### 3.1 - unreleased
+
+_Non-breaking changes:_
+
+* `Client`, `Server`: speed up constructor from ~8ms to ~13µs by not copying or validating bundled lexicons.
+
 ### 3.0 - 2026-10-18
 
 _Breaking changes:_
