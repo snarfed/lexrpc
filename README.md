@@ -229,7 +229,10 @@ Here's how to package, test, and ship a new release.
 
 _Non-breaking changes:_
 
-* `Client`, `Server`: speed up constructor from ~8ms to ~13µs by not copying or validating bundled lexicons.
+* `Base`:
+  * Speed up constructor from ~8ms to ~13µs by not copying or validating bundled lexicons.
+  * Bug fix for lexicon validation for the `record`, `parameters`, `input`, `output`, and `message` fields.
+
 
 ### 3.0 - 2026-10-18
 

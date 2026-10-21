@@ -219,7 +219,7 @@ class Base():
             logger.error('No lexicons loaded!')
 
     def _build_defs(self, lexicons):
-        """Generates :attr:`defs` based on a given set of lexicons.
+        """Validates a set of lexicons and populates them into :attr:`defs`.
 
         Args:
           lexicons (sequence of dict) lexicon definitions
@@ -243,13 +243,19 @@ class Base():
                     raise ValidationError(f'Bad type for lexicon {id}: {type}')
 
                 if self._validate:
-                    for field in ('input', 'output', 'message', 'parameters',
-                                  'record'):
-                        if schema := defn.get('field'):
-                            if not isinstance(schema, dict):
-                                raise ValidationError(f'{nsid} {field} is invalid')
-                            elif not isinstance(schema.get('properties'), dict):
-                                raise ValidationError(f'{nsid} {field} properties is invalid')
+                    if type == 'record':
+                        record = defn.get('record')
+                        if (not isinstance(record, dict)
+                                or not isinstance(record.get('properties'), dict)):
+                            raise ValidationError(f'{nsid} record is invalid')
+                    elif type in METHOD_TYPES:
+                        # input, output, message are {encoding, schema} wrappers
+                        for field in 'parameters', 'input', 'output', 'message':
+                            if (val := defn.get(field)) is not None:
+                                if not isinstance(val, dict):
+                                    raise ValidationError(f'{nsid} {field} is invalid')
+                                elif 'schema' in val and not isinstance(val['schema'], dict):
+                                    raise ValidationError(f'{nsid} {field} schema is invalid')
 
                 self.defs[id] = defn
 

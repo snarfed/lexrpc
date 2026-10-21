@@ -137,6 +137,23 @@ class BaseTest(TestCase):
                 'defs': {'main': {'type': 'unknown'}},
             }], validate=True)
 
+    def test_bad_schema_lexicon(self):
+        for defn in (
+                {'type': 'record', 'record': 'foo'},
+                {'type': 'record', 'record': {'type': 'object', 'properties': 'foo'}},
+                {'type': 'query', 'parameters': 'foo'},
+                {'type': 'query', 'output': 'foo'},
+                {'type': 'procedure', 'input': {'encoding': 'application/json',
+                                                'schema': 'foo'}},
+                {'type': 'subscription', 'message': {'schema': ['foo']}},
+        ):
+            with self.subTest(defn=defn), self.assertRaises(ValidationError):
+                Base(LEXICONS + [{
+                    'lexicon': 1,
+                    'id': 'io.example.badSchema',
+                    'defs': {'main': defn},
+                }], validate=True)
+
     def test_bundled_lexicons_valid(self):
         base = Base(_bundled_lexicons, validate=True)
         self.assertEqual(Base().defs, base.defs)
