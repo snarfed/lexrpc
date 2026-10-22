@@ -227,11 +227,11 @@ Here's how to package, test, and ship a new release.
 
 ### 3.1 - unreleased
 
-_Non-breaking changes:_
-
 * `Base`:
   * Speed up constructor from ~8ms to ~13µs by not copying or validating bundled lexicons.
   * Bug fix for lexicon validation for the `record`, `parameters`, `input`, `output`, and `message` fields.
+* Updated bundled lexicons:
+  * `app.bsky`, `chat.bsky`, and `network.bsky`, from [bluesky-social/bsky@297ceac](https://github.com/bluesky-social/bsky/commit/297ceaccce68f93dcef1e2269eb5fca16bf7f2ed).
 
 
 ### 3.0 - 2026-10-18
