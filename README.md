@@ -232,6 +232,7 @@ Here's how to package, test, and ship a new release.
   * Bug fix for lexicon validation for the `record`, `parameters`, `input`, `output`, and `message` fields.
 * Updated bundled lexicons:
   * `app.bsky`, `chat.bsky`, and `network.bsky`, from [bluesky-social/bsky@297ceac](https://github.com/bluesky-social/bsky/commit/297ceaccce68f93dcef1e2269eb5fca16bf7f2ed).
+  * `com.atproto` and `tools.ozone`, from [bluesky-social/atproto@b43dd14](https://github.com/bluesky-social/atproto/commit/b43dd14e0b1ca2aff9d6470d9a5d726c9be301fb).
 
 
 ### 3.0 - 2026-10-18
